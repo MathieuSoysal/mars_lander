@@ -44,11 +44,11 @@ impl Starship {
     }
 
     pub fn get_x(&self) -> u32 {
-        self.x.round() as u32
+        (self.x + 0.5) as u32
     }
 
     pub fn get_y(&self) -> u32 {
-        self.y.round() as u32
+        (self.y + 0.5) as u32
     }
 
     pub fn get_fuel(&self) -> u16 {
