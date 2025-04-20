@@ -1,15 +1,4 @@
-use std::collections::HashSet;
-
-use super::{
-    segment::Segment,
-    starship::{
-        Starship,
-        starship_getter::{
-            starship_get_rotation, starship_get_x, starship_get_x_speed, starship_get_y,
-            starship_get_y_speed,
-        },
-    },
-};
+use super::{segment::Segment, starship::Starship};
 
 pub const MARS_GRAVITY: f64 = 3.711;
 const MAX_H_SPEED_ON_LAND: f32 = 20.;
@@ -46,21 +35,21 @@ impl Game {
     }
 
     pub fn starship_is_crash(&self, starship: Starship) -> bool {
-        let x = starship_get_x(starship);
-        let y = starship_get_y(starship);
+        let x = starship.get_x();
+        let y = starship.get_y();
         self.crash_points[x as usize] >= y
     }
 
     pub fn starship_is_landing(&self, starship: Starship) -> bool {
-        let x = starship_get_x(starship) as usize;
-        let y = starship_get_y(starship) as usize;
+        let x = starship.get_x() as usize;
+        let y = starship.get_y() as usize;
         x >= self.landing.start.x
             && x <= self.landing.end.x
             && y >= self.landing.start.y
             && y <= self.landing.end.y
-            && starship_get_x_speed(starship).abs() <= MAX_H_SPEED_ON_LAND
-            && starship_get_y_speed(starship).abs() <= MAX_V_SPEED_ON_LAND
-            && starship_get_rotation(starship) == ANGLE_TO_LAND
+            && starship.get_x_speed().abs() <= MAX_H_SPEED_ON_LAND
+            && starship.get_y_speed().abs() <= MAX_V_SPEED_ON_LAND
+            && starship.get_rotation() == ANGLE_TO_LAND as i8
     }
 
     pub fn add_point(&mut self, x: usize, y: usize) {
@@ -113,7 +102,7 @@ impl Point {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::entities::starship::{Starship, starship_init};
+    use crate::entities::starship::Starship;
 
     #[test]
     fn test_game() {
@@ -137,15 +126,15 @@ mod tests {
         game.add_point(5000, 1500);
         game.add_point(6999, 1000);
 
-        let starship = starship_init(1000, 2000, 0, 0, 0, 0., 0.);
+        let starship = Starship::new(1000., 2000., 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(starship));
-        let starship = starship_init(1000, 1500, 0, 0, 0, 0., 0.);
+        let starship = Starship::new(1000., 1500., 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(starship));
-        let starship = starship_init(2001, 500, 0, 0, 0, 0., 0.);
+        let starship = Starship::new(2001., 500., 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_crash(starship));
-        let starship = starship_init(3499, 500, 0, 0, 0, 0., 0.);
+        let starship = Starship::new(3499., 500., 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_crash(starship));
-        let starship = starship_init(5000, 1500, 0, 0, 0, 0., 0.);
+        let starship = Starship::new(5000., 1500., 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(starship));
     }
 
@@ -159,15 +148,15 @@ mod tests {
         game.add_point(5000, 1500);
         game.add_point(6999, 1000);
 
-        let starship = starship_init(1000, 2000, 0, 0, 0, 0., 0.);
+        let starship = Starship::new(1000., 2000., 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_landing(starship));
-        let starship = starship_init(1000, 1500, 0, 0, 0, 0., 0.);
+        let starship = Starship::new(1000., 1500., 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_landing(starship));
-        let starship = starship_init(2000, 500, 0, 0, 0, 0., 0.);
+        let starship = Starship::new(2000., 500., 0, 0, 0, 0., 0.);
         assert!(game.starship_is_landing(starship));
-        let starship = starship_init(3500, 500, 0, 0, 0, 0., 0.);
+        let starship = Starship::new(3500., 500., 0, 0, 0, 0., 0.);
         assert!(game.starship_is_landing(starship));
-        let starship = starship_init(5000, 1500, 0, 0, 0, 0., 0.);
+        let starship = Starship::new(5000., 1500., 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_landing(starship));
     }
 }

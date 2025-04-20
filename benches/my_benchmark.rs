@@ -1,5 +1,5 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
-use my_lib::entities::game::Game;
+use my_lib::entities::{game::Game, starship::Starship};
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("crash detection", |b| {
@@ -14,7 +14,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
 
             for x in 0..7000 {
                 for y in 0..3000 {
-                    let starship = my_lib::entities::starship::starship_init(x, y, 0, 0, 0, 0., 0.);
+                    let starship = Starship::new(x as f32, y as f32, 0, 0, 0, 0., 0.);
                     black_box(game.starship_is_crash(starship));
                 }
             }

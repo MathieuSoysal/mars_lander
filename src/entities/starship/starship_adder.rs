@@ -1,64 +1,59 @@
-use super::{starship_getter::*, *};
+use super::*;
 
-pub const fn starship_add_rotation(s: Starship, rotation: i32) -> Starship {
-    let new_rotation = starship_get_rotation(s) + rotation;
-    if new_rotation < MIN_ROTATE {
-        return starship_set_rotation(s, MIN_ROTATE);
-    }
-    if new_rotation > MAX_ROTATE {
-        return starship_set_rotation(s, MAX_ROTATE);
-    }
-    starship_set_rotation(s, new_rotation)
-}
 
-pub const fn starship_add_x_speed(s: Starship, x_speed: f32) -> Starship {
-    let new_x_speed = starship_get_x_speed(s) + x_speed;
-    if new_x_speed < MIN_SPEED {
-        return starship_set_x_speed(s, MIN_SPEED);
+impl Starship {
+    pub fn add_rotation(&mut self, rotation: i8) {
+        let new_rotation = self.rotation + rotation;
+        if new_rotation < MIN_ROTATE {
+            self.rotation = MIN_ROTATE;
+        } else if new_rotation > MAX_ROTATE {
+            self.rotation = MAX_ROTATE;
+        } else {
+            self.rotation = new_rotation;
+        }
     }
-    if new_x_speed > MAX_SPEED {
-        return starship_set_x_speed(s, MAX_SPEED);
-    }
-    starship_set_x_speed(s, new_x_speed)
-}
 
-pub const fn starship_add_y_speed(s: Starship, y_speed: f32) -> Starship {
-    let new_y_speed = starship_get_y_speed(s) + y_speed;
-    if new_y_speed < MIN_SPEED {
-        return starship_set_y_speed(s, MIN_SPEED);
+    fn add_x_speed(&mut self, x_speed: f32) {
+        let new_x_speed = self.x_speed + x_speed;
+        if new_x_speed < MIN_SPEED {
+            self.x_speed = MIN_SPEED;
+        } else if new_x_speed > MAX_SPEED {
+            self.x_speed = MAX_SPEED;
+        } else {
+            self.x_speed = new_x_speed;
+        }
     }
-    if new_y_speed > MAX_SPEED {
-        return starship_set_y_speed(s, MAX_SPEED);
+    fn add_y_speed(&mut self, y_speed: f32) {
+        let new_y_speed = self.y_speed + y_speed;
+        if new_y_speed < MIN_SPEED {
+            self.y_speed = MIN_SPEED;
+        } else if new_y_speed > MAX_SPEED {
+            self.y_speed = MAX_SPEED;
+        } else {
+            self.y_speed = new_y_speed;
+        }
     }
-    starship_set_y_speed(s, new_y_speed)
-}
 
-const fn starship_consum_fuel(s: Starship) -> Starship {
-    let power = starship_get_power(s) as i32;
-    if power == 0 {
-        return s;
+    pub fn add_power(&mut self, add_power: i32) {
+        if add_power > 0 && self.power < MAX_POWER {
+            self.power += 1 as u8;
+        } else if add_power < 0 && self.power > 0 {
+            self.power -= 1 as u8;
+        }
+        if self.can_consume_fuel() {
+            self.consume_fuel();
+        } else {
+            self.power = 0;
+        }
     }
-    let new_fuel = starship_get_fuel(s) as i32 - power;
-    if new_fuel < 0 {
-        starship_set_fuel(s, 0)
-    } else {
-        starship_set_fuel(s, new_fuel as u32)
-    }
-}
 
-pub fn starship_add_power(s: Starship, add_power: i32) -> Starship {
-    if add_power == 0 {
-        return starship_consum_fuel(s);
+    fn consume_fuel(&mut self) {
+        self.fuel -= self.power as u16;
     }
-    let current_power = starship_get_power(s);
-    let s = if add_power > 0 && current_power < MAX_POWER {
-        starship_set_power(s, (current_power + add_power as u32).min(MAX_POWER))
-    } else if add_power < 0 {
-        starship_set_power(s, current_power.saturating_sub(add_power.abs() as u32))
-    } else {
-        s
-    };
-    starship_consum_fuel(s)
+
+    fn can_consume_fuel(&self) -> bool {
+        self.power as u16 <= self.fuel
+    }
 }
 
 #[cfg(test)]
@@ -67,57 +62,50 @@ mod tests {
 
     #[test]
     fn test_starship_add_rotation() {
-        let starship = 0; // Assuming a constructor exists
-        let starship = starship_set_rotation(starship, 0);
-        let rotated_starship = starship_add_rotation(starship, 10);
-        assert_eq!(starship_get_rotation(rotated_starship), 10);
-
-        let rotated_starship = starship_add_rotation(rotated_starship, -20);
-        assert_eq!(starship_get_rotation(rotated_starship), -10);
-
-        let rotated_starship = starship_add_rotation(rotated_starship, MAX_ROTATE * 2);
-        assert_eq!(starship_get_rotation(rotated_starship), MAX_ROTATE);
+        let mut starship = Starship::new(0., 0., 0, 0, 0, 0., 0.);
+        starship.add_rotation(10);
+        assert_eq!(starship.get_rotation(), 10);
+        starship.add_rotation(-20);
+        assert_eq!(starship.get_rotation(), -10);
+        starship.add_rotation(MAX_ROTATE +30);
+        assert_eq!(starship.get_rotation(), MAX_ROTATE);
     }
 
     #[test]
     fn test_starship_add_x_speed() {
-        let starship = starship_set_x_speed(0, 0.);
-        let faster_starship = starship_add_x_speed(starship, 50.);
-        assert_eq!(starship_get_x_speed(faster_starship), 50.);
-
-        let faster_starship = starship_add_x_speed(faster_starship, -100.);
-        assert_eq!(starship_get_x_speed(faster_starship), -50.);
-
-        let faster_starship = starship_add_x_speed(faster_starship, MAX_SPEED * 2.);
-        assert_eq!(starship_get_x_speed(faster_starship), MAX_SPEED);
+        let mut starship = Starship::new(0., 0., 0, 0, 0, 0., 0.);
+        starship.add_x_speed(50.);
+        assert_eq!(starship.get_x_speed(), 50.);
+        starship.add_x_speed(-100.);
+        assert_eq!(starship.get_x_speed(), -50.);
+        starship.add_x_speed(MAX_SPEED * 2.);
+        assert_eq!(starship.get_x_speed(), MAX_SPEED);
     }
 
     #[test]
     fn test_starship_add_y_speed() {
-        let starship = starship_set_y_speed(0, 0.);
-        let faster_starship = starship_add_y_speed(starship, 30.);
-        assert_eq!(starship_get_y_speed(faster_starship), 30.);
-
-        let faster_starship = starship_add_y_speed(faster_starship, -50.);
-        assert_eq!(starship_get_y_speed(faster_starship), -20.);
-
-        let faster_starship = starship_add_y_speed(faster_starship, MAX_SPEED * 2.);
-        assert_eq!(starship_get_y_speed(faster_starship), MAX_SPEED);
+        let mut starship = Starship::new(0., 0., 0, 0, 0, 0., 0.);
+        starship.add_y_speed(30.);
+        assert_eq!(starship.get_y_speed(), 30.);
+        starship.add_y_speed(-50.);
+        assert_eq!(starship.get_y_speed(), -20.);
+        starship.add_y_speed(MAX_SPEED * 2.);
+        assert_eq!(starship.get_y_speed(), MAX_SPEED);
     }
 
     #[test]
     fn test_starship_add_power() {
-        let starship = starship_set_power(0, 0);
-        let powered_starship = starship_add_power(starship, 10);
-        assert_eq!(starship_get_power(powered_starship), 4);
+        let mut starship = Starship::new(0., 0., 50, 0, 0, 0., 0.);
+        starship.add_power(10);
+        assert_eq!(starship.get_power(), 1);
 
-        let powered_starship = starship_add_power(powered_starship, -5);
-        assert_eq!(starship_get_power(powered_starship), 0);
+        starship.add_power(-5);
+        assert_eq!(starship.get_power(), 0);
 
-        let powered_starship = starship_add_power(powered_starship, MAX_POWER as i32 + 1);
-        assert_eq!(starship_get_power(powered_starship), 4);
+        starship.add_power(MAX_POWER as i32 + 1);
+        assert_eq!(starship.get_power(), 1);
 
-        let powered_starship = starship_add_power(powered_starship, 0 as i32 - 1);
-        assert_eq!(starship_get_power(powered_starship), 3);
+        starship.add_power(0 as i32 - 1);
+        assert_eq!(starship.get_power(), 0);
     }
 }

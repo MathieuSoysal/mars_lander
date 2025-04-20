@@ -1,10 +1,15 @@
 mod physics;
 pub mod starship_adder;
-use starship_setter::*;
 
-pub mod starship_getter;
-pub mod starship_setter;
-pub type Starship = u128;
+pub struct Starship {
+    pub x: f32,
+    pub y: f32,
+    pub fuel: u16,
+    pub rotation: i8,
+    pub power: u8,
+    pub x_speed: f32,
+    pub y_speed: f32,
+}
 
 const X_SIZE_BITS: u32 = 13;
 const Y_SIZE_BITS: u32 = 12;
@@ -15,46 +20,57 @@ const Y_SPEED_SIZE_BITS: u32 = 19;
 const X_SPEED_SIZE_BITS: u32 = 19;
 const SPEED_PRECISION: f32 = 100.;
 
-const X_MASK: Starship = (1 << X_SIZE_BITS) - 1;
-const Y_MASK: Starship = (1 << Y_SIZE_BITS) - 1;
-const FUEL_MASK: Starship = (1 << FUEL_SIZE_BITS) - 1;
-const ROTATE_MASK: Starship = (1 << ROTATE_SIZE_BITS) - 1;
-const POWER_MASK: Starship = (1 << POWER_SIZE_BITS) - 1;
-const Y_SPEED_MASK: Starship = (1 << Y_SPEED_SIZE_BITS) - 1;
-const X_SPEED_MASK: Starship = (1 << X_SPEED_SIZE_BITS) - 1;
-
-const MIN_ROTATE: i32 = -90;
-const MAX_ROTATE: i32 = 90;
+const MIN_ROTATE: i8 = -90;
+const MAX_ROTATE: i8 = 90;
 const MIN_SPEED: f32 = -500.;
 const MAX_SPEED: f32 = 500.;
 
-const MAX_POWER: u32 = 4;
+const MAX_POWER: u8 = 4;
 const MAX_X: u32 = 6999;
 const MAX_Y: u32 = 2999;
 
-pub fn starship_init(
-    x: u32,
-    y: u32,
-    fuel: u32,
-    rotation: i32,
-    power: u32,
-    x_speed: f32,
-    y_speed: f32,
-) -> Starship {
-    starship_set_x(
-        starship_set_y(
-            starship_set_fuel(
-                starship_set_rotation(
-                    starship_set_power(
-                        starship_set_x_speed(starship_set_y_speed(0, y_speed), x_speed),
-                        power,
-                    ),
-                    rotation,
-                ),
-                fuel,
-            ),
+impl Starship {
+
+    pub fn new(x: f32, y: f32, fuel: u16, rotation: i8, power: u8, x_speed: f32, y_speed: f32) -> Self {
+        Starship {
+            x,
             y,
-        ),
-        x,
-    )
+            fuel,
+            rotation,
+            power,
+            x_speed,
+            y_speed,
+        }
+    }
+
+    pub fn get_x(&self) -> u32 {
+        self.x.round() as u32
+    }
+
+    pub fn get_y(&self) -> u32 {
+        self.y.round() as u32
+    }
+
+    pub fn get_fuel(&self) -> u16 {
+        self.fuel
+    }
+
+    pub fn get_rotation(&self) -> i8 {
+        self.rotation
+    }
+
+    pub fn get_power(&self) -> u8 {
+        self.power
+    }
+
+    pub fn get_x_speed(&self) -> f32 {
+        self.x_speed
+    }
+
+    pub fn get_y_speed(&self) -> f32 {
+        self.y_speed
+    }
 }
+
+
+

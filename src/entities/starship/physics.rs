@@ -1,22 +1,37 @@
-use super::{Starship, starship_getter::*, starship_setter::*};
+use super::Starship;
 
 const MARS_GRAVITY: f32 = 3.711;
-const MAX_SPEED: f32 = 500.;
-const MIN_SPEED: f32 = -500.;
 
-// fn apply_movement(starship: Starship) -> Starship {
-//     let x_speed = starship_get_x_speed(starship) as f32;
-//     let y_speed = starship_get_y_speed(starship) as f32;
-//     let rotation = starship_get_rotation(starship) as f32;
-//     let power = starship_get_power(starship) as f32;
+impl Starship {
+    pub fn apply_movement(&mut self) {
+        let v0 = self.y_speed;
 
-//     let new_x_speed = (x_speed + (rotation.to_radians().cos() * power))
-//         .max(MIN_SPEED)
-//         .min(MAX_SPEED);
-//     let new_y_speed = (y_speed + (rotation.to_radians().sin() * power) - MARS_GRAVITY)
-//         .max(MIN_SPEED)
-//         .min(MAX_SPEED);
+        let v1 = -MARS_GRAVITY;
 
-//     let s = starship_set_y_speed(s, new_y_speed as i32);
-//     starship_set_x_speed(s, new_x_speed as i32)
-// }
+        self.y_speed += v1;
+
+        let calculated_y = v0 + (v1 / 2.);
+
+        self.y += calculated_y;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_apply_movement() {
+        let mut starship = Starship::new(1000., 2700., 10000, 0, 0, 0., 0.);
+        for i in 0..20 {
+            starship.apply_movement();
+            println!(
+                "{i} x: {}, y: {}",
+                starship.get_x(),
+                starship.get_y()
+            );
+        }
+        assert_eq!(starship.get_y(), 1958);
+    }
+}
