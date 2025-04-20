@@ -25,6 +25,7 @@ const MIN_ROTATE: i32 = -90;
 const MAX_ROTATE: i32 = 90;
 const MIN_SPEED: i32 = -499;
 const MAX_SPEED: i32 = 499;
+
 const MAX_POWER: u32 = 4;
 const MAX_X: u32 = 6999;
 const MAX_Y: u32 = 2999;
