@@ -46,12 +46,25 @@ mod tests {
 
 
     #[test]
-    fn test_apply_movement_with_power1() {
+    fn test_apply_movement_with_power1_with_orientation() {
         let mut starship = Starship::new(1000., 2700., 10000, 0, 0, 0., 0.);
         starship.add_power(1);
+        starship.add_rotation(15);
         for _ in 0..20 {
             starship.apply_movement();
         }
-        assert_eq!(starship.get_y(), 2158);
+        assert_eq!(starship.get_y(), 2151);
+    }
+
+    #[test]
+    fn test_apply_movement_with_power4_with_orientation() {
+        let mut starship = Starship::new(2500., 2700., 10000, 0, 0, 0., 0.);
+        starship.add_rotation(15);
+        for _ in 0..20 {
+            starship.add_power(1);
+            starship.apply_movement();
+        }
+        assert_eq!(starship.get_y(), 2621);
+        assert_eq!(starship.get_x(), 2322);
     }
 }
