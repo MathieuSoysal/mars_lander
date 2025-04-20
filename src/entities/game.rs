@@ -12,8 +12,8 @@ use super::{
 };
 
 pub const MARS_GRAVITY: f64 = 3.711;
-const MAX_H_SPEED_ON_LAND: i32 = 20;
-const MAX_V_SPEED_ON_LAND: i32 = 40;
+const MAX_H_SPEED_ON_LAND: f32 = 20.;
+const MAX_V_SPEED_ON_LAND: f32 = 40.;
 const ANGLE_TO_LAND: i32 = 0;
 
 pub struct Point {
@@ -137,15 +137,15 @@ mod tests {
         game.add_point(5000, 1500);
         game.add_point(6999, 1000);
 
-        let starship = starship_init(1000, 2000, 0, 0, 0, 0, 0);
+        let starship = starship_init(1000, 2000, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(starship));
-        let starship = starship_init(1000, 1500, 0, 0, 0, 0, 0);
+        let starship = starship_init(1000, 1500, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(starship));
-        let starship = starship_init(2001, 500, 0, 0, 0, 0, 0);
+        let starship = starship_init(2001, 500, 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_crash(starship));
-        let starship = starship_init(3499, 500, 0, 0, 0, 0, 0);
+        let starship = starship_init(3499, 500, 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_crash(starship));
-        let starship = starship_init(5000, 1500, 0, 0, 0, 0, 0);
+        let starship = starship_init(5000, 1500, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(starship));
     }
 
@@ -159,15 +159,15 @@ mod tests {
         game.add_point(5000, 1500);
         game.add_point(6999, 1000);
 
-        let starship = starship_init(1000, 2000, 0, 0, 0, 0, 0);
+        let starship = starship_init(1000, 2000, 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_landing(starship));
-        let starship = starship_init(1000, 1500, 0, 0, 0, 0, 0);
+        let starship = starship_init(1000, 1500, 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_landing(starship));
-        let starship = starship_init(2000, 500, 0, 0, 0, 0, 0);
+        let starship = starship_init(2000, 500, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_landing(starship));
-        let starship = starship_init(3500, 500, 0, 0, 0, 0, 0);
+        let starship = starship_init(3500, 500, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_landing(starship));
-        let starship = starship_init(5000, 1500, 0, 0, 0, 0, 0);
+        let starship = starship_init(5000, 1500, 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_landing(starship));
     }
 }

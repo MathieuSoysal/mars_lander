@@ -26,21 +26,23 @@ pub const fn starship_get_power(s: Starship) -> u32 {
 }
 
 #[inline(always)]
-pub const fn starship_get_x_speed(s: Starship) -> i32 {
-    ((s >> (X_SIZE_BITS + Y_SIZE_BITS + FUEL_SIZE_BITS + ROTATE_SIZE_BITS + POWER_SIZE_BITS))
-        & X_SPEED_MASK) as i32
+pub const fn starship_get_x_speed(s: Starship) -> f32 {
+    (((s >> (X_SIZE_BITS + Y_SIZE_BITS + FUEL_SIZE_BITS + ROTATE_SIZE_BITS + POWER_SIZE_BITS))
+        & X_SPEED_MASK) as f32)
+        / SPEED_PRECISION
         - MAX_SPEED
 }
 
 #[inline(always)]
-pub const fn starship_get_y_speed(s: Starship) -> i32 {
-    ((s >> (X_SIZE_BITS
+pub const fn starship_get_y_speed(s: Starship) -> f32 {
+    (((s >> (X_SIZE_BITS
         + Y_SIZE_BITS
         + FUEL_SIZE_BITS
         + ROTATE_SIZE_BITS
         + POWER_SIZE_BITS
         + X_SPEED_SIZE_BITS))
-        & Y_SPEED_MASK) as i32
+        & Y_SPEED_MASK) as f32)
+        / SPEED_PRECISION
         - MAX_SPEED
 }
 
@@ -93,17 +95,17 @@ mod tests {
 
     #[test]
     fn test_starship_get_x_speed() {
-        let s = starship_set_x_speed(0, 50);
-        assert_eq!(starship_get_x_speed(s), 50);
-        let s = starship_set_x_speed(0, -50);
-        assert_eq!(starship_get_x_speed(s), -50);
+        let s = starship_set_x_speed(0, 50.);
+        assert_eq!(starship_get_x_speed(s), 50.);
+        let s = starship_set_x_speed(0, -50.);
+        assert_eq!(starship_get_x_speed(s), -50.);
     }
 
     #[test]
     fn test_starship_get_y_speed() {
-        let s = starship_set_y_speed(0, 50);
-        assert_eq!(starship_get_y_speed(s), 50);
-        let s = starship_set_y_speed(0, -50);
-        assert_eq!(starship_get_y_speed(s), -50);
+        let s = starship_set_y_speed(0, 50.);
+        assert_eq!(starship_get_y_speed(s), 50.);
+        let s = starship_set_y_speed(0, -50.);
+        assert_eq!(starship_get_y_speed(s), -50.);
     }
 }

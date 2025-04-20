@@ -25,14 +25,14 @@ pub const fn starship_set_power(s: Starship, power: u32) -> Starship {
             << (X_SIZE_BITS + Y_SIZE_BITS + FUEL_SIZE_BITS + ROTATE_SIZE_BITS))
 }
 
-pub const fn starship_set_x_speed(s: Starship, x_speed: i32) -> Starship {
+pub const fn starship_set_x_speed(s: Starship, x_speed: f32) -> Starship {
     (s & !(X_SPEED_MASK
         << (X_SIZE_BITS + Y_SIZE_BITS + FUEL_SIZE_BITS + ROTATE_SIZE_BITS + POWER_SIZE_BITS)))
-        | (((x_speed + MAX_SPEED) as Starship & X_SPEED_MASK)
+        | ((((x_speed + MAX_SPEED) * SPEED_PRECISION) as Starship & X_SPEED_MASK)
             << (X_SIZE_BITS + Y_SIZE_BITS + FUEL_SIZE_BITS + ROTATE_SIZE_BITS + POWER_SIZE_BITS))
 }
 
-pub const fn starship_set_y_speed(s: Starship, y_speed: i32) -> Starship {
+pub const fn starship_set_y_speed(s: Starship, y_speed: f32) -> Starship {
     (s & !(Y_SPEED_MASK
         << (X_SIZE_BITS
             + Y_SIZE_BITS
@@ -40,7 +40,7 @@ pub const fn starship_set_y_speed(s: Starship, y_speed: i32) -> Starship {
             + ROTATE_SIZE_BITS
             + POWER_SIZE_BITS
             + X_SPEED_SIZE_BITS)))
-        | (((y_speed + MAX_SPEED) as Starship & Y_SPEED_MASK)
+        | ((((y_speed + MAX_SPEED) * SPEED_PRECISION) as Starship & Y_SPEED_MASK)
             << (X_SIZE_BITS
                 + Y_SIZE_BITS
                 + FUEL_SIZE_BITS

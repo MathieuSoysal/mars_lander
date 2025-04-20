@@ -11,7 +11,7 @@ pub const fn starship_add_rotation(s: Starship, rotation: i32) -> Starship {
     starship_set_rotation(s, new_rotation)
 }
 
-pub const fn starship_add_x_speed(s: Starship, x_speed: i32) -> Starship {
+pub const fn starship_add_x_speed(s: Starship, x_speed: f32) -> Starship {
     let new_x_speed = starship_get_x_speed(s) + x_speed;
     if new_x_speed < MIN_SPEED {
         return starship_set_x_speed(s, MIN_SPEED);
@@ -22,7 +22,7 @@ pub const fn starship_add_x_speed(s: Starship, x_speed: i32) -> Starship {
     starship_set_x_speed(s, new_x_speed)
 }
 
-pub const fn starship_add_y_speed(s: Starship, y_speed: i32) -> Starship {
+pub const fn starship_add_y_speed(s: Starship, y_speed: f32) -> Starship {
     let new_y_speed = starship_get_y_speed(s) + y_speed;
     if new_y_speed < MIN_SPEED {
         return starship_set_y_speed(s, MIN_SPEED);
@@ -81,27 +81,27 @@ mod tests {
 
     #[test]
     fn test_starship_add_x_speed() {
-        let starship = starship_set_x_speed(0, 0);
-        let faster_starship = starship_add_x_speed(starship, 50);
-        assert_eq!(starship_get_x_speed(faster_starship), 50);
+        let starship = starship_set_x_speed(0, 0.);
+        let faster_starship = starship_add_x_speed(starship, 50.);
+        assert_eq!(starship_get_x_speed(faster_starship), 50.);
 
-        let faster_starship = starship_add_x_speed(faster_starship, -100);
-        assert_eq!(starship_get_x_speed(faster_starship), -50);
+        let faster_starship = starship_add_x_speed(faster_starship, -100.);
+        assert_eq!(starship_get_x_speed(faster_starship), -50.);
 
-        let faster_starship = starship_add_x_speed(faster_starship, MAX_SPEED * 2);
+        let faster_starship = starship_add_x_speed(faster_starship, MAX_SPEED * 2.);
         assert_eq!(starship_get_x_speed(faster_starship), MAX_SPEED);
     }
 
     #[test]
     fn test_starship_add_y_speed() {
-        let starship = starship_set_y_speed(0, 0);
-        let faster_starship = starship_add_y_speed(starship, 30);
-        assert_eq!(starship_get_y_speed(faster_starship), 30);
+        let starship = starship_set_y_speed(0, 0.);
+        let faster_starship = starship_add_y_speed(starship, 30.);
+        assert_eq!(starship_get_y_speed(faster_starship), 30.);
 
-        let faster_starship = starship_add_y_speed(faster_starship, -50);
-        assert_eq!(starship_get_y_speed(faster_starship), -20);
+        let faster_starship = starship_add_y_speed(faster_starship, -50.);
+        assert_eq!(starship_get_y_speed(faster_starship), -20.);
 
-        let faster_starship = starship_add_y_speed(faster_starship, MAX_SPEED * 2);
+        let faster_starship = starship_add_y_speed(faster_starship, MAX_SPEED * 2.);
         assert_eq!(starship_get_y_speed(faster_starship), MAX_SPEED);
     }
 
