@@ -46,9 +46,9 @@ impl Game {
     }
 
     pub fn starship_is_crash(&self, starship: Starship) -> bool {
-        let x = starship_get_x(starship) as f64;
-        let y = starship_get_y(starship) as f64;
-        self.crash_points[x as usize] >= y as u32
+        let x = starship_get_x(starship);
+        let y = starship_get_y(starship);
+        self.crash_points[x as usize] >= y
     }
 
     pub fn starship_is_landing(&self, starship: Starship) -> bool {
