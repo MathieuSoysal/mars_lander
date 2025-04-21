@@ -1,7 +1,7 @@
 use crate::genetics::pheno::Phenotype;
 
 use super::{
-    game::Game,
+    game::{self, Game},
     starship::{self, Starship},
 };
 
@@ -42,7 +42,7 @@ pub fn get_power_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
 }
 
 #[derive(Clone, Copy)]
-struct DNA<'a> {
+pub struct DNA<'a> {
     genome: Genome,
     game: &'a Game,
     starship: Starship,
@@ -50,9 +50,6 @@ struct DNA<'a> {
 
 impl<'a> Phenotype<i32> for DNA<'a> {
     fn fitness(&self) -> i32 {
-        let x = self.starship.get_x();
-        let y = self.starship.get_y();
-        let mut fitness = 0;
         let mut starship = self.starship.copy();
         for i in 0..80 {
             let rotate = get_rotate_on_turn(&self.genome, i);
@@ -61,15 +58,14 @@ impl<'a> Phenotype<i32> for DNA<'a> {
             starship.add_rotation(rotate);
             starship.apply_movement();
             if self.game.starship_is_crash(&starship) {
-                fitness -= 1000;
-                break;
+                return self.game.get_distance_to_landing(&starship) / 10;
             }
             if self.game.starship_is_landing(&starship) {
-                return 7000 - starship.get_fuel() as i32;
+                return starship.get_fuel() as i32;
             }
         }
-        fitness
-    }
+        self.game.get_distance_to_landing(&starship) / 10
+        }
 
     fn mutate(&self) -> DNA<'a> {
         let mut mutated = *self;
@@ -90,3 +86,4 @@ impl<'a> Phenotype<i32> for DNA<'a> {
         child
     }
 }
+

@@ -36,6 +36,17 @@ impl Game {
         }
     }
 
+    pub fn get_distance_to_landing(&self, starship: &Starship) -> i32 {
+        let x = starship.get_x();
+        let d_start_x = self.landing.start.x as i32 - x;
+        let d_end_x = self.landing.end.x as i32 - x;
+        if d_end_x < d_start_x {
+            d_end_x as i32
+        } else {
+            d_start_x as i32
+        }
+    }
+
     pub fn starship_is_crash(&self, starship: &Starship) -> bool {
         let x = starship.get_x();
         let y = starship.get_y();
