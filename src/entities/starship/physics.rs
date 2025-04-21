@@ -9,7 +9,7 @@ impl Starship {
         let rotation = self.rotation as f32;
         let power = self.power as f32;
 
-        let v1_x = rotation.to_radians().sin() * power;
+        let v1_x = -1. * rotation.to_radians().sin() * power;
         let v1_y = rotation.to_radians().cos() * power - MARS_GRAVITY;
 
         self.y_speed += v1_y;
@@ -44,7 +44,6 @@ mod tests {
         assert_eq!(starship.get_y(), 1958);
     }
 
-
     #[test]
     fn test_apply_movement_with_power1_with_orientation() {
         let mut starship = Starship::new(1000., 2700., 10000, 0, 0, 0., 0.);
@@ -66,5 +65,17 @@ mod tests {
         }
         assert_eq!(starship.get_y(), 2621);
         assert_eq!(starship.get_x(), 2322);
+    }
+
+    #[test]
+    fn test_apply_movement_with_power4_with_orientation_negatif() {
+        let mut starship = Starship::new(2500., 2700., 10000, 0, 0, 0., 0.);
+        starship.add_rotation(-15);
+        for _ in 0..20 {
+            starship.add_power(1);
+            starship.apply_movement();
+        }
+        assert_eq!(starship.get_y(), 2621);
+        assert_eq!(starship.get_x(), 2678);
     }
 }
