@@ -1,6 +1,7 @@
 mod physics;
 pub mod starship_adder;
 
+#[derive(Clone, Copy)]
 pub struct Starship {
     pub x: i32,
     pub y: i32,
@@ -17,6 +18,18 @@ const MAX_ROTATE: i8 = 90;
 const MAX_POWER: u8 = 4;
 
 impl Starship {
+
+    pub fn copy(&self) -> Self {
+        Starship {
+            x: self.x,
+            y: self.y,
+            fuel: self.fuel,
+            rotation: self.rotation,
+            power: self.power,
+            x_speed: self.x_speed,
+            y_speed: self.y_speed,
+        }
+    }
 
     pub fn new(x: i32, y: i32, fuel: u16, rotation: i8, power: u8, x_speed: f32, y_speed: f32) -> Self {
         Starship {

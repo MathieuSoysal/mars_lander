@@ -15,7 +15,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             for x in 0..7000 {
                 for y in 0..3000 {
                     let starship = Starship::new(x, y, 0, 0, 0, 0., 0.);
-                    black_box(game.starship_is_crash(starship));
+                    black_box(game.starship_is_crash(&starship));
                 }
             }
         })
