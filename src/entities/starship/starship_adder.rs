@@ -1,5 +1,8 @@
 use super::*;
 
+const MIN_SPEED: f32 = -500.;
+const MAX_SPEED: f32 = 500.;
+
 
 impl Starship {
     pub fn add_rotation(&mut self, rotation: i8) {
