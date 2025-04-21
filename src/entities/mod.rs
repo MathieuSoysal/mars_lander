@@ -1,4 +1,4 @@
-pub mod genome_a;
+pub mod genome;
 mod segment;
 pub mod game;
 pub mod simulation;
