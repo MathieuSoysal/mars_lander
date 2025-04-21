@@ -2,8 +2,8 @@ mod physics;
 pub mod starship_adder;
 
 pub struct Starship {
-    pub x: f32,
-    pub y: f32,
+    pub x: i32,
+    pub y: i32,
     pub fuel: u16,
     pub rotation: i8,
     pub power: u8,
@@ -19,10 +19,10 @@ const MAX_POWER: u8 = 4;
 
 impl Starship {
 
-    pub fn new(x: f32, y: f32, fuel: u16, rotation: i8, power: u8, x_speed: f32, y_speed: f32) -> Self {
+    pub fn new(x: i32, y: i32, fuel: u16, rotation: i8, power: u8, x_speed: f32, y_speed: f32) -> Self {
         Starship {
-            x,
-            y,
+            x : (x * 100),
+            y : (y * 100),
             fuel,
             rotation,
             power,
@@ -32,11 +32,11 @@ impl Starship {
     }
 
     pub fn get_x(&self) -> u32 {
-        (self.x + 0.5) as u32
+        ((self.x + 50) / 100) as u32
     }
 
     pub fn get_y(&self) -> u32 {
-        (self.y + 0.5) as u32
+        ((self.y + 50) / 100) as u32
     }
 
     pub fn get_fuel(&self) -> u16 {

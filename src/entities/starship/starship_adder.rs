@@ -5,6 +5,8 @@ const MAX_SPEED: f32 = 500.;
 
 
 impl Starship {
+
+    #[inline(always)]
     pub fn add_rotation(&mut self, rotation: i8) {
         let new_rotation = self.rotation + rotation;
         if new_rotation < MIN_ROTATE {
@@ -16,7 +18,18 @@ impl Starship {
         }
     }
 
-    fn add_x_speed(&mut self, x_speed: f32) {
+    #[inline(always)]
+    pub fn add_x(&mut self, x: f32) {
+        self.x += (x * 100.) as i32;
+    }
+
+    #[inline(always)]
+    pub fn add_y(&mut self, y: f32) {
+        self.y += (y * 100.) as i32;
+    }
+
+    #[inline(always)]
+    pub fn add_x_speed(&mut self, x_speed: f32) {
         let new_x_speed = self.x_speed + x_speed;
         if new_x_speed < MIN_SPEED {
             self.x_speed = MIN_SPEED;
@@ -26,7 +39,9 @@ impl Starship {
             self.x_speed = new_x_speed;
         }
     }
-    fn add_y_speed(&mut self, y_speed: f32) {
+
+    #[inline(always)]
+    pub fn add_y_speed(&mut self, y_speed: f32) {
         let new_y_speed = self.y_speed + y_speed;
         if new_y_speed < MIN_SPEED {
             self.y_speed = MIN_SPEED;
@@ -37,6 +52,7 @@ impl Starship {
         }
     }
 
+    #[inline(always)]
     pub fn add_power(&mut self, add_power: i32) {
         if add_power > 0 && self.power < MAX_POWER {
             self.power += 1 as u8;
@@ -54,7 +70,7 @@ mod tests {
 
     #[test]
     fn test_starship_add_rotation() {
-        let mut starship = Starship::new(0., 0., 0, 0, 0, 0., 0.);
+        let mut starship = Starship::new(0, 0, 0, 0, 0, 0., 0.);
         starship.add_rotation(10);
         assert_eq!(starship.get_rotation(), 10);
         starship.add_rotation(-20);
@@ -65,7 +81,7 @@ mod tests {
 
     #[test]
     fn test_starship_add_x_speed() {
-        let mut starship = Starship::new(0., 0., 0, 0, 0, 0., 0.);
+        let mut starship = Starship::new(0, 0, 0, 0, 0, 0., 0.);
         starship.add_x_speed(50.);
         assert_eq!(starship.get_x_speed(), 50.);
         starship.add_x_speed(-100.);
@@ -76,7 +92,7 @@ mod tests {
 
     #[test]
     fn test_starship_add_y_speed() {
-        let mut starship = Starship::new(0., 0., 0, 0, 0, 0., 0.);
+        let mut starship = Starship::new(0, 0, 0, 0, 0, 0., 0.);
         starship.add_y_speed(30.);
         assert_eq!(starship.get_y_speed(), 30.);
         starship.add_y_speed(-50.);
@@ -87,7 +103,7 @@ mod tests {
 
     #[test]
     fn test_starship_add_power() {
-        let mut starship = Starship::new(0., 0., 50, 0, 0, 0., 0.);
+        let mut starship = Starship::new(0, 0, 50, 0, 0, 0., 0.);
         starship.add_power(10);
         assert_eq!(starship.get_power(), 1);
 

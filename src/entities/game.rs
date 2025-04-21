@@ -128,19 +128,19 @@ mod tests {
         game.add_point(5000, 1500);
         game.add_point(6999, 1000);
 
-        let starship = Starship::new(1000., 2000., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(1000, 2000, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(starship));
-        let starship = Starship::new(1000., 1500., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(1000, 1500, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(starship));
-        let starship = Starship::new(2001., 500., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(2001, 500, 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_crash(starship));
-        let starship = Starship::new(3499., 500., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(3499, 500, 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_crash(starship));
-        let starship = Starship::new(5000., 1500., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(5000, 1500, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(starship));
-        let starship = Starship::new(9999., 1000., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(9999, 1000, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(starship));
-        let starship = Starship::new(5., 9999., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(5, 9999, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(starship));
     }
 
@@ -154,15 +154,15 @@ mod tests {
         game.add_point(5000, 1500);
         game.add_point(6999, 1000);
 
-        let starship = Starship::new(1000., 2000., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(1000, 2000, 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_landing(starship));
-        let starship = Starship::new(1000., 1500., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(1000, 1500, 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_landing(starship));
-        let starship = Starship::new(2000., 500., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(2000, 500, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_landing(starship));
-        let starship = Starship::new(3500., 500., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(3500, 500, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_landing(starship));
-        let starship = Starship::new(5000., 1500., 0, 0, 0, 0., 0.);
+        let starship = Starship::new(5000, 1500, 0, 0, 0, 0., 0.);
         assert!(!game.starship_is_landing(starship));
     }
 }
