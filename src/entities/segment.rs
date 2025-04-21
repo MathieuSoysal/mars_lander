@@ -1,4 +1,4 @@
-use super::{game::Point};
+use super::game::Point;
 
 pub struct Segment {
     pub start: Point,
@@ -11,9 +11,9 @@ impl Segment {
     }
 
     pub fn length(&self) -> f64 {
-        let dx = (self.end.x as f64 - self.start.x as f64).powi(2);
-        let dy = (self.end.y as f64 - self.start.y as f64).powi(2);
-        (dx + dy).sqrt()
+        let dx = self.end.x as f64 - self.start.x as f64;
+        let dy = self.end.y as f64 - self.start.y as f64;
+        dx.hypot(dy)
     }
 
     pub fn is_landing(&self) -> bool {

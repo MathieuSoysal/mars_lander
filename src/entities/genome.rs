@@ -1,4 +1,3 @@
-
 const GENOME_SIZE_BITS: usize = 127;
 const ROTATE_SIZE_BITS: usize = 2;
 const POWER_SIZE_BITS: usize = 2;
@@ -25,6 +24,3 @@ pub const fn get_power(g: Genome, nb_turn: usize) -> u8 {
 pub const fn get_rotate(g: Genome, nb_turn: usize) -> u8 {
     (get_turn(g, nb_turn) >> POWER_SIZE_BITS) as u8
 }
-
-
-
