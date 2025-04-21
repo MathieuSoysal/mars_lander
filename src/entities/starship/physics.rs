@@ -23,10 +23,10 @@ impl Starship {
     pub fn apply_movement(&mut self) {
         let v0_y = self.y_speed;
         let v0_x = self.x_speed;
-        let rotation = self.rotation as f32;
+        let rotation = (self.rotation.abs() as f32).to_radians();
         let power = self.power() as f32;
-        let v1_x = -1. * rotation.to_radians().sin() * power;
-        let v1_y = rotation.to_radians().cos() * power - MARS_GRAVITY;
+        let v1_x = -1. * rotation.sin() * power;
+        let v1_y = rotation.cos() * power - MARS_GRAVITY;
         self.add_y_speed(v1_y);
         self.add_x_speed(v1_x);
         self.add_x(v0_x + (v1_x / 2.));

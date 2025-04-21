@@ -31,12 +31,12 @@ impl Starship {
         }
     }
 
-    pub fn get_x(&self) -> u32 {
-        ((self.x + 50) / 100) as u32
+    pub fn get_x(&self) -> i32 {
+        (self.x + 50) / 100 
     }
 
-    pub fn get_y(&self) -> u32 {
-        ((self.y + 50) / 100) as u32
+    pub fn get_y(&self) -> i32 {
+        (self.y + 50) / 100
     }
 
     pub fn get_fuel(&self) -> u16 {

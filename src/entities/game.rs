@@ -4,8 +4,8 @@ pub const MARS_GRAVITY: f64 = 3.711;
 const MAX_H_SPEED_ON_LAND: f32 = 20.;
 const MAX_V_SPEED_ON_LAND: f32 = 40.;
 const ANGLE_TO_LAND: i32 = 0;
-const MAX_X: u32 = 6999;
-const MAX_Y: u32 = 2999;
+const MAX_X: i32 = 6999;
+const MAX_Y: i32 = 2999;
 
 pub struct Point {
     pub x: usize,
@@ -39,7 +39,7 @@ impl Game {
     pub fn starship_is_crash(&self, starship: Starship) -> bool {
         let x = starship.get_x();
         let y = starship.get_y();
-        x > MAX_X || y > MAX_Y || self.crash_points[x as usize] >= y
+        x < 0 || x > MAX_X || y > MAX_Y || y < 0 || self.crash_points[x as usize] >= y as u32
     }
 
     pub fn starship_is_landing(&self, starship: Starship) -> bool {
