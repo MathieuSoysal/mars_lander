@@ -40,20 +40,9 @@ impl Starship {
         } else if add_power < 0 && self.power > 0 {
             self.power -= 1 as u8;
         }
-        if self.can_consume_fuel() {
-            self.consume_fuel();
-        } else {
-            self.power = 0;
-        }
     }
 
-    fn consume_fuel(&mut self) {
-        self.fuel -= self.power as u16;
-    }
 
-    fn can_consume_fuel(&self) -> bool {
-        self.power as u16 <= self.fuel
-    }
 }
 
 #[cfg(test)]

@@ -3,11 +3,28 @@ use super::Starship;
 const MARS_GRAVITY: f32 = 3.711;
 
 impl Starship {
+    fn consume_fuel(&mut self) {
+        self.fuel -= self.power as u16;
+    }
+
+    fn can_consume_fuel(&self) -> bool {
+        self.power as u16 <= self.fuel
+    }
+
+    fn power(&mut self) -> u8 {
+        if self.can_consume_fuel() {
+            self.consume_fuel();
+        } else {
+            self.power = 0;
+        }
+        self.power
+    }
+
     pub fn apply_movement(&mut self) {
         let v0_y = self.y_speed;
         let v0_x = self.x_speed;
         let rotation = self.rotation as f32;
-        let power = self.power as f32;
+        let power = self.power() as f32;
 
         let v1_x = -1. * rotation.to_radians().sin() * power;
         let v1_y = rotation.to_radians().cos() * power - MARS_GRAVITY;

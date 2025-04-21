@@ -20,6 +20,18 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             }
         })
     });
+    c.bench_function("starship movement", |b| {
+        b.iter(|| {
+            for rotation in -90..=90 {
+                for power in 0..=4 {
+                    let mut starship = Starship::new(0., 0., 10000, rotation, power, 0., 0.);
+                    for _ in 0..50 {
+                        black_box(starship.apply_movement());
+                    }
+                }
+            }
+        })
+    });
 }
 
 criterion_group!(benches, criterion_benchmark);
