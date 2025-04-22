@@ -1,3 +1,4 @@
+pub mod my_genetics;
 use entities::{game::Game, genome::{gen_init_rand, get_power_on_turn, get_rotate_on_turn, DNA}, starship::{self, Starship}};
 use genetics::sim::{seq::Simulator, Builder, Simulation};
 

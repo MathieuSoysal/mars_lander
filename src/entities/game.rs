@@ -38,8 +38,13 @@ impl Game {
 
     pub fn get_distance_to_landing(&self, starship: &Starship) -> i32 {
         let x = starship.get_x();
-        let d_start_x = self.landing.start.x as i32 - x;
-        let d_end_x = self.landing.end.x as i32 - x;
+        if x >= self.landing.start.x as i32
+            && x <= self.landing.end.x as i32
+        {
+            return 0;
+        }
+        let d_start_x = (self.landing.start.x as i32 - x).abs();
+        let d_end_x = (self.landing.end.x as i32 - x).abs();
         if d_end_x < d_start_x {
             d_end_x as i32
         } else {
@@ -50,7 +55,15 @@ impl Game {
     pub fn starship_is_crash(&self, starship: &Starship) -> bool {
         let x = starship.get_x();
         let y = starship.get_y();
-        x < 0 || x > MAX_X || y > MAX_Y || y < 0 || self.crash_points[x as usize] >= y as u32
+        let is_on_landing = x as usize >= self.landing.start.x
+            && x as usize <= self.landing.end.x
+            && y as usize <= self.landing.start.y;
+        starship.get_x() < 0
+            || x > MAX_X
+            || y > MAX_Y
+            || starship.get_y() < 0
+            || self.crash_points[x as usize] >= y as u32
+            || is_on_landing
     }
 
     pub fn starship_is_landing(&self, starship: &Starship) -> bool {
@@ -58,18 +71,16 @@ impl Game {
         let y = starship.get_y() as usize;
         x >= self.landing.start.x
             && x <= self.landing.end.x
-            && y >= self.landing.start.y
-            && y <= self.landing.end.y
+            && y <= self.landing.start.y
             && starship.get_x_speed().abs() <= MAX_H_SPEED_ON_LAND
-            && starship.get_y_speed().abs() <= MAX_V_SPEED_ON_LAND
+            && starship.get_y_speed().abs() <= MAX_V_SPEED_ON_LAND + 30.
             && starship.get_rotation() == ANGLE_TO_LAND as i8
     }
 
     pub fn add_point(&mut self, x: usize, y: usize) {
-        if self.points.len() < self.nb_points {
-            self.points.push(Point { x, y });
-        }
-        if self.points.len() % 2 == 0 {
+        self.points.push(Point { x, y });
+        if self.points.len() > 1 {
+            println!("Adding segment");
             let start = Point {
                 x: self.points[self.points.len() - 2].x,
                 y: self.points[self.points.len() - 2].y,
@@ -92,17 +103,37 @@ impl Game {
                 },
             };
         } else {
-            let start_x = seg.start.x as u32;
-            let start_y = seg.start.y.min(seg.end.y) as u32;
-            let end_y = seg.start.y.max(seg.end.y) as u32;
-            let end_x = seg.end.x as u32;
-            let ecart_x = end_x - start_x as u32;
-            let ecart_y = end_y - seg.start.y as u32;
+            let start_x = seg.start.x as i32;
+            let start_y = seg.start.y as i32;
+            let end_y = seg.end.y as i32;
+            let end_x = seg.end.x as i32;
             self.segments.push(seg);
             for x in start_x..=end_x {
-                self.crash_points[x as usize] = ((x * ecart_x).max(1) / ecart_y.max(1)) + start_y;
+                self.crash_points[x as usize] = ((((end_y - start_y) * x) / (end_x - start_x))
+                    + (start_y + -1 * ((start_x * (end_y - start_y)) / (end_x - start_x))))
+                    as u32;
             }
         }
+    }
+
+    pub fn to_svg(&self) -> String {
+        let mut svg = String::new();
+        for segment in &self.segments {
+            svg.push_str(&format!(
+                "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"red\"  stroke-width=\"7\" />\n",
+                segment.start.x, 3000 - segment.start.y, segment.end.x, 3000 - segment.end.y
+            ));
+        }
+        svg.push_str(&format!(
+            "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"green\"  stroke-width=\"8\">\n",
+            self.landing.start.x,
+            3000 - self.landing.start.y,
+            self.landing.end.x,
+            3000 - self.landing.end.y
+        ));
+        svg.push_str("<title>Landing</title>\n");
+        svg.push_str("</line>\n");
+        svg
     }
 }
 
@@ -126,7 +157,7 @@ mod tests {
         game.add_point(3, 3);
 
         assert_eq!(game.points.len(), 4);
-        assert_eq!(game.segments.len(), 2);
+        assert_eq!(game.segments.len(), 3);
     }
 
     #[test]
@@ -143,16 +174,36 @@ mod tests {
         assert!(game.starship_is_crash(&starship));
         let starship = Starship::new(1000, 1500, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(&starship));
-        let starship = Starship::new(2001, 500, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship));
-        let starship = Starship::new(3499, 500, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship));
         let starship = Starship::new(5000, 1500, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(&starship));
         let starship = Starship::new(9999, 1000, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(&starship));
         let starship = Starship::new(5, 9999, 0, 0, 0, 0., 0.);
         assert!(game.starship_is_crash(&starship));
+    }
+
+    #[test]
+    fn test_starship_is_not_crash() {
+        let mut game = Game::new(10);
+        game.add_point(0, 1500);
+        game.add_point(1000, 2000);
+        game.add_point(2000, 500);
+        game.add_point(3500, 500);
+        game.add_point(5000, 1500);
+        game.add_point(6999, 1000);
+
+        let starship = Starship::new(500, 2500, 0, 0, 0, 0., 0.);
+        assert!(!game.starship_is_crash(&starship));
+        let starship = Starship::new(600, 1850, 0, 0, 0, 0., 0.);
+        assert!(!game.starship_is_crash(&starship));
+        let starship = Starship::new(1600, 1200, 0, 0, 0, 0., 0.);
+        assert!(!game.starship_is_crash(&starship));
+        let starship = Starship::new(6000, 1500, 0, 0, 0, 0., 0.);
+        assert!(!game.starship_is_crash(&starship));
+        let starship = Starship::new(1500, 1500, 0, 0, 0, 0., 0.);
+        assert!(!game.starship_is_crash(&starship));
+        let starship = Starship::new(500, 2000, 0, 0, 0, 0., 0.);
+        assert!(!game.starship_is_crash(&starship));
     }
 
     #[test]

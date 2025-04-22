@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mars Lander SVG Gallery</title>
+  <style>
+    html, body { margin:0; padding:0; height:100%; overflow:hidden; }
+    .gallery { height:100%; overflow-y:auto; }
+    .gallery img { width:100%; display:block; }
+    #viewer {
+      width:100%;
+      display:block;
+      opacity:1;
+      transition:opacity .3s ease;
+    }
+    .viewer-container {
+      position:relative;
+      max-width:100%;
+      margin:0 auto;
+      padding-top: 50px;
+      padding-bottom: 80px;
+    }
+    .viewer-container button {
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      background:rgba(0,0,0,.5);
+      border:none;
+      color:#fff;
+      font-size:24px;
+      width:40px;
+      height:40px;
+      border-radius:20px;
+      cursor:pointer;
+    }
+    #prev { left:10px; }
+    #next { right:10px; }
+    #counter {
+      position:absolute;
+      bottom:10px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,.5);
+      color:#fff;
+      padding:4px 8px;
+      border-radius:4px;
+      font-size:14px;
+    }
+    body {
+      background: #111;
+      color: #eee;
+      font-family: sans-serif;
+    }
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 8px 16px;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+    }
+    header h1 { margin:0; font-size:1.2em; }
+    header progress {
+      width: 200px; height:6px;
+      border-radius:3px;
+      background: #333;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #seek {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mars Lander Viewer</h1>
+    <progress id="progress" value="1" max="100"></progress>
+  </header>
+
+  <div class="viewer-container">
+    <img id="viewer" src="all_svg/output0.svg" alt="Mars Lander" />
+    <button id="prev">❮</button>
+    <button id="next">❯</button>
+    <div id="counter">1 / 100</div>
+    <div id="loader" class="hidden"></div>
+  </div>
+
+  <input type="range" id="seek" min="1" max="100" value="1" />
+
+  <script>
+    (function(){
+      const progress = document.getElementById('progress');
+      const seek     = document.getElementById('seek');
+      const loader   = document.getElementById('loader');
+      const viewer   = document.getElementById('viewer');
+      const prev     = document.getElementById('prev');
+      const next     = document.getElementById('next');
+      const counter  = document.getElementById('counter');
+      const total    = 100;
+      let current    = 0;
+
+      function show(n){
+        loader.classList.remove('hidden');
+        viewer.style.opacity = 0;
+        current = (n + total) % total;
+        counter.textContent = `${current+1} / ${total}`;
+        progress.value = current+1;
+        seek.value     = current+1;
+        viewer.onload = ()=>{
+          viewer.style.opacity = 1;
+          loader.classList.add('hidden');
+        };
+        viewer.src = `all_svg/output${current}.svg`;
+      }
+
+      prev.addEventListener('click', ()=> show(current-1));
+      next.addEventListener('click', ()=> show(current+1));
+      document.addEventListener('keydown', e=>{
+        if(e.key==='ArrowLeft')  show(current-1);
+        if(e.key==='ArrowRight') show(current+1);
+      });
+      seek.addEventListener('input', ()=> show(seek.value-1));
+
+      show(0);
+    })();
+  </script>
+</body>
+</html>

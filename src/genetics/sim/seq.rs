@@ -20,6 +20,8 @@
 //! To use a `Simulator`, you need a `SimulatorBuilder`, which you can
 //! obtain by calling `Simulator::builder()`.
 
+use crate::entities::genome::population_to_svg;
+
 use super::earlystopper::*;
 use super::iterlimit::*;
 use super::select::*;
