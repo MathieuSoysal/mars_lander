@@ -80,7 +80,6 @@ impl Game {
     pub fn add_point(&mut self, x: usize, y: usize) {
         self.points.push(Point { x, y });
         if self.points.len() > 1 {
-            println!("Adding segment");
             let start = Point {
                 x: self.points[self.points.len() - 2].x,
                 y: self.points[self.points.len() - 2].y,
