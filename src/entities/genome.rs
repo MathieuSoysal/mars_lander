@@ -131,16 +131,20 @@ impl<'a> DNA<'a> {
 impl<'a> Phenotype<i32> for DNA<'a> {
     fn fitness(&self) -> i32 {
         let mut s = self.starship.copy();
-        let distance = self.game.get_distance_to_landing(&s);
         for i in 0..GENOME_SIZE {
             let rotate = get_rotate_on_turn(&self.genome, i);
             let power = get_power_on_turn(&self.genome, i);
             s.add_power(power as i32);
             s.add_rotation(rotate);
             s.apply_movement();
+            if self.game.starship_is_landing(&s) {
+                return 14000 ;
+            }
             if self.game.starship_is_crash(&s) {
-                return (distance - self.game.get_distance_to_landing(&s)) * 10
-                 + s.get_fuel() as i32 * 2;
+                if self.game.get_distance_to_landing(&s) == 0 {
+                    return 7000 ;
+                }
+                return (7000 - self.game.get_distance_to_landing(&s)) / self.game.get_distance_to_landing(&s);
             }
         }
         0
@@ -149,7 +153,7 @@ impl<'a> Phenotype<i32> for DNA<'a> {
     fn mutate(&self) -> DNA<'a> {
         let mut mutated = *self;
         for i in 0..GENOME_SIZE {
-            if rand::random::<f32>() <= 0.05 {
+            if rand::random::<f32>() <= 0.1 {
                 mutated.genome[i] = rand::random::<u8>();
             }
         }

@@ -73,7 +73,7 @@ impl Game {
             && x <= self.landing.end.x
             && y <= self.landing.start.y
             && starship.get_x_speed().abs() <= MAX_H_SPEED_ON_LAND
-            && starship.get_y_speed().abs() <= MAX_V_SPEED_ON_LAND + 30.
+            && starship.get_y_speed().abs() <= MAX_V_SPEED_ON_LAND
             && starship.get_rotation() == ANGLE_TO_LAND as i8
     }
 
