@@ -1,3 +1,4 @@
 /target
 Cargo.lock
 /all_svg
+output.rs
