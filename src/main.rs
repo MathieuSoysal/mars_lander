@@ -1,8 +1,7 @@
 use std::convert::TryInto;
 use std::{array, io};
 
-use my_lib::entities::genome::{DNA, population_to_svg};
-use my_lib::genetics::pheno::Phenotype;
+use my_lib::entities::genome::population_to_svg;
 
 extern crate my_lib;
 
@@ -49,52 +48,48 @@ fn main() {
     //         hs as f32,
     //     );
 
-        let mut game = my_lib::entities::game::Game::new(10);
-        let mut starship = my_lib::entities::starship::Starship::new(6500, 2900, 10000, 0, 0, 0., 0.);
-        game.add_point(0, 1500);
-        game.add_point(1000, 2000);
-        game.add_point(2000, 500);
-        game.add_point(3500, 500);
-        game.add_point(5000, 2000);
-        game.add_point(6999, 1000);
-        let start_time = std::time::Instant::now();
+    let mut game = my_lib::entities::game::Game::new(10);
+    let mut starship = my_lib::entities::starship::Starship::new(6500, 1900, 10000, 0, 0, 0., 0.);
+    game.add_point(0, 1500);
+    game.add_point(1000, 2000);
+    game.add_point(2000, 500);
+    game.add_point(3500, 500);
+    game.add_point(5000, 1500);
+    game.add_point(6999, 1000);
+    let start_time = std::time::Instant::now();
 
-        let mut population: [my_lib::entities::genome::DNA; 100] = array::from_fn(|_| {
-            let genome = my_lib::entities::genome::gen_init_rand();
-            my_lib::entities::genome::DNA::new(genome, &game, starship.copy())
-        });
-        let mut new_population: [my_lib::entities::genome::DNA; 100] = array::from_fn(|_| {
-            let genome = my_lib::entities::genome::gen_init_rand();
-            my_lib::entities::genome::DNA::new(genome, &game, starship.copy())
-        });
-        population[0] = my_lib::entities::genome::DNA::new(
-            my_lib::entities::genome::gen_init_full(),
-            &game,
-            starship.copy(),
+    let mut population: [my_lib::entities::genome::DNA; 100] = array::from_fn(|_| {
+        let genome = my_lib::entities::genome::gen_init_rand();
+        my_lib::entities::genome::DNA::new(genome, &game, starship.copy())
+    });
+    let mut new_population: [my_lib::entities::genome::DNA; 100] = array::from_fn(|_| {
+        let genome = my_lib::entities::genome::gen_init_rand();
+        my_lib::entities::genome::DNA::new(genome, &game, starship.copy())
+    });
+    population[0] = my_lib::entities::genome::DNA::new(
+        my_lib::entities::genome::gen_init_full(),
+        &game,
+        starship.copy(),
+    );
+    population[1] = my_lib::entities::genome::DNA::new(
+        my_lib::entities::genome::gen_init_semi_full(),
+        &game,
+        starship.copy(),
+    );
+    for i in 0..300 {
+        my_lib::my_genetics::elitiste::elitiste_new_population(
+            &population,
+            &mut new_population,
+            10,
+            0.6,
         );
-        population[1] = my_lib::entities::genome::DNA::new(
-            my_lib::entities::genome::gen_init_semi_full(),
-            &game,
-            starship.copy(),
-        );
-        let mut best: DNA = population[0].clone();
-        for i in 0..100 {
-            best = population
-                .iter()
-                .max_by_key(|dna| dna.fitness())
-                .unwrap()
-                .clone();
-            population_to_svg(&population, i);
-            my_lib::my_genetics::roulette::roulette_new_population(
-                &population,
-                &mut new_population,
-                0.6,
-            );
-            population = new_population;
-        }
-        let rot = my_lib::entities::genome::get_rotate_on_turn(best.get_genome(), 0);
-        starship.add_rotation(rot);
-        let thrust = my_lib::entities::genome::get_power_on_turn(best.get_genome(), 0);
-        starship.add_power(thrust as i32);
-        println!("{} {}", starship.get_rotation(), starship.get_power());
+        population_to_svg(&population, i);
+        population = new_population;
     }
+    let best = population[0].clone();
+    let rot = my_lib::entities::genome::get_rotate_on_turn(best.get_genome(), 0);
+    starship.add_rotation(rot);
+    let thrust = my_lib::entities::genome::get_power_on_turn(best.get_genome(), 0);
+    starship.add_power(thrust as i32);
+    println!("{} {}", starship.get_rotation(), starship.get_power());
+}

@@ -111,14 +111,18 @@ impl<'a> DNA<'a> {
             s.apply_movement();
             str.push_str(&format!("{},{} ", s.get_x(), 3000 - s.get_y()));
             if self.game.starship_is_landing(&s) {
-                str.push_str("\" fill=\"none\" stroke=\"green\" stroke-width=\"80\" />");
+                str.push_str(&format!("\" fill=\"none\" stroke=\"green\" stroke-width=\"{}\" />",10));
+                str.push_str(&format!(
+                    "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"none\" stroke=\"green\" stroke-width=\"1\" />",
+                    s.get_x(), 3000 - s.get_y(),10 + s.get_fuel() as u32 / 200 
+                ));
                 return str;
             }
             if self.game.starship_is_crash(&s) {
                 str.push_str("\" fill=\"none\" stroke=\"white\" />");
                 str.push_str(&format!(
                     "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"none\" stroke=\"white\" stroke-width=\"1\" />",
-                    s.get_x(), 3000 - s.get_y(), 90 - s.get_rotation().abs() as u32 
+                    s.get_x(), 3000 - s.get_y(), 3 
                 ));
                 return str;
             }
@@ -138,13 +142,15 @@ impl<'a> Phenotype<i32> for DNA<'a> {
             s.add_rotation(rotate);
             s.apply_movement();
             if self.game.starship_is_landing(&s) {
-                return 14000 ;
+                return 7000 *500 + 90 *500 + 90 *500 + 90 *500 + s.get_fuel() as i32 * 5000;
             }
             if self.game.starship_is_crash(&s) {
                 if self.game.get_distance_to_landing(&s) == 0 {
-                    return 7000 ;
+                    return (7000 *500) + (90 - s.get_rotation().abs() as i32) * 500
+                    + (90 - s.get_x_speed().abs().min(90.).max(20.) as i32) * 500
+                    + (90 - s.get_y_speed().abs().min(90.).max(40.) as i32) * 500; 
                 }
-                return (7000 - self.game.get_distance_to_landing(&s)) / self.game.get_distance_to_landing(&s);
+                return (7000 - self.game.get_distance_to_landing(&s)) * 500;
             }
         }
         0

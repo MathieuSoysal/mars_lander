@@ -22,7 +22,7 @@ where
 
     // helper: tournament select one parent
     let mut tournament = |rng: &mut ThreadRng| -> &T {
-        const TOUR_SIZE: usize = 3;
+        const TOUR_SIZE: usize = 5;
         let mut best = &population[indices[rng.gen_range(0..elite_count)]];
         for _ in 1..TOUR_SIZE {
             let contender = &population[indices[rng.gen_range(0..elite_count)]];
@@ -40,7 +40,7 @@ where
             let p2 = tournament(&mut rng);
             new_population[i] = p1.crossover(p2).mutate();
         } else {
-            new_population[i] = p1.clone();
+            new_population[i] = p1.clone().mutate();
         }
     }
 }
