@@ -1,12 +1,12 @@
 /* tslint:disable */
 /* eslint-disable */
-export function tes(nb_generations: number): string[];
+export function tes(nb_generations: number, crossover_rate: number, mutation_rate: number): string[];
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly tes: (a: number) => [number, number];
+  readonly tes: (a: number, b: number, c: number) => [number, number];
   readonly __wbindgen_exn_store: (a: number) => void;
   readonly __externref_table_alloc: () => number;
   readonly __wbindgen_export_2: WebAssembly.Table;

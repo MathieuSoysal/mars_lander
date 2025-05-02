@@ -7,6 +7,7 @@ const ANGLE_TO_LAND: i32 = 0;
 const MAX_X: i32 = 6999;
 const MAX_Y: i32 = 2999;
 
+#[derive(Clone)]
 pub struct Point {
     pub x: usize,
     pub y: usize,
@@ -78,29 +79,17 @@ impl Game {
     }
 
     pub fn add_point(&mut self, x: usize, y: usize) {
-        self.points.push(Point { x, y });
-        if self.points.len() > 1 {
-            let start = Point {
-                x: self.points[self.points.len() - 2].x,
-                y: self.points[self.points.len() - 2].y,
-            };
+        if !self.points.is_empty() {
+            let start = self.points.last().unwrap().clone();
             let end = Point { x, y };
             self.add_segment(Segment { start, end });
         }
+        self.points.push(Point { x, y });
     }
 
     fn add_segment(&mut self, seg: Segment) {
         if seg.is_landing() {
-            self.landing = Segment {
-                start: Point {
-                    x: seg.start.x,
-                    y: seg.start.y,
-                },
-                end: Point {
-                    x: seg.end.x,
-                    y: seg.end.y,
-                },
-            };
+            self.landing = seg.clone();
         } else {
             let start_x = seg.start.x as i32;
             let start_y = seg.start.y as i32;

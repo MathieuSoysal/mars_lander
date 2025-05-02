@@ -1,12 +1,8 @@
-use std::io::Write;
-
-use chrono::format;
-
-use crate::genetics::pheno::Phenotype;
+use crate::{genetics::pheno::Phenotype, SIMULATION_PARAMETER};
 
 use super::{
-    game::{self, Game},
-    starship::{self, Starship},
+    game::{Game},
+    starship::{Starship},
 };
 
 const GEN_POWER_SIZE_BITS: usize = 2;
@@ -14,7 +10,7 @@ const GEN_ROTATE_SIZE_BITS: usize = 2;
 const GEN_MASK_POWER: u8 = (1 << GEN_POWER_SIZE_BITS) - 1;
 const GEN_MASK_ROTATE: u8 = (1 << GEN_ROTATE_SIZE_BITS) - 1;
 
-const GENOME_SIZE: usize = 100;
+pub const GENOME_SIZE: usize = 100;
 
 type Nucleotide = u8;
 pub type Genome = [Nucleotide; GENOME_SIZE];
@@ -168,6 +164,7 @@ impl<'a> Phenotype<i32> for DNA<'a> {
                     self.fitness = (7000 *500) + (90 - s.get_rotation().abs() as i32) * 500
                     + (90 - s.get_x_speed().abs().min(90.).max(20.) as i32) * 500
                     + (90 - s.get_y_speed().abs().min(90.).max(40.) as i32) * 500;
+                  
                     return self.fitness;
                 }
                 self.fitness = (7000 - self.game.get_distance_to_landing(&s)) * 500;
@@ -182,7 +179,7 @@ impl<'a> Phenotype<i32> for DNA<'a> {
         let mut mutated = *self;
         mutated.fitness = -1;
         for i in 0..GENOME_SIZE {
-            if rand::random::<f32>() <= 0.1 {
+            if rand::random::<f32>() <= SIMULATION_PARAMETER.lock().unwrap().clone() {
                 mutated.genome[i] = rand::random::<u8>();
             }
         }

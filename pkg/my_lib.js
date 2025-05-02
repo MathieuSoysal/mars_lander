@@ -58,10 +58,12 @@ function getArrayJsValueFromWasm0(ptr, len) {
 }
 /**
  * @param {number} nb_generations
+ * @param {number} crossover_rate
+ * @param {number} mutation_rate
  * @returns {string[]}
  */
-export function tes(nb_generations) {
-    const ret = wasm.tes(nb_generations);
+export function tes(nb_generations, crossover_rate, mutation_rate) {
+    const ret = wasm.tes(nb_generations, crossover_rate, mutation_rate);
     var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
     return v1;
@@ -120,6 +122,9 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_getRandomValues_bcb4912f16000dc4 = function() { return handleError(function (arg0, arg1) {
         arg0.getRandomValues(arg1);
     }, arguments) };
+    imports.wbg.__wbg_log_0a3953f5f89e18b5 = function(arg0, arg1) {
+        console.log(getStringFromWasm0(arg0, arg1));
+    };
     imports.wbg.__wbg_msCrypto_0a36e2ec3a343d26 = function(arg0) {
         const ret = arg0.msCrypto;
         return ret;
