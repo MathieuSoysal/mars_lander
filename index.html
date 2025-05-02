@@ -247,7 +247,7 @@
       const speedValue = document.getElementById('speed-value');
       const miniProgress = document.getElementById('mini-progress');
       const progressText = document.getElementById('progress-text');
-      let total = 300; // Default value, will be updated with actual SVG count
+      let total = 0; // Default value, will be updated with actual SVG count
       let current = 0;
       let autoScrollInterval = null;
       let preloadedImages = [];
@@ -372,7 +372,14 @@
         playPauseBtn.classList.add('active');
         
         const speed = 11 - speedControl.value;
-        autoScrollInterval = setInterval(() => show(current + 1), speed * 100);
+        autoScrollInterval = setInterval(() => {
+          // Check if we've reached the end
+          if (current >= total - 1) {
+            stopAutoScroll();
+            return;
+          }
+          show(current + 1);
+        }, speed * 100);
       }
 
       function stopAutoScroll() {
