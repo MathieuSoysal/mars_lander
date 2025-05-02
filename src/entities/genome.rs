@@ -1,8 +1,8 @@
 use crate::{genetics::pheno::Phenotype, SIMULATION_PARAMETER};
 
 use super::{
-    game::{Game},
-    starship::{Starship},
+    game::{Game, HEIGHT},
+    starship::Starship,
 };
 
 const GEN_POWER_SIZE_BITS: usize = 2;
@@ -94,11 +94,10 @@ impl<'a> DNA<'a> {
 
     pub fn to_svg(&self) -> String {
         let mut str = String::new();
-        str.push_str("<polyline points=\"");
         str.push_str(&format!(
-            "{},{} ",
+            "<polyline points=\"{},{} ",
             self.starship.get_x(),
-            3000 - self.starship.get_y()
+            HEIGHT as i32 - self.starship.get_y()
         ));
         let mut s = self.starship.copy();
         for i in 0..GENOME_SIZE {
@@ -107,12 +106,12 @@ impl<'a> DNA<'a> {
             s.add_power(power as i32);
             s.add_rotation(rotate);
             s.apply_movement();
-            str.push_str(&format!("{},{} ", s.get_x(), 3000 - s.get_y()));
+            str.push_str(&format!("{},{} ", s.get_x(), HEIGHT as i32 - s.get_y()));
             if self.game.starship_is_landing(&s) {
                 str.push_str(&format!("\" fill=\"none\" stroke=\"green\" stroke-width=\"{}\" />",10));
                 str.push_str(&format!(
                     "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"none\" stroke=\"green\" stroke-width=\"1\" />",
-                    s.get_x(), 3000 - s.get_y(),10 + s.get_fuel() as u32 / 200 
+                    s.get_x(), HEIGHT as i32 - s.get_y(), 10 + s.get_fuel() as u32 / 200 
                 ));
                 return str;
             }
@@ -120,7 +119,7 @@ impl<'a> DNA<'a> {
                 str.push_str("\" fill=\"none\" stroke=\"white\" />");
                 str.push_str(&format!(
                     "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"none\" stroke=\"white\" stroke-width=\"1\" />",
-                    s.get_x(), 3000 - s.get_y(), 3 
+                    s.get_x(), HEIGHT as i32 - s.get_y(), 3 
                 ));
                 return str;
             }

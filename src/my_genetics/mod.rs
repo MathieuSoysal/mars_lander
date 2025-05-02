@@ -1,5 +1,3 @@
-use selectors::Selector;
-
 use crate::genetics::pheno::Phenotype;
 
 pub mod crossovers;

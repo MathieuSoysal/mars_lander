@@ -1,4 +1,4 @@
-use super::{segment::Segment, starship::Starship};
+use super::starship::Starship;
 
 pub const MARS_GRAVITY: f64 = 3.711;
 const MAX_H_SPEED_ON_LAND: f32 = 20.;
@@ -6,6 +6,8 @@ const MAX_V_SPEED_ON_LAND: f32 = 40.;
 const ANGLE_TO_LAND: i32 = 0;
 const MAX_X: i32 = 6999;
 const MAX_Y: i32 = 2999;
+pub const WIDTH: usize = 7000;
+pub const HEIGHT: usize = 3000;
 
 #[derive(Clone)]
 pub struct Point {
@@ -13,11 +15,22 @@ pub struct Point {
     pub y: usize,
 }
 
+#[derive(Clone)]
+pub struct Segment {
+    pub start: Point,
+    pub end: Point,
+}
+
+impl Segment {
+    pub fn is_landing(&self) -> bool {
+        self.start.y == self.end.y
+    }
+}
+
 pub struct Game {
-    nb_points: usize,
     points: Vec<Point>,
     segments: Vec<Segment>,
-    crash_points: [u32; 7000], // Dans le puzzle lv 3 cela ne marchera plus
+    crash_points: [u32; WIDTH], // Dans le puzzle lv 3 cela ne marchera plus
     landing: Segment,
 }
 
@@ -26,10 +39,9 @@ impl Game {
         let points = Vec::with_capacity(nb_points);
         let segments = Vec::with_capacity(nb_points);
         Game {
-            nb_points,
             points,
             segments,
-            crash_points: [0; 7000],
+            crash_points: [0; WIDTH],
             landing: Segment {
                 start: Point { x: 0, y: 0 },
                 end: Point { x: 0, y: 0 },
@@ -109,25 +121,19 @@ impl Game {
         for segment in &self.segments {
             svg.push_str(&format!(
                 "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"red\"  stroke-width=\"7\" />\n",
-                segment.start.x, 3000 - segment.start.y, segment.end.x, 3000 - segment.end.y
+                segment.start.x, HEIGHT - segment.start.y, segment.end.x, HEIGHT - segment.end.y
             ));
         }
         svg.push_str(&format!(
             "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"green\"  stroke-width=\"8\">\n",
             self.landing.start.x,
-            3000 - self.landing.start.y,
+            HEIGHT - self.landing.start.y,
             self.landing.end.x,
-            3000 - self.landing.end.y
+            HEIGHT - self.landing.end.y
         ));
         svg.push_str("<title>Landing</title>\n");
         svg.push_str("</line>\n");
         svg
-    }
-}
-
-impl Point {
-    pub fn new(x: usize, y: usize) -> Self {
-        Point { x, y }
     }
 }
 
