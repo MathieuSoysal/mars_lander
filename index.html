@@ -16,21 +16,95 @@
           <span class="play-icon">▶</span>
           <span class="pause-icon hidden">⏸</span>
         </button>
-        <div class="speed-control">
-          <label for="speed">Vitesse:</label>
-          <input type="range" id="speed" min="1" max="10" value="3">
-        </div>
       </div>
       <progress id="progress" value="1" max="300"></progress>
     </div>
   </header>
 
-  <div class="viewer-container">
-    <img id="viewer" src="all_svg/output0.svg" alt="Mars Lander" />
-    <button id="prev" class="nav-button">❮</button>
-    <button id="next" class="nav-button">❯</button>
-    <div id="counter">1 / 300</div>
-    <div id="loader" class="loader hidden"></div>
+  <div class="main-container">
+    <div class="viewer-container">
+      <img id="viewer" src="all_svg/output0.svg" alt="Mars Lander" />
+      
+      <!-- Fixed player controls -->
+      <div class="player-controls">
+        <button id="prev" class="player-button"><span>⏮</span></button>
+        <button id="play-pause" class="player-button">
+          <span class="play-icon">▶</span>
+          <span class="pause-icon hidden">⏸</span>
+        </button>
+        <button id="next" class="player-button"><span>⏭</span></button>
+        
+        <!-- Speed control -->
+        <div class="speed-control-compact">
+          <span class="speed-label">Speed</span>
+          <input type="range" id="speed-compact" min="1" max="10" value="3" class="speed-slider">
+          <span id="speed-value">3x</span>
+        </div>
+        
+        <!-- Mini progress indicator -->
+        <div class="mini-progress-container">
+          <div class="mini-progress-bar">
+            <div id="mini-progress" class="mini-progress-fill"></div>
+          </div>
+          <span id="progress-text">0%</span>
+        </div>
+      </div>
+      
+      <div id="counter">1 / 300</div>
+      <div id="loader" class="loader hidden"></div>
+    </div>
+
+    <div class="dashboard futuristic">
+      <div class="dashboard-header">
+        <h2>Mission Control</h2>
+        <div class="glow-line"></div>
+      </div>
+      <form id="ga-params">
+        <div class="param-group">
+          <label for="population-size">Population Size:</label>
+          <input type="number" id="population-size" min="10" max="1000" value="100">
+          <div class="slider-decoration"></div>
+        </div>
+        
+        <div class="param-group">
+          <label for="generation-count">Number of Generations:</label>
+          <input type="number" id="generation-count" min="1" max="1000" value="50">
+          <div class="slider-decoration"></div>
+        </div>
+        
+        <div class="param-group">
+          <label for="selection-mode">Selection Mode:</label>
+          <select id="selection-mode">
+            <option value="tournament">Tournament</option>
+            <option value="roulette">Roulette Wheel</option>
+            <option value="rank">Rank-based</option>
+          </select>
+          <div class="slider-decoration"></div>
+        </div>
+        
+        <div class="param-group">
+          <label for="crossover-rate">Crossover Rate:</label>
+          <input type="range" id="crossover-rate" min="0" max="100" value="80">
+          <span id="crossover-rate-value">80%</span>
+          <div class="slider-decoration"></div>
+        </div>
+        
+        <div class="param-group">
+          <label for="mutation-rate">Mutation Rate:</label>
+          <input type="range" id="mutation-rate" min="0" max="100" value="5">
+          <span id="mutation-rate-value">5%</span>
+          <div class="slider-decoration"></div>
+        </div>
+        
+        <div class="button-container">
+          <button type="button" id="run-ga" class="primary-button">
+            <span class="button-text">Run Algorithm</span>
+            <span class="button-glow"></span>
+          </button>
+          <button type="reset" class="secondary-button">Reset</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <div class="seek-container">
@@ -45,9 +119,13 @@
       const viewer = document.getElementById('viewer');
       const prev = document.getElementById('prev');
       const next = document.getElementById('next');
+      const playPauseBtn = document.getElementById('play-pause');
       const counter = document.getElementById('counter');
       const autoScrollBtn = document.getElementById('auto-scroll');
-      const speedControl = document.getElementById('speed');
+      const speedControl = document.getElementById('speed-compact'); // Changed to speed-compact
+      const speedValue = document.getElementById('speed-value');
+      const miniProgress = document.getElementById('mini-progress');
+      const progressText = document.getElementById('progress-text');
       const total = 300;
       let current = 0;
       let autoScrollInterval = null;
@@ -64,7 +142,9 @@
           preloadedImages[i].src = `all_svg/output${i}.svg`;
           preloadedImages[i].onload = () => {
             loadedCount++;
-            progress.value = Math.floor((loadedCount / total) * 100);
+            const percentLoaded = Math.floor((loadedCount / total) * 100);
+            progress.value = percentLoaded;
+            updateMiniProgress(percentLoaded);
             
             if (loadedCount === total) {
               loader.classList.add('hidden');
@@ -74,29 +154,38 @@
         }
       }
 
+      // Update mini progress display
+      function updateMiniProgress(percent) {
+        miniProgress.style.width = `${percent}%`;
+        progressText.textContent = `${percent}%`;
+      }
+
       function show(n, skipPreloadCheck = false) {
-        if (!skipPreloadCheck && preloadedImages.length === 0) {
-          return; // Attendre que le préchargement soit terminé
-        }
+        if (!skipPreloadCheck && preloadedImages.length === 0) return;
         
         current = (n + total) % total;
         counter.textContent = `${current+1} / ${total}`;
         progress.value = current+1;
         seek.value = current+1;
         
-        // Utiliser l'image préchargée si disponible
-        if (preloadedImages[current]) {
-          viewer.src = preloadedImages[current].src;
-        } else {
-          viewer.src = `all_svg/output${current}.svg`;
-        }
+        // Update mini progress
+        const percentComplete = Math.floor(((current + 1) / total) * 100);
+        updateMiniProgress(percentComplete);
+        
+        viewer.src = preloadedImages[current] ? 
+          preloadedImages[current].src : `all_svg/output${current}.svg`;
       }
 
       function toggleAutoScroll() {
+        isAutoScrolling ? stopAutoScroll() : startAutoScroll();
+        
+        // Update play/pause button to match state
         if (isAutoScrolling) {
-          stopAutoScroll();
+          playPauseBtn.querySelector('.play-icon').classList.add('hidden');
+          playPauseBtn.querySelector('.pause-icon').classList.remove('hidden');
         } else {
-          startAutoScroll();
+          playPauseBtn.querySelector('.play-icon').classList.remove('hidden');
+          playPauseBtn.querySelector('.pause-icon').classList.add('hidden');
         }
       }
 
@@ -108,10 +197,13 @@
         autoScrollBtn.querySelector('.play-icon').classList.add('hidden');
         autoScrollBtn.querySelector('.pause-icon').classList.remove('hidden');
         
-        const speed = 11 - speedControl.value; // Inversé pour que plus grand = plus rapide
-        autoScrollInterval = setInterval(() => {
-          show(current + 1);
-        }, speed * 100);
+        // Update the player controls
+        playPauseBtn.querySelector('.play-icon').classList.add('hidden');
+        playPauseBtn.querySelector('.pause-icon').classList.remove('hidden');
+        playPauseBtn.classList.add('active');
+        
+        const speed = 11 - speedControl.value;
+        autoScrollInterval = setInterval(() => show(current + 1), speed * 100);
       }
 
       function stopAutoScroll() {
@@ -121,9 +213,14 @@
         autoScrollBtn.classList.remove('active');
         autoScrollBtn.querySelector('.play-icon').classList.remove('hidden');
         autoScrollBtn.querySelector('.pause-icon').classList.add('hidden');
+        
+        // Update the player controls
+        playPauseBtn.querySelector('.play-icon').classList.remove('hidden');
+        playPauseBtn.querySelector('.pause-icon').classList.add('hidden');
+        playPauseBtn.classList.remove('active');
       }
 
-      // Événements
+      // Event listeners
       prev.addEventListener('click', () => {
         stopAutoScroll();
         show(current-1);
@@ -134,6 +231,8 @@
         show(current+1);
       });
       
+      playPauseBtn.addEventListener('click', toggleAutoScroll);
+      
       document.addEventListener('keydown', e => {
         if (e.key === 'ArrowLeft') {
           stopAutoScroll();
@@ -143,7 +242,7 @@
           stopAutoScroll();
           show(current+1);
         }
-        if (e.key === ' ') { // Espace pour pause/play
+        if (e.key === ' ') {
           toggleAutoScroll();
           e.preventDefault();
         }
@@ -156,13 +255,46 @@
       
       autoScrollBtn.addEventListener('click', toggleAutoScroll);
       
+      // Update speed display when slider changes
       speedControl.addEventListener('input', () => {
-        if (isAutoScrolling) {
-          startAutoScroll(); // Redémarrer avec la nouvelle vitesse
-        }
+        speedValue.textContent = `${speedControl.value}x`;
+        if (isAutoScrolling) startAutoScroll();
       });
 
-      // Commencer le préchargement au chargement de la page
+      // Dashboard event listeners
+      const crossoverRateInput = document.getElementById('crossover-rate');
+      const crossoverRateValue = document.getElementById('crossover-rate-value');
+      const mutationRateInput = document.getElementById('mutation-rate');
+      const mutationRateValue = document.getElementById('mutation-rate-value');
+      const runGaButton = document.getElementById('run-ga');
+
+      crossoverRateInput.addEventListener('input', () => {
+        crossoverRateValue.textContent = `${crossoverRateInput.value}%`;
+      });
+
+      mutationRateInput.addEventListener('input', () => {
+        mutationRateValue.textContent = `${mutationRateInput.value}%`;
+      });
+
+      runGaButton.addEventListener('click', () => {
+        const params = {
+          populationSize: document.getElementById('population-size').value,
+          generationCount: document.getElementById('generation-count').value,
+          selectionMode: document.getElementById('selection-mode').value,
+          crossoverRate: crossoverRateInput.value,
+          mutationRate: mutationRateInput.value
+        };
+        
+        console.log('Running genetic algorithm with parameters:', params);
+        alert('Genetic Algorithm parameters submitted!\n' + 
+              `Population Size: ${params.populationSize}\n` +
+              `Generations: ${params.generationCount}\n` +
+              `Selection Mode: ${params.selectionMode}\n` +
+              `Crossover Rate: ${params.crossoverRate}%\n` +
+              `Mutation Rate: ${params.mutationRate}%`);
+      });
+
+      // Start preloading images
       window.addEventListener('load', preloadImages);
     })();
   </script>
