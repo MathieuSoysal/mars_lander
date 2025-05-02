@@ -10,20 +10,25 @@
 <body>
   <header>
     <h1>Mars Lander Viewer</h1>
-    <div class="controls">
-      <div class="auto-scroll-controls">
-        <button id="auto-scroll" class="control-button">
-          <span class="play-icon">▶</span>
-          <span class="pause-icon hidden">⏸</span>
-        </button>
-      </div>
-      <progress id="progress" value="1" max="300"></progress>
-    </div>
   </header>
 
   <div class="main-container">
     <div class="viewer-container">
-      <img id="viewer" src="all_svg/output0.svg" alt="Mars Lander" />
+      <div id="svg-container">
+        <svg xmlns="http://www.w3.org/2000/svg" width="7000" height="3000" viewBox="0 0 7000 3000">
+          <rect width="100%" height="100%" fill="black"></rect>
+          <line x1="0" y1="1500" x2="1000" y2="1000" stroke="red" stroke-width="7"></line>
+          <line x1="1000" y1="1000" x2="2000" y2="2500" stroke="red" stroke-width="7"></line>
+          <line x1="3500" y1="2500" x2="5000" y2="1500" stroke="red" stroke-width="7"></line>
+          <line x1="5000" y1="1500" x2="6999" y2="2000" stroke="red" stroke-width="7"></line>
+          <line x1="2000" y1="2500" x2="3500" y2="2500" stroke="green" stroke-width="8">
+            <title>Landing</title>
+          </line>
+          <g>
+            <!-- SVG content for Mars Lander simulation -->
+          </g>
+        </svg>
+      </div>
       
       <!-- Fixed player controls -->
       <div class="player-controls">
@@ -37,8 +42,8 @@
         <!-- Speed control -->
         <div class="speed-control-compact">
           <span class="speed-label">Speed</span>
-          <input type="range" id="speed-compact" min="1" max="10" value="3" class="speed-slider">
-          <span id="speed-value">3x</span>
+          <input type="range" id="speed-compact" min="1" max="10" value="10" class="speed-slider">
+          <span id="speed-value">10x</span>
         </div>
         
         <!-- Mini progress indicator -->
@@ -52,6 +57,7 @@
       
       <div id="counter">1 / 300</div>
       <div id="loader" class="loader hidden"></div>
+      <div id="error-message" class="error-message"></div>
     </div>
 
     <div class="dashboard futuristic">
@@ -111,70 +117,210 @@
     <input type="range" id="seek" min="1" max="300" value="1" />
   </div>
 
+  <script type="module">
+    import init, { tes } from "./pkg/my_lib.js";
+    
+    // Global reference to store SVG data
+    let svgData = [];
+    let wasmReady = false;
+
+    async function run() {
+        try {
+            await init(); // Load and initialize WebAssembly module
+            wasmReady = true;
+            console.log("WASM module initialized successfully");
+        } catch (error) {
+            console.error("Failed to initialize WASM module:", error);
+            document.getElementById('error-message').innerText = `WASM initialization error: ${error.message}`;
+        }
+    }
+
+    // Start loading WASM module
+    run();
+
+    // Function to clean SVG string by unescaping quotes and newlines
+    function cleanSvgString(svgString) {
+        // First check if the string is wrapped in quotes
+        let cleaned = svgString;
+        
+        // Remove surrounding quotes if present
+        if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+            cleaned = cleaned.substring(1, cleaned.length - 1);
+        }
+        
+        // Replace escaped quotes with actual quotes
+        cleaned = cleaned.replace(/\\"/g, '"');
+        
+        // Remove newline characters completely (they're just formatting)
+        cleaned = cleaned.replace(/\\n/g, '');
+        
+        return cleaned;
+    }
+
+    // Function to run Mars Lander simulation with genetic algorithm parameters
+    window.runMarsLanderSimulation = (params) => {
+        if (!wasmReady) {
+            const error = "WASM module not ready yet. Please wait for initialization to complete.";
+            console.error(error);
+            document.getElementById('error-message').innerText = error;
+            return false;
+        }
+
+        try {
+            // Get the number of generations from params
+            const nbGenerations = params.generationCount;
+            console.log(`Calling WASM function 'tes' with ${nbGenerations} generations...`);
+            
+            // Call the tes function which returns array of SVG strings
+            svgData = tes(nbGenerations);
+            
+            // Update the viewer with the new SVG data
+            if (Array.isArray(svgData) && svgData.length > 0) {
+                console.log(`Received ${svgData.length} SVG frames from simulation`);
+                
+                // Clean SVG strings (unescape quotes and remove newlines)
+                svgData = svgData.map(cleanSvgString);
+                
+                // Update the progress and seek inputs to match the new number of frames
+                const total = svgData.length;
+                document.getElementById('seek').max = total;
+                document.getElementById('counter').textContent = `1 / ${total}`;
+                
+                // Insert the first SVG content directly into the container
+                document.getElementById('svg-container').innerHTML = svgData[0];
+                
+                // Set SVG data globally for dynamic usage
+                window.setSvgData(svgData);
+                
+                return true;
+            } else {
+                const error = "No valid SVG data received from simulation. Check WASM function output.";
+                console.error(error);
+                document.getElementById('error-message').innerText = error;
+                return false;
+            }
+        } catch (error) {
+            console.error("Error running Mars Lander simulation:", error);
+            document.getElementById('error-message').innerText = `Simulation error: ${error.message}`;
+            return false;
+        }
+    };
+  </script>
+
   <script>
     (function(){
-      const progress = document.getElementById('progress');
+      // Hide the seek input as a progress bar since we don't have a dedicated progress element
       const seek = document.getElementById('seek');
       const loader = document.getElementById('loader');
-      const viewer = document.getElementById('viewer');
+      const svgContainer = document.getElementById('svg-container');
       const prev = document.getElementById('prev');
       const next = document.getElementById('next');
       const playPauseBtn = document.getElementById('play-pause');
       const counter = document.getElementById('counter');
-      const autoScrollBtn = document.getElementById('auto-scroll');
-      const speedControl = document.getElementById('speed-compact'); // Changed to speed-compact
+      const speedControl = document.getElementById('speed-compact');
       const speedValue = document.getElementById('speed-value');
       const miniProgress = document.getElementById('mini-progress');
       const progressText = document.getElementById('progress-text');
-      const total = 300;
+      let total = 300; // Default value, will be updated with actual SVG count
       let current = 0;
       let autoScrollInterval = null;
       let preloadedImages = [];
       let isAutoScrolling = false;
+      let svgDataFromWasm = []; // Store SVG data from WASM
 
       // Précharger toutes les images
       function preloadImages() {
         loader.classList.remove('hidden');
         let loadedCount = 0;
         
+        // If we have SVG data from WASM, use that instead of loading from files
+        if (svgDataFromWasm.length > 0) {
+          total = svgDataFromWasm.length;
+          
+          // Update UI elements to match new total
+          seek.max = total;
+          counter.textContent = `1 / ${total}`;
+          
+          // No need for preloading when we have SVG strings directly
+          loader.classList.add('hidden');
+          show(0, true);
+          return;
+        }
+        
+        // If no WASM data, load from files as before
         for (let i = 0; i < total; i++) {
-          preloadedImages[i] = new Image();
-          preloadedImages[i].src = `all_svg/output${i}.svg`;
-          preloadedImages[i].onload = () => {
-            loadedCount++;
-            const percentLoaded = Math.floor((loadedCount / total) * 100);
-            progress.value = percentLoaded;
-            updateMiniProgress(percentLoaded);
-            
-            if (loadedCount === total) {
-              loader.classList.add('hidden');
-              show(0, true);
+          // Create a new XMLHttpRequest to fetch the SVG file
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', `all_svg/output${i}.svg`, true);
+          xhr.onload = () => {
+            if (xhr.status === 200) {
+              // Store the SVG content string
+              svgDataFromWasm[i] = xhr.responseText;
+              
+              loadedCount++;
+              const percentLoaded = Math.floor((loadedCount / total) * 100);
+              // Update mini progress instead of non-existent progress element
+              updateMiniProgress(percentLoaded);
+              
+              if (loadedCount === total) {
+                loader.classList.add('hidden');
+                show(0, true);
+              }
             }
           };
+          xhr.send();
         }
       }
 
       // Update mini progress display
       function updateMiniProgress(percent) {
-        miniProgress.style.width = `${percent}%`;
-        progressText.textContent = `${percent}%`;
+        if (miniProgress) {
+          miniProgress.style.width = `${percent}%`;
+        }
+        if (progressText) {
+          progressText.textContent = `${percent}%`;
+        }
       }
 
       function show(n, skipPreloadCheck = false) {
-        if (!skipPreloadCheck && preloadedImages.length === 0) return;
+        if (!skipPreloadCheck && svgDataFromWasm.length === 0) return;
         
         current = (n + total) % total;
         counter.textContent = `${current+1} / ${total}`;
-        progress.value = current+1;
-        seek.value = current+1;
+        
+        if (seek) seek.value = current+1;
         
         // Update mini progress
         const percentComplete = Math.floor(((current + 1) / total) * 100);
         updateMiniProgress(percentComplete);
         
-        viewer.src = preloadedImages[current] ? 
-          preloadedImages[current].src : `all_svg/output${current}.svg`;
+        // Insert SVG content directly into the DOM
+        if (svgDataFromWasm[current]) {
+          // Use the cleaned SVG string
+          svgContainer.innerHTML = svgDataFromWasm[current];
+        } else {
+          // Fallback to show an error or placeholder
+          svgContainer.innerHTML = '<div class="error-placeholder">SVG data not available</div>';
+        }
       }
+
+      // Global function to set SVG data from WASM
+      window.setSvgData = (data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          svgDataFromWasm = data;
+          total = data.length;
+          
+          // Update UI elements
+          if (seek) seek.max = total;
+          counter.textContent = `1 / ${total}`;
+          
+          // Preload the new images
+          preloadImages();
+          
+          return true;
+        }
+        return false;
+      };
 
       function toggleAutoScroll() {
         isAutoScrolling ? stopAutoScroll() : startAutoScroll();
@@ -193,9 +339,6 @@
         if (autoScrollInterval) clearInterval(autoScrollInterval);
         
         isAutoScrolling = true;
-        autoScrollBtn.classList.add('active');
-        autoScrollBtn.querySelector('.play-icon').classList.add('hidden');
-        autoScrollBtn.querySelector('.pause-icon').classList.remove('hidden');
         
         // Update the player controls
         playPauseBtn.querySelector('.play-icon').classList.add('hidden');
@@ -210,9 +353,6 @@
         clearInterval(autoScrollInterval);
         autoScrollInterval = null;
         isAutoScrolling = false;
-        autoScrollBtn.classList.remove('active');
-        autoScrollBtn.querySelector('.play-icon').classList.remove('hidden');
-        autoScrollBtn.querySelector('.pause-icon').classList.add('hidden');
         
         // Update the player controls
         playPauseBtn.querySelector('.play-icon').classList.remove('hidden');
@@ -253,8 +393,6 @@
         show(seek.value-1);
       });
       
-      autoScrollBtn.addEventListener('click', toggleAutoScroll);
-      
       // Update speed display when slider changes
       speedControl.addEventListener('input', () => {
         speedValue.textContent = `${speedControl.value}x`;
@@ -278,20 +416,32 @@
 
       runGaButton.addEventListener('click', () => {
         const params = {
-          populationSize: document.getElementById('population-size').value,
-          generationCount: document.getElementById('generation-count').value,
+          populationSize: parseInt(document.getElementById('population-size').value),
+          generationCount: parseInt(document.getElementById('generation-count').value),
           selectionMode: document.getElementById('selection-mode').value,
-          crossoverRate: crossoverRateInput.value,
-          mutationRate: mutationRateInput.value
+          crossoverRate: parseInt(crossoverRateInput.value),
+          mutationRate: parseInt(mutationRateInput.value)
         };
         
         console.log('Running genetic algorithm with parameters:', params);
-        alert('Genetic Algorithm parameters submitted!\n' + 
-              `Population Size: ${params.populationSize}\n` +
-              `Generations: ${params.generationCount}\n` +
-              `Selection Mode: ${params.selectionMode}\n` +
-              `Crossover Rate: ${params.crossoverRate}%\n` +
-              `Mutation Rate: ${params.mutationRate}%`);
+        
+        // Show loading indicator
+        loader.classList.remove('hidden');
+        
+        // Call the WASM function through the wrapper
+        const success = window.runMarsLanderSimulation(params);
+        
+        if (success) {
+          // Hide loading indicator when done
+          loader.classList.add('hidden');
+          // Reset to the first frame and start auto-scrolling to show the simulation
+          current = 0;
+          show(0, true);
+          startAutoScroll();
+        } else {
+          loader.classList.add('hidden');
+          alert('Failed to run the simulation. Check the console for more details.');
+        }
       });
 
       // Start preloading images

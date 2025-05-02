@@ -200,9 +200,8 @@ impl<'a> Phenotype<i32> for DNA<'a> {
     }
 }
 
-pub fn population_to_svg(population: &[DNA], nb: usize) -> String {
+pub fn population_to_svg(population: &[DNA]) -> String {
     let mut svg = String::new();
-    let mut file = std::fs::File::create(format!("all_svg/output{nb}.svg")).unwrap();
     svg.push_str(r#"<svg xmlns="http://www.w3.org/2000/svg" width="7000" height="3000" viewBox="0 0 7000 3000">"#);
     svg.push_str(r#"<rect width="100%" height="100%" fill="black" />"#);
     svg.push_str(&population[0].get_game().to_svg());
@@ -212,55 +211,5 @@ pub fn population_to_svg(population: &[DNA], nb: usize) -> String {
     }
     svg.push_str("</g>\n");
     svg.push_str(r#"</svg>"#);
-    file.write_all(svg.as_bytes()).unwrap();
     svg
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::entities::game::Game;
-    use crate::entities::starship::Starship;
-    use crate::genetics::sim::select::{StochasticSelector, UnstableMaximizeSelector};
-    use crate::genetics::sim::seq::Simulator;
-    use crate::genetics::sim::{Builder, Simulation};
-
-    #[test]
-    fn test_genome() {
-        let mut game = Game::new(10);
-        game.add_point(0, 1500);
-        game.add_point(1000, 2000);
-        game.add_point(2000, 500);
-        game.add_point(3500, 500);
-        game.add_point(5000, 1500);
-        game.add_point(6999, 1000);
-
-        let starship = Starship::new(2500, 2700, 1000, 0, 0, 0., 0.);
-
-        let mut population: Vec<DNA> = Vec::with_capacity(400);
-        let mut rng = ::rand::thread_rng();
-        for _ in 0..300 {
-            let genome = gen_init_rand();
-            let dna = DNA::new(genome, &game, starship.copy());
-            population.push(dna);
-        }
-        #[allow(deprecated)]
-        let mut builder = Simulator::builder(&mut population);
-        builder
-            .with_selector(Box::new(StochasticSelector::new(50)))
-            .with_max_iters(100);
-        let mut s = builder.build();
-        s.run();
-        let result = s.get().unwrap();
-        let time = s.time();
-        println!("Execution time: {} ns.", time.unwrap());
-        
-        // Need to create a mutable clone since result is an immutable reference
-        let mut result_clone = result.clone();
-        println!(
-            "Result: {:?} | Fitness: {}.",
-            result.get_genome(),
-            result_clone.fitness()
-        );
-    }
 }
