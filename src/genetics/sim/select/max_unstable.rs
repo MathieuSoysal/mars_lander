@@ -16,7 +16,7 @@ impl UnstableMaximizeSelector {
 
 impl<T, F> Selector<T, F> for UnstableMaximizeSelector
 where
-    T: Phenotype<F>,
+    T: Phenotype<F> + Clone,
     F: Fitness,
     T: Send,
     T: Sync,
@@ -30,12 +30,18 @@ where
             ));
         }
 
-        let mut borrowed: Vec<&T> = population.iter().collect();
-        borrowed.sort_unstable_by(|x, y| y.fitness().cmp(&x.fitness()));
+        // Sort indices instead of borrowing directly
+        let mut indices: Vec<usize> = (0..population.len()).collect();
+        indices.sort_unstable_by(|&i, &j| {
+            let mut y_clone = population[j].clone();
+            let mut x_clone = population[i].clone();
+            y_clone.fitness().cmp(&x_clone.fitness())
+        });
+        
         let mut index = 0;
         let mut result: Parents<&T> = Vec::new();
         while index < self.count {
-            result.push((borrowed[index], borrowed[index + 1]));
+            result.push((&population[indices[index]], &population[indices[index + 1]]));
             index += 2;
         }
         Ok(result)

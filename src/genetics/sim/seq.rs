@@ -113,13 +113,27 @@ where
             self.population.append(&mut children);
 
             if let Some(ref mut stopper) = self.earlystopper {
-                let highest_fitness = self
-                    .population
-                    .iter()
-                    .max_by_key(|x| x.fitness())
-                    .unwrap()
-                    .fitness();
-                stopper.update(highest_fitness);
+                // Create clones and get fitness since we need mutability
+                let mut highest_fitness: Option<F> = None;
+                
+                // Find the highest fitness directly by calculating for each individual
+                for x in self.population.iter() {
+                    let mut clone = x.clone();
+                    let fitness = clone.fitness();
+                    
+                    if highest_fitness.is_none() {
+                        highest_fitness = Some(fitness);
+                    } else if let Some(ref current_best) = highest_fitness {
+                        if fitness > *current_best {
+                            highest_fitness = Some(fitness);
+                        }
+                    }
+                }
+                
+                // Use the calculated value directly without dereferencing
+                if let Some(highest) = highest_fitness {
+                    stopper.update(highest); // Pass by value, no dereferencing needed
+                }
             }
 
             self.iter_limit.inc();
@@ -163,7 +177,28 @@ where
     fn get(&'a self) -> SimResult<'a, T> {
         match self.error {
             Some(ref e) => Err(e),
-            None => Ok(self.population.iter().max_by_key(|x| x.fitness()).unwrap()),
+            None => {
+                // Find the individual with the highest fitness by creating clones
+                let mut best_idx = 0;
+                let mut best_fitness: Option<F> = None;
+                
+                for (i, x) in self.population.iter().enumerate() {
+                    let mut clone = x.clone();
+                    let fitness = clone.fitness();
+                    
+                    if best_fitness.is_none() {
+                        best_fitness = Some(fitness);
+                        best_idx = i;
+                    } else if let Some(ref current_best) = best_fitness {
+                        if fitness > *current_best {
+                            best_fitness = Some(fitness);
+                            best_idx = i;
+                        }
+                    }
+                }
+                
+                Ok(&self.population[best_idx])
+            }
         }
     }
 

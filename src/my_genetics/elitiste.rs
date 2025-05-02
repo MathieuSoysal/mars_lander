@@ -2,7 +2,7 @@ use crate::genetics::pheno::Phenotype;
 use rand::prelude::*;  // thread_rng, Rng
 
 pub fn elitiste_new_population<T>(
-    population: &[T],
+    population: &mut [T],
     new_population: &mut [T],
     elite_count: usize,
     crossover_rate: f64,
@@ -13,7 +13,11 @@ where
     let mut rng = thread_rng();
 
     let mut indices: Vec<usize> = (0..population.len()).collect();
-    indices.sort_by_key(|&i| -population[i].fitness());
+    // Need to sort using mutable references
+    indices.sort_by_key(|&i| {
+        let mut phenotype = population[i].clone();
+        -phenotype.fitness()
+    });
     
     // 1) copy elites deterministically
     for (dst, &src_idx) in new_population.iter_mut().zip(indices.iter()).take(elite_count) {
@@ -21,16 +25,27 @@ where
     }
 
     // helper: tournament select one parent
-    let mut tournament = |rng: &mut ThreadRng| -> &T {
+    let tournament = |rng: &mut ThreadRng| -> &T {
         const TOUR_SIZE: usize = 5;
-        let mut best = &population[indices[rng.gen_range(0..elite_count)]];
+        let mut best_idx = indices[rng.gen_range(0..elite_count)];
+        let mut best_fitness = {
+            let mut phenotype = population[best_idx].clone();
+            phenotype.fitness()
+        };
+        
         for _ in 1..TOUR_SIZE {
-            let contender = &population[indices[rng.gen_range(0..elite_count)]];
-            if contender.fitness() > best.fitness() {
-                best = contender;
+            let contender_idx = indices[rng.gen_range(0..elite_count)];
+            let contender_fitness = {
+                let mut phenotype = population[contender_idx].clone();
+                phenotype.fitness()
+            };
+            
+            if contender_fitness > best_fitness {
+                best_idx = contender_idx;
+                best_fitness = contender_fitness;
             }
         }
-        best
+        &population[best_idx]
     };
 
     // 2) fill out the rest

@@ -6,7 +6,7 @@ pub trait Phenotype<F>: Clone
 where
     F: Fitness,
 {
-    fn fitness(&self) -> F;
+    fn fitness(&mut self) -> F;
     fn crossover(&self, other: &Self) -> Self;
     fn mutate(&self) -> Self;
 }

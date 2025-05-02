@@ -38,7 +38,7 @@ impl TournamentSelector {
 
 impl<T, F> Selector<T, F> for TournamentSelector
 where
-    T: Phenotype<F>,
+    T: Phenotype<F> + Clone,
     F: Fitness,
 {
     fn select<'a>(&self, population: &'a [T]) -> Result<Parents<&'a T>, String> {
@@ -60,13 +60,21 @@ where
         let mut result: Parents<&T> = Vec::new();
         let mut rng = ::rand::thread_rng();
         for _ in 0..(self.count / 2) {
-            let mut tournament: Vec<&T> = Vec::with_capacity(self.participants);
+            // Get tournament participant indices
+            let mut participant_indices: Vec<usize> = Vec::with_capacity(self.participants);
             for _ in 0..self.participants {
                 let index = rng.gen_range(0..population.len());
-                tournament.push(&population[index]);
+                participant_indices.push(index);
             }
-            tournament.sort_by(|x, y| y.fitness().cmp(&x.fitness()));
-            result.push((tournament[0], tournament[1]));
+            
+            // Sort by fitness using clones
+            participant_indices.sort_by(|&i, &j| {
+                let mut y_clone = population[j].clone();
+                let mut x_clone = population[i].clone();
+                y_clone.fitness().cmp(&x_clone.fitness())
+            });
+            
+            result.push((&population[participant_indices[0]], &population[participant_indices[1]]));
         }
         Ok(result)
     }

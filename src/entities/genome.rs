@@ -71,6 +71,7 @@ pub struct DNA<'a> {
     genome: Genome,
     game: &'a Game,
     starship: Starship,
+    fitness: i32,
 }
 
 impl<'a> DNA<'a> {
@@ -79,6 +80,7 @@ impl<'a> DNA<'a> {
             genome,
             game,
             starship,
+            fitness: -1,
         }
     }
 
@@ -130,10 +132,26 @@ impl<'a> DNA<'a> {
         str.push_str("\" fill=\"none\" stroke=\"white\" />");
         str
     }
+
+    pub fn update_with_new_starship(&mut self, starship: Starship) {
+        self.starship = starship;
+        // Reset fitness to -1 to force recalculation
+        self.fitness = -1;
+        // Move DNA array to left by 1
+        for i in 0..GENOME_SIZE - 1 {
+            self.genome[i] = self.genome[i + 1];
+        }
+        // Set last element to random value
+        self.genome[GENOME_SIZE - 1] = ((rand::random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS)
+            | (rand::random::<u8>() % 3);
+    }
 }
 
 impl<'a> Phenotype<i32> for DNA<'a> {
-    fn fitness(&self) -> i32 {
+    fn fitness(&mut self) -> i32 {
+        if self.fitness != -1 {
+            return self.fitness;
+        }
         let mut s = self.starship.copy();
         for i in 0..GENOME_SIZE {
             let rotate = get_rotate_on_turn(&self.genome, i);
@@ -142,22 +160,27 @@ impl<'a> Phenotype<i32> for DNA<'a> {
             s.add_rotation(rotate);
             s.apply_movement();
             if self.game.starship_is_landing(&s) {
-                return 7000 *500 + 90 *500 + 90 *500 + 90 *500 + s.get_fuel() as i32 * 5000;
+                self.fitness = 7000 *500 + 90 *500 + 90 *500 + 90 *500 + s.get_fuel() as i32 * 5000;
+                return self.fitness;
             }
             if self.game.starship_is_crash(&s) {
                 if self.game.get_distance_to_landing(&s) == 0 {
-                    return (7000 *500) + (90 - s.get_rotation().abs() as i32) * 500
+                    self.fitness = (7000 *500) + (90 - s.get_rotation().abs() as i32) * 500
                     + (90 - s.get_x_speed().abs().min(90.).max(20.) as i32) * 500
-                    + (90 - s.get_y_speed().abs().min(90.).max(40.) as i32) * 500; 
+                    + (90 - s.get_y_speed().abs().min(90.).max(40.) as i32) * 500;
+                    return self.fitness;
                 }
-                return (7000 - self.game.get_distance_to_landing(&s)) * 500;
+                self.fitness = (7000 - self.game.get_distance_to_landing(&s)) * 500;
+                return self.fitness;
             }
         }
+        self.fitness = 0;
         0
     }
 
     fn mutate(&self) -> DNA<'a> {
         let mut mutated = *self;
+        mutated.fitness = -1;
         for i in 0..GENOME_SIZE {
             if rand::random::<f32>() <= 0.1 {
                 mutated.genome[i] = rand::random::<u8>();
@@ -168,6 +191,7 @@ impl<'a> Phenotype<i32> for DNA<'a> {
 
     fn crossover(&self, other: &Self) -> Self {
         let mut child = *self;
+        child.fitness = -1;
         let crossover_point = rand::random::<usize>() % GENOME_SIZE;
         for i in crossover_point..GENOME_SIZE {
             child.genome[i] = other.genome[i];
@@ -230,10 +254,13 @@ mod tests {
         let result = s.get().unwrap();
         let time = s.time();
         println!("Execution time: {} ns.", time.unwrap());
+        
+        // Need to create a mutable clone since result is an immutable reference
+        let mut result_clone = result.clone();
         println!(
             "Result: {:?} | Fitness: {}.",
             result.get_genome(),
-            result.fitness()
+            result_clone.fitness()
         );
     }
 }

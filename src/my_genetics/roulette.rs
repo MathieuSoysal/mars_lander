@@ -10,7 +10,10 @@ where
     // 1) Compute (non‐negative) fitnesses
     let fitnesses: Vec<f64> = population
         .iter()
-        .map(|ind| ind.fitness().max(0) as f64)
+        .map(|ind| {
+            let mut ind_clone = ind.clone();
+            ind_clone.fitness().max(0) as f64
+        })
         .collect();
     let total_fitness: f64 = fitnesses.iter().sum();
     let mut rng = thread_rng();
