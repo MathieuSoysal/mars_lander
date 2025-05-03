@@ -1,5 +1,5 @@
 pub mod my_genetics;
-pub mod params; // Add this line
+pub mod params;
 
 use entities::{
     game::Game,
@@ -14,8 +14,6 @@ use wasm_bindgen::prelude::*;
 pub mod entities;
 pub mod genetics;
 
-const POP_SIZE: usize = 60;
-
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
@@ -24,12 +22,14 @@ extern "C" {
 
 #[wasm_bindgen]
 pub fn run_simulation(
+    pop_size: usize,
     nb_generations: i32,
     crossover_rate: f64,
     mutation_rate: f32,
     elite_count: usize,
 ) -> Vec<String> {
     let params = SimulationParams {
+        pop_size,
         nb_generations,
         crossover_rate,
         mutation_rate,
@@ -40,7 +40,7 @@ pub fn run_simulation(
         Err(_) => log("Simulation parameters already initialized."),
     }
 
-    log(&format!("Running simulation with parameters: {:?}", params));
+    log(&format!("Running simulation with {:?}", params));
 
     let mut returned: Vec<String> = Vec::new();
     let mut game = Game::new(10);
@@ -62,15 +62,17 @@ pub fn run_simulation(
 
     for i in (0..points.len()).step_by(2) {
         game.add_point(points[i], points[i + 1]);
-        log(&format!("point {} {}", points[i], points[i + 1]));
+        // log(&format!("Point({}, {})", points[i], points[i + 1]));
     }
 
-    let mut population: [DNA; POP_SIZE] = std::array::from_fn(|_| {
-        let genome = gen_init_rand();
-        DNA::new(genome, &game, starship.copy())
-    });
+    let mut population = (0..params.pop_size)
+        .map(|_| {
+            let genome = gen_init_rand();
+            DNA::new(genome, &game, starship.copy())
+        })
+        .collect_vec();
 
-    let mut new_population: [DNA; POP_SIZE] = population.clone();
+    let mut new_population = population.clone();
 
     for _ in 0..params.nb_generations {
         elitiste_new_population(
@@ -79,8 +81,8 @@ pub fn run_simulation(
             params.elite_count,
             params.crossover_rate,
         );
-        returned.push(format!("{:?}", population_to_svg(&population)));
-        population = new_population;
+        returned.push(population_to_svg(&population));
+        std::mem::swap(&mut population, &mut new_population);
     }
     returned
 }

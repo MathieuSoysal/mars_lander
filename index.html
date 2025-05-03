@@ -192,16 +192,17 @@
 
       try {
         // Get the number of generations and crossover rate from params
+        const populationSize = params.populationSize;
         const nbGenerations = params.generationCount;
         const crossoverRate = params.crossoverRate / 100;
         const mutationRate = params.mutationRate / 100;
         const eliteCount = params.eliteCount;
 
-        console.log(`Calling WASM function 'run_simulation' with ${nbGenerations} generations and ${crossoverRate}% crossover rate and ${mutationRate}% mutation rate and ${eliteCount} elite count...`);
+        console.log(`Calling WASM function 'run_simulation' with ${populationSize} population size, ${nbGenerations} generations, ${crossoverRate} crossover rate, ${mutationRate} mutation rate, ${eliteCount} elite count...`);
 
         // Call the run_simulation function which returns array of SVG strings
         // Pass both required parameters to the run_simulation function
-        svgData = run_simulation(nbGenerations, crossoverRate, mutationRate, eliteCount);
+        svgData = run_simulation(populationSize, nbGenerations, crossoverRate, mutationRate, eliteCount);
 
         // Update the viewer with the new SVG data
         if (Array.isArray(svgData) && svgData.length > 0) {
