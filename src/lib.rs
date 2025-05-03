@@ -76,7 +76,7 @@ pub fn run_simulation(
         elitiste_new_population(
             &mut population,
             &mut new_population,
-            20,
+            params.elite_count,
             params.crossover_rate,
         );
         returned.push(format!("{:?}", population_to_svg(&population)));
