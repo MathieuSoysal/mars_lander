@@ -102,6 +102,11 @@
         </div>
 
         <div class="param-group">
+          <label for="elite-count">Elite count:</label>
+          <input type="number" id="elite-count" min="1" value="20">
+        </div>
+
+        <div class="param-group">
           <label for="selection-mode">Selection Mode:</label>
           <select id="selection-mode">
             <option value="tournament">Tournament</option>
@@ -137,7 +142,7 @@
   </div>
 
   <script type="module">
-    import init, { tes } from "./pkg/my_lib.js";
+    import init, { run_simulation } from "./pkg/my_lib.js";
 
     // Global reference to store SVG data
     let svgData = [];
@@ -190,12 +195,13 @@
         const nbGenerations = params.generationCount;
         const crossoverRate = params.crossoverRate / 100;
         const mutationRate = params.mutationRate / 100;
+        const eliteCount = params.eliteCount;
 
-        console.log(`Calling WASM function 'tes' with ${nbGenerations} generations and ${crossoverRate}% crossover rate and ${mutationRate}% mutation rate ...`);
+        console.log(`Calling WASM function 'run_simulation' with ${nbGenerations} generations and ${crossoverRate}% crossover rate and ${mutationRate}% mutation rate and ${eliteCount} elite count...`);
 
-        // Call the tes function which returns array of SVG strings
-        // Pass both required parameters to the tes function
-        svgData = tes(nbGenerations, crossoverRate, mutationRate);
+        // Call the run_simulation function which returns array of SVG strings
+        // Pass both required parameters to the run_simulation function
+        svgData = run_simulation(nbGenerations, crossoverRate, mutationRate, eliteCount);
 
         // Update the viewer with the new SVG data
         if (Array.isArray(svgData) && svgData.length > 0) {
@@ -440,6 +446,24 @@
       const mutationRateInput = document.getElementById('mutation-rate');
       const mutationRateValue = document.getElementById('mutation-rate-value');
       const runGaButton = document.getElementById('run-ga');
+      const populationSizeInput = document.getElementById('population-size');
+      const eliteCountInput = document.getElementById('elite-count');
+
+      // Function to update elite count max based on population size
+      function updateEliteCountMax() {
+        const currentPopulationSize = parseInt(populationSizeInput.value);
+        eliteCountInput.max = currentPopulationSize;
+        // Also adjust elite count value if it exceeds the new max
+        if (parseInt(eliteCountInput.value) > currentPopulationSize) {
+          eliteCountInput.value = currentPopulationSize;
+        }
+      }
+
+      // Initial setup
+      updateEliteCountMax();
+
+      // Update max when population size changes
+      populationSizeInput.addEventListener('input', updateEliteCountMax);
 
       crossoverRateInput.addEventListener('input', () => {
         crossoverRateValue.textContent = `${crossoverRateInput.value}%`;
@@ -450,9 +474,19 @@
       });
 
       runGaButton.addEventListener('click', () => {
+        const populationSize = parseInt(populationSizeInput.value);
+        const eliteCount = parseInt(eliteCountInput.value);
+
+        // Validate elite count against population size before running
+        if (eliteCount > populationSize) {
+          alert(`Elite count (${eliteCount}) cannot be greater than Population Size (${populationSize}). Please adjust the values.`);
+          return; // Stop execution if validation fails
+        }
+
         const params = {
-          populationSize: parseInt(document.getElementById('population-size').value),
+          populationSize: populationSize, // Use the already parsed value
           generationCount: parseInt(document.getElementById('generation-count').value),
+          eliteCount: eliteCount, // Use the already parsed value
           selectionMode: document.getElementById('selection-mode').value,
           crossoverRate: parseInt(crossoverRateInput.value),
           mutationRate: parseInt(mutationRateInput.value)

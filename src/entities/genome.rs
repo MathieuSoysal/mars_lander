@@ -1,4 +1,4 @@
-use crate::{genetics::pheno::Phenotype, SIMULATION_PARAMETER};
+use crate::{genetics::pheno::Phenotype, params};
 
 use super::{
     game::{Game, HEIGHT},
@@ -178,7 +178,7 @@ impl<'a> Phenotype<i32> for DNA<'a> {
         let mut mutated = *self;
         mutated.fitness = -1;
         for i in 0..GENOME_SIZE {
-            if rand::random::<f32>() <= SIMULATION_PARAMETER.lock().unwrap().clone() {
+            if rand::random::<f32>() <= params::get_params().mutation_rate {
                 mutated.genome[i] = rand::random::<u8>();
             }
         }
