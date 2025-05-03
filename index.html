@@ -454,6 +454,11 @@
       function checkScreenSize() {
         if (window.innerWidth <= 1300) {
           dashboardToggle.classList.remove('hidden');
+          // Make dashboard expanded by default on small screens
+          dashboardElement.classList.add('active');
+          // Update toggle button icons to show close icon by default
+          dashboardToggle.querySelector('.open-icon').classList.add('hidden');
+          dashboardToggle.querySelector('.close-icon').classList.remove('hidden');
         } else {
           dashboardToggle.classList.add('hidden');
           // Make sure dashboard is visible when screen is large
