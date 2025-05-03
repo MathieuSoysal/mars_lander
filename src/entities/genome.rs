@@ -6,7 +6,7 @@ use super::{
 };
 
 const GEN_POWER_SIZE_BITS: usize = 2;
-const GEN_ROTATE_SIZE_BITS: usize = 2;
+const GEN_ROTATE_SIZE_BITS: usize = 5;
 const GEN_MASK_POWER: u8 = (1 << GEN_POWER_SIZE_BITS) - 1;
 const GEN_MASK_ROTATE: u8 = (1 << GEN_ROTATE_SIZE_BITS) - 1;
 
@@ -43,12 +43,7 @@ pub fn gen_init_semi_full() -> Genome {
 pub fn get_rotate_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     let turn = genome[nb_turn];
     let rotate = turn & GEN_MASK_ROTATE as u8;
-    match rotate {
-        0 => 0,
-        1 => -15,
-        2 => 15,
-        _ => 0,
-    }
+    rotate as i8 - 15
 }
 
 pub fn get_power_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
@@ -138,7 +133,7 @@ impl<'a> DNA<'a> {
         }
         // Set last element to random value
         self.genome[GENOME_SIZE - 1] = ((rand::random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS)
-            | (rand::random::<u8>() % 3);
+            | (rand::random::<u8>() % 31);
     }
 }
 
@@ -163,7 +158,6 @@ impl<'a> Phenotype<i32> for DNA<'a> {
                     self.fitness = (7000 *500) + (90 - s.get_rotation().abs() as i32) * 500
                     + (90 - s.get_x_speed().abs().min(90.).max(20.) as i32) * 500
                     + (90 - s.get_y_speed().abs().min(90.).max(40.) as i32) * 500;
-                  
                     return self.fitness;
                 }
                 self.fitness = (7000 - self.game.get_distance_to_landing(&s)) * 500;
@@ -179,7 +173,8 @@ impl<'a> Phenotype<i32> for DNA<'a> {
         mutated.fitness = -1;
         for i in 0..GENOME_SIZE {
             if rand::random::<f32>() <= params::get_params().mutation_rate {
-                mutated.genome[i] = rand::random::<u8>();
+                mutated.genome[i] = ((rand::random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS)
+                | (rand::random::<u8>() % 31);
             }
         }
         mutated
