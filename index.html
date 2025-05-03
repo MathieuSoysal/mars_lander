@@ -82,8 +82,13 @@
 
       <div id="counter">1 / 300</div>
       <div id="loader" class="loader hidden"></div>
-      <div id="error-message" class="error-message"></div>
     </div>
+
+    <!-- Add dashboard toggle button for small screens -->
+    <button id="dashboard-toggle" class="dashboard-toggle hidden">
+      <span class="open-icon">⚙️</span>
+      <span class="close-icon hidden">✕</span>
+    </button>
 
     <div class="dashboard futuristic">
       <div class="dashboard-header">
@@ -441,6 +446,35 @@
         if (isAutoScrolling) startAutoScroll();
       });
 
+      // Dashboard toggle functionality for responsive design
+      const dashboardToggle = document.getElementById('dashboard-toggle');
+      const dashboardElement = document.querySelector('.dashboard');
+      
+      // Function to check screen size and show/hide toggle button
+      function checkScreenSize() {
+        if (window.innerWidth <= 1300) {
+          dashboardToggle.classList.remove('hidden');
+        } else {
+          dashboardToggle.classList.add('hidden');
+          // Make sure dashboard is visible when screen is large
+          dashboardElement.classList.remove('active');
+        }
+      }
+      
+      // Toggle dashboard visibility
+      dashboardToggle.addEventListener('click', () => {
+        dashboardElement.classList.toggle('active');
+        const isActive = dashboardElement.classList.contains('active');
+        
+        // Update toggle button icons
+        dashboardToggle.querySelector('.open-icon').classList.toggle('hidden', isActive);
+        dashboardToggle.querySelector('.close-icon').classList.toggle('hidden', !isActive);
+      });
+      
+      // Check screen size on load and resize
+      window.addEventListener('load', checkScreenSize);
+      window.addEventListener('resize', checkScreenSize);
+
       // Dashboard event listeners
       const crossoverRateInput = document.getElementById('crossover-rate');
       const crossoverRateValue = document.getElementById('crossover-rate-value');
@@ -482,6 +516,13 @@
         if (eliteCount > populationSize) {
           alert(`Elite count (${eliteCount}) cannot be greater than Population Size (${populationSize}). Please adjust the values.`);
           return; // Stop execution if validation fails
+        }
+
+        // Hide dashboard if screen is small
+        if (window.innerWidth <= 1300) {
+          dashboardElement.classList.remove('active');
+          dashboardToggle.querySelector('.open-icon').classList.remove('hidden');
+          dashboardToggle.querySelector('.close-icon').classList.add('hidden');
         }
 
         const params = {

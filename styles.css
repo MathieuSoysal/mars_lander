@@ -13,6 +13,13 @@
   --grid-color: rgba(0, 246, 255, 0.1);
 }
 
+/* Media query for small screens */
+@media (max-width: 1300px) {
+  :root {
+    --dashboard-width: 100%;
+  }
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -686,4 +693,232 @@ h2 {
   color: var(--accent-color);
   text-align: center;
   padding: 10px;
+}
+
+/* Dashboard toggle button for small screens */
+.dashboard-toggle {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+  color: white;
+  border: none;
+  font-size: 18px;
+  box-shadow: 0 0 15px rgba(0, 246, 255, 0.4);
+  z-index: 100;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.dashboard-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(0, 246, 255, 0.6);
+}
+
+.dashboard-toggle .open-icon,
+.dashboard-toggle .close-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
+}
+
+/* Media Query for small screens */
+@media (max-width: 1300px) {
+  .main-container {
+    flex-direction: column;
+  }
+  
+  .viewer-container {
+    margin: 0;
+    border-radius: 0;
+  }
+  
+  /* More futuristic header on small screens */
+  header {
+    background: linear-gradient(90deg, rgba(0, 8, 36, 0.9), rgba(0, 12, 66, 0.8));
+    height: 50px;
+    padding: 10px 15px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+    animation: scanLine 2s linear infinite;
+  }
+  
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary-color), var(--accent-color), transparent);
+    opacity: 0.6;
+  }
+  
+  @keyframes scanLine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  
+  h1 {
+    font-size: 18px;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .dashboard {
+    position: fixed;
+    top: 50px;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 350px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    border-left: 1px solid rgba(0, 246, 255, 0.3);
+    box-shadow: -5px 0 25px rgba(0, 0, 30, 0.8);
+  }
+  
+  .dashboard.active {
+    transform: translateX(0);
+  }
+  
+  .dashboard-toggle {
+    display: flex;
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    z-index: 100;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(0, 246, 255, 0.2) 0%, rgba(0, 98, 196, 0.9) 70%);
+    box-shadow: 
+      0 0 15px rgba(0, 246, 255, 0.4),
+      inset 0 0 8px rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 246, 255, 0.8);
+    animation: pulse-light 3s infinite;
+  }
+  
+  @keyframes pulse-light {
+    0% { box-shadow: 0 0 15px rgba(0, 246, 255, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.6); }
+    50% { box-shadow: 0 0 25px rgba(0, 246, 255, 0.7), inset 0 0 12px rgba(255, 255, 255, 0.8); }
+    100% { box-shadow: 0 0 15px rgba(0, 246, 255, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.6); }
+  }
+  
+  /* Holographic player controls on small screens */
+  .player-controls {
+    padding: 8px 15px;
+    background: rgba(0, 12, 36, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 246, 255, 0.6);
+    box-shadow: 
+      0 0 20px rgba(0, 246, 255, 0.3),
+      inset 0 0 8px rgba(0, 246, 255, 0.2);
+    border-radius: 30px;
+  }
+  
+  .player-controls::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 246, 255, 0.8), transparent);
+  }
+  
+  /* Hide non-essential controls on very small screens */
+  @media (max-width: 480px) {
+    .speed-control-compact, 
+    .mini-progress-container {
+      display: none;
+    }
+    
+    .player-controls {
+      padding: 6px 10px;
+      gap: 8px;
+      border-radius: 25px;
+      bottom: 10px;
+    }
+    
+    #play-pause {
+      width: 40px;
+      height: 40px;
+      box-shadow: 0 0 15px rgba(0, 246, 255, 0.4);
+    }
+    
+    .player-button {
+      width: 32px;
+      height: 32px;
+    }
+    
+    /* Add holographic button effect */
+    .player-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 70%);
+      z-index: 1;
+    }
+    
+    /* Floating counter for frame number */
+    #counter {
+      bottom: 60px;
+      padding: 3px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      background: rgba(0, 12, 36, 0.8);
+      border: 1px solid rgba(0, 246, 255, 0.5);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 0 10px rgba(0, 246, 255, 0.3);
+    }
+    
+    /* Improved seek container */
+    .seek-container {
+      padding: 3px 10px;
+    }
+    
+    #seek {
+      height: 4px;
+      margin: 6px 0;
+    }
+    
+    #seek::-webkit-slider-thumb {
+      width: 12px;
+      height: 12px;
+    }
+  }
+  
+  .speed-control-compact, 
+  .mini-progress-container {
+    padding-left: 10px;
+  }
+  
+  .mini-progress-bar {
+    width: 60px;
+  }
 }
