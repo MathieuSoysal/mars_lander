@@ -136,6 +136,7 @@
           <button type="button" id="run-ga" class="primary-button">
             <span class="button-text">Run Algorithm</span>
             <span class="button-glow"></span>
+            <span class="holographic-scan"></span>
           </button>
         </div>
       </form>
@@ -541,6 +542,9 @@
 
         console.log('Running genetic algorithm with parameters:', params);
 
+        // Add loading class to button for futuristic animation
+        runGaButton.classList.add('loading');
+
         // Show loading indicator
         loader.classList.remove('hidden');
 
@@ -550,12 +554,18 @@
         if (success) {
           // Hide loading indicator when done
           loader.classList.add('hidden');
+          // Remove loading class from button
+          runGaButton.classList.remove('loading');
+          runGaButton.disabled = false;
           // Reset to the first frame and start auto-scrolling to show the simulation
           current = 0;
           show(0, true);
           startAutoScroll();
         } else {
           loader.classList.add('hidden');
+          // Remove loading class from button
+          runGaButton.classList.remove('loading');
+          runGaButton.disabled = false;
           alert('Failed to run the simulation. Check the console for more details.');
         }
       });
