@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <header>
     <h1>Mars Lander Viewer</h1>
@@ -24,19 +26,19 @@
               <stop offset="0%" stop-color="rgba(255, 60, 0, 0.2)" />
               <stop offset="100%" stop-color="rgba(0, 0, 0, 0)" />
             </radialGradient>
-            
+
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="2" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
           </defs>
-          
+
           <!-- Black background -->
           <rect width="100%" height="100%" fill="black"></rect>
-          
+
           <!-- Mars atmospheric glow -->
           <rect x="0" y="2500" width="7000" height="500" fill="url(#marsGlow)" opacity="0.7"></rect>
-          
+
           <!-- Surface terrain with enhanced visuals -->
           <line x1="0" y1="1500" x2="1000" y2="1000" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
           <line x1="1000" y1="1000" x2="2000" y2="2500" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
@@ -46,13 +48,13 @@
             <title>Landing Zone</title>
             <animate attributeName="stroke-opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" />
           </line>
-          
+
           <g>
             <!-- SVG content for Mars Lander simulation -->
           </g>
         </svg>
       </div>
-      
+
       <!-- Fixed player controls -->
       <div class="player-controls">
         <button id="prev" class="player-button"><span>⏮</span></button>
@@ -61,14 +63,14 @@
           <span class="pause-icon hidden">⏸</span>
         </button>
         <button id="next" class="player-button"><span>⏭</span></button>
-        
+
         <!-- Speed control -->
         <div class="speed-control-compact">
           <span class="speed-label">Speed</span>
           <input type="range" id="speed-compact" min="1" max="10" value="10" class="speed-slider">
           <span id="speed-value">10x</span>
         </div>
-        
+
         <!-- Mini progress indicator -->
         <div class="mini-progress-container">
           <div class="mini-progress-bar">
@@ -77,7 +79,7 @@
           <span id="progress-text">0%</span>
         </div>
       </div>
-      
+
       <div id="counter">1 / 300</div>
       <div id="loader" class="loader hidden"></div>
       <div id="error-message" class="error-message"></div>
@@ -92,15 +94,13 @@
         <div class="param-group">
           <label for="population-size">Population Size:</label>
           <input type="number" id="population-size" min="10" max="1000" value="100">
-          <div class="slider-decoration"></div>
         </div>
-        
+
         <div class="param-group">
           <label for="generation-count">Number of Generations:</label>
           <input type="number" id="generation-count" min="1" max="1000" value="200">
-          <div class="slider-decoration"></div>
         </div>
-        
+
         <div class="param-group">
           <label for="selection-mode">Selection Mode:</label>
           <select id="selection-mode">
@@ -108,23 +108,20 @@
             <option value="roulette">Roulette Wheel</option>
             <option value="rank">Rank-based</option>
           </select>
-          <div class="slider-decoration"></div>
         </div>
-        
+
         <div class="param-group">
           <label for="crossover-rate">Crossover Rate:</label>
           <input type="range" id="crossover-rate" min="0" max="100" value="90">
           <span id="crossover-rate-value">90%</span>
-          <div class="slider-decoration"></div>
         </div>
-        
+
         <div class="param-group">
           <label for="mutation-rate">Mutation Rate:</label>
           <input type="range" id="mutation-rate" min="0" max="100" value="10">
           <span id="mutation-rate-value">10%</span>
-          <div class="slider-decoration"></div>
         </div>
-        
+
         <div class="button-container">
           <button type="button" id="run-ga" class="primary-button">
             <span class="button-text">Run Algorithm</span>
@@ -141,20 +138,20 @@
 
   <script type="module">
     import init, { tes } from "./pkg/my_lib.js";
-    
+
     // Global reference to store SVG data
     let svgData = [];
     let wasmReady = false;
 
     async function run() {
-        try {
-            await init(); // Load and initialize WebAssembly module
-            wasmReady = true;
-            console.log("WASM module initialized successfully");
-        } catch (error) {
-            console.error("Failed to initialize WASM module:", error);
-            document.getElementById('error-message').innerText = `WASM initialization error: ${error.message}`;
-        }
+      try {
+        await init(); // Load and initialize WebAssembly module
+        wasmReady = true;
+        console.log("WASM module initialized successfully");
+      } catch (error) {
+        console.error("Failed to initialize WASM module:", error);
+        document.getElementById('error-message').innerText = `WASM initialization error: ${error.message}`;
+      }
     }
 
     // Start loading WASM module
@@ -162,79 +159,79 @@
 
     // Function to clean SVG string by unescaping quotes and newlines
     function cleanSvgString(svgString) {
-        // First check if the string is wrapped in quotes
-        let cleaned = svgString;
-        
-        // Remove surrounding quotes if present
-        if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
-            cleaned = cleaned.substring(1, cleaned.length - 1);
-        }
-        
-        // Replace escaped quotes with actual quotes
-        cleaned = cleaned.replace(/\\"/g, '"');
-        
-        // Remove newline characters completely (they're just formatting)
-        cleaned = cleaned.replace(/\\n/g, '');
-        
-        return cleaned;
+      // First check if the string is wrapped in quotes
+      let cleaned = svgString;
+
+      // Remove surrounding quotes if present
+      if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+        cleaned = cleaned.substring(1, cleaned.length - 1);
+      }
+
+      // Replace escaped quotes with actual quotes
+      cleaned = cleaned.replace(/\\"/g, '"');
+
+      // Remove newline characters completely (they're just formatting)
+      cleaned = cleaned.replace(/\\n/g, '');
+
+      return cleaned;
     }
 
     // Function to run Mars Lander simulation with genetic algorithm parameters
     window.runMarsLanderSimulation = (params) => {
-        if (!wasmReady) {
-            const error = "WASM module not ready yet. Please wait for initialization to complete.";
-            console.error(error);
-            document.getElementById('error-message').innerText = error;
-            return false;
-        }
+      if (!wasmReady) {
+        const error = "WASM module not ready yet. Please wait for initialization to complete.";
+        console.error(error);
+        document.getElementById('error-message').innerText = error;
+        return false;
+      }
 
-        try {
-            // Get the number of generations and crossover rate from params
-            const nbGenerations = params.generationCount;
-            const crossoverRate = params.crossoverRate / 100;
-            const mutationRate = params.mutationRate / 100;
+      try {
+        // Get the number of generations and crossover rate from params
+        const nbGenerations = params.generationCount;
+        const crossoverRate = params.crossoverRate / 100;
+        const mutationRate = params.mutationRate / 100;
 
-            console.log(`Calling WASM function 'tes' with ${nbGenerations} generations and ${crossoverRate}% crossover rate and ${mutationRate}% mutation rate ...`);
-            
-            // Call the tes function which returns array of SVG strings
-            // Pass both required parameters to the tes function
-            svgData = tes(nbGenerations, crossoverRate, mutationRate);
-            
-            // Update the viewer with the new SVG data
-            if (Array.isArray(svgData) && svgData.length > 0) {
-                console.log(`Received ${svgData.length} SVG frames from simulation`);
-                
-                // Clean SVG strings (unescape quotes and remove newlines)
-                svgData = svgData.map(cleanSvgString);
-                
-                // Update the progress and seek inputs to match the new number of frames
-                const total = svgData.length;
-                document.getElementById('seek').max = total;
-                document.getElementById('counter').textContent = `1 / ${total}`;
-                
-                // Insert the first SVG content directly into the container
-                document.getElementById('svg-container').innerHTML = svgData[0];
-                
-                // Set SVG data globally for dynamic usage
-                window.setSvgData(svgData);
-                
-                return true;
-            } else {
-                const error = "No valid SVG data received from simulation. Check WASM function output.";
-                console.error(error);
-                document.getElementById('error-message').innerText = error;
-                return false;
-            }
-        } catch (error) {
-            console.error("Error running Mars Lander simulation:", error);
-            document.getElementById('error-message').innerText = `Simulation error: ${error.message}`;
-            return false;
+        console.log(`Calling WASM function 'tes' with ${nbGenerations} generations and ${crossoverRate}% crossover rate and ${mutationRate}% mutation rate ...`);
+
+        // Call the tes function which returns array of SVG strings
+        // Pass both required parameters to the tes function
+        svgData = tes(nbGenerations, crossoverRate, mutationRate);
+
+        // Update the viewer with the new SVG data
+        if (Array.isArray(svgData) && svgData.length > 0) {
+          console.log(`Received ${svgData.length} SVG frames from simulation`);
+
+          // Clean SVG strings (unescape quotes and remove newlines)
+          svgData = svgData.map(cleanSvgString);
+
+          // Update the progress and seek inputs to match the new number of frames
+          const total = svgData.length;
+          document.getElementById('seek').max = total;
+          document.getElementById('counter').textContent = `1 / ${total}`;
+
+          // Insert the first SVG content directly into the container
+          document.getElementById('svg-container').innerHTML = svgData[0];
+
+          // Set SVG data globally for dynamic usage
+          window.setSvgData(svgData);
+
+          return true;
+        } else {
+          const error = "No valid SVG data received from simulation. Check WASM function output.";
+          console.error(error);
+          document.getElementById('error-message').innerText = error;
+          return false;
         }
+      } catch (error) {
+        console.error("Error running Mars Lander simulation:", error);
+        document.getElementById('error-message').innerText = `Simulation error: ${error.message}`;
+        return false;
+      }
     };
   </script>
 
   <script>
-    (function(){
+    (function () {
       // Hide the seek input as a progress bar since we don't have a dedicated progress element
       const seek = document.getElementById('seek');
       const loader = document.getElementById('loader');
@@ -258,21 +255,21 @@
       function preloadImages() {
         loader.classList.remove('hidden');
         let loadedCount = 0;
-        
+
         // If we have SVG data from WASM, use that instead of loading from files
         if (svgDataFromWasm.length > 0) {
           total = svgDataFromWasm.length;
-          
+
           // Update UI elements to match new total
           seek.max = total;
           counter.textContent = `1 / ${total}`;
-          
+
           // No need for preloading when we have SVG strings directly
           loader.classList.add('hidden');
           show(0, true);
           return;
         }
-        
+
         // If no WASM data, load from files as before
         for (let i = 0; i < total; i++) {
           // Create a new XMLHttpRequest to fetch the SVG file
@@ -282,12 +279,12 @@
             if (xhr.status === 200) {
               // Store the SVG content string
               svgDataFromWasm[i] = xhr.responseText;
-              
+
               loadedCount++;
               const percentLoaded = Math.floor((loadedCount / total) * 100);
               // Update mini progress instead of non-existent progress element
               updateMiniProgress(percentLoaded);
-              
+
               if (loadedCount === total) {
                 loader.classList.add('hidden');
                 show(0, true);
@@ -310,16 +307,16 @@
 
       function show(n, skipPreloadCheck = false) {
         if (!skipPreloadCheck && svgDataFromWasm.length === 0) return;
-        
+
         current = (n + total) % total;
-        counter.textContent = `${current+1} / ${total}`;
-        
-        if (seek) seek.value = current+1;
-        
+        counter.textContent = `${current + 1} / ${total}`;
+
+        if (seek) seek.value = current + 1;
+
         // Update mini progress
         const percentComplete = Math.floor(((current + 1) / total) * 100);
         updateMiniProgress(percentComplete);
-        
+
         // Insert SVG content directly into the DOM
         if (svgDataFromWasm[current]) {
           // Use the cleaned SVG string
@@ -335,14 +332,14 @@
         if (Array.isArray(data) && data.length > 0) {
           svgDataFromWasm = data;
           total = data.length;
-          
+
           // Update UI elements
           if (seek) seek.max = total;
           counter.textContent = `1 / ${total}`;
-          
+
           // Preload the new images
           preloadImages();
-          
+
           return true;
         }
         return false;
@@ -350,7 +347,7 @@
 
       function toggleAutoScroll() {
         isAutoScrolling ? stopAutoScroll() : startAutoScroll();
-        
+
         // Update play/pause button to match state
         if (isAutoScrolling) {
           playPauseBtn.querySelector('.play-icon').classList.add('hidden');
@@ -363,14 +360,14 @@
 
       function startAutoScroll() {
         if (autoScrollInterval) clearInterval(autoScrollInterval);
-        
+
         isAutoScrolling = true;
-        
+
         // Update the player controls
         playPauseBtn.querySelector('.play-icon').classList.add('hidden');
         playPauseBtn.querySelector('.pause-icon').classList.remove('hidden');
         playPauseBtn.classList.add('active');
-        
+
         const speed = 11 - speedControl.value;
         autoScrollInterval = setInterval(() => {
           // Check if we've reached the end
@@ -386,7 +383,7 @@
         clearInterval(autoScrollInterval);
         autoScrollInterval = null;
         isAutoScrolling = false;
-        
+
         // Update the player controls
         playPauseBtn.querySelector('.play-icon').classList.remove('hidden');
         playPauseBtn.querySelector('.pause-icon').classList.add('hidden');
@@ -396,36 +393,36 @@
       // Event listeners
       prev.addEventListener('click', () => {
         stopAutoScroll();
-        show(current-1);
+        show(current - 1);
       });
-      
+
       next.addEventListener('click', () => {
         stopAutoScroll();
-        show(current+1);
+        show(current + 1);
       });
-      
+
       playPauseBtn.addEventListener('click', toggleAutoScroll);
-      
+
       document.addEventListener('keydown', e => {
         if (e.key === 'ArrowLeft') {
           stopAutoScroll();
-          show(current-1);
+          show(current - 1);
         }
         if (e.key === 'ArrowRight') {
           stopAutoScroll();
-          show(current+1);
+          show(current + 1);
         }
         if (e.key === ' ') {
           toggleAutoScroll();
           e.preventDefault();
         }
       });
-      
+
       seek.addEventListener('input', () => {
         stopAutoScroll();
-        show(seek.value-1);
+        show(seek.value - 1);
       });
-      
+
       // Update speed display when slider changes
       speedControl.addEventListener('input', () => {
         speedValue.textContent = `${speedControl.value}x`;
@@ -455,15 +452,15 @@
           crossoverRate: parseInt(crossoverRateInput.value),
           mutationRate: parseInt(mutationRateInput.value)
         };
-        
+
         console.log('Running genetic algorithm with parameters:', params);
-        
+
         // Show loading indicator
         loader.classList.remove('hidden');
-        
+
         // Call the WASM function through the wrapper
         const success = window.runMarsLanderSimulation(params);
-        
+
         if (success) {
           // Hide loading indicator when done
           loader.classList.add('hidden');
@@ -482,4 +479,5 @@
     })();
   </script>
 </body>
+
 </html>
