@@ -346,6 +346,11 @@
       };
 
       function toggleAutoScroll() {
+        // If we're at the last frame and trying to play, reset to the first frame
+        if (!isAutoScrolling && current >= total - 1) {
+          show(0);
+        }
+        
         isAutoScrolling ? stopAutoScroll() : startAutoScroll();
 
         // Update play/pause button to match state
