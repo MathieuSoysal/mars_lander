@@ -82,7 +82,7 @@ h2 {
 /* Layout */
 .main-container {
   display: flex;
-  height: 100svh;
+  height: calc(100svh - 120px)
 }
 
 .dashboard {
