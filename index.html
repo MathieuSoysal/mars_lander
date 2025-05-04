@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <meta name="theme-color" content="#000824">
-  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 
@@ -207,7 +207,7 @@
         const mutationRate = params.mutationRate / 100;
         const eliteCount = params.eliteCount;
 
-        console.log(`Calling WASM function 'run_simulation'...`);
+        console.log(`Calling WASM function 'run_simulation' with ${populationSize} population size, ${nbGenerations} generations, ${crossoverRate} crossover rate, ${mutationRate} mutation rate, ${eliteCount} elite count...`);
 
         // Call the run_simulation function which returns array of SVG strings
         // Pass both required parameters to the run_simulation function
@@ -248,6 +248,14 @@
 
   <script>
     (function () {
+      let crossoverRateInput = document.getElementById('crossover-rate');
+        let crossoverRateValue = document.getElementById('crossover-rate-value');
+        let mutationRateInput = document.getElementById('mutation-rate');
+        let mutationRateValue = document.getElementById('mutation-rate-value');
+        let runGaButton = document.getElementById('run-ga');
+        let populationSizeInput = document.getElementById('population-size');
+        let eliteCountInput = document.getElementById('elite-count');
+
       // Hide the seek input as a progress bar since we don't have a dedicated progress element
       const seek = document.getElementById('seek');
       const loader = document.getElementById('loader');
@@ -483,15 +491,6 @@
       // Check screen size on load and resize
       window.addEventListener('load', checkScreenSize);
       window.addEventListener('resize', checkScreenSize);
-
-      // Dashboard event listeners
-      const crossoverRateInput = document.getElementById('crossover-rate');
-      const crossoverRateValue = document.getElementById('crossover-rate-value');
-      const mutationRateInput = document.getElementById('mutation-rate');
-      const mutationRateValue = document.getElementById('mutation-rate-value');
-      const runGaButton = document.getElementById('run-ga');
-      const populationSizeInput = document.getElementById('population-size');
-      const eliteCountInput = document.getElementById('elite-count');
 
       // Function to update elite count max based on population size
       function updateEliteCountMax() {
