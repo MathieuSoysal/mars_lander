@@ -12,20 +12,28 @@ pub struct SimulationParams {
 }
 
 // Global static variable to hold the simulation parameters.
-// It will be initialized once via a function called from JavaScript.
-static SIMULATION_PARAMS: OnceCell<SimulationParams> = OnceCell::new();
+// It will be initialized and can be updated multiple times.
+static SIMULATION_PARAMS: OnceCell<std::sync::Mutex<SimulationParams>> = OnceCell::new();
 
 /// Retrieves the global simulation parameters.
 /// Panics if the parameters have not been initialized yet.
 pub fn get_params() -> SimulationParams {
-    *SIMULATION_PARAMS.get().expect(
-        "Simulation parameters have not been initialized. Call `init_simulation_params` first.",
-    )
+    let lock = SIMULATION_PARAMS
+        .get()
+        .expect(
+            "Simulation parameters have not been initialized. Call `init_simulation_params` first.",
+        )
+        .lock()
+        .expect("Failed to acquire lock on simulation parameters.");
+    *lock
 }
 
-/// Initializes the global simulation parameters.
-/// This function should only be called once, typically from JavaScript.
-/// Returns Ok(()) if initialization was successful, Err(params) if already initialized.
-pub(crate) fn init_params(params: SimulationParams) -> Result<(), SimulationParams> {
-    SIMULATION_PARAMS.set(params)
+/// Initializes or updates the global simulation parameters.
+/// This function can be called multiple times to update the parameters.
+pub(crate) fn set_params(params: SimulationParams) {
+    let mutex = SIMULATION_PARAMS.get_or_init(|| std::sync::Mutex::new(params));
+    let mut lock = mutex
+        .lock()
+        .expect("Failed to acquire lock on simulation parameters.");
+    *lock = params;
 }

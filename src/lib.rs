@@ -35,11 +35,12 @@ pub fn run_simulation(
         mutation_rate,
         elite_count,
     };
-    if let Err(_) = params::init_params(params) {
-        log("Simulation parameters already initialized.");
-    }
+    params::set_params(params);
 
-    log(&format!("Running simulation with {:?}", params));
+    log(&format!(
+        "Running simulation with {:?}",
+        params::get_params()
+    ));
 
     let mut returned: Vec<String> = Vec::new();
     let mut game = Game::new(10);
