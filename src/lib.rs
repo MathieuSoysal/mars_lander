@@ -35,9 +35,8 @@ pub fn run_simulation(
         mutation_rate,
         elite_count,
     };
-    match params::init_params(params) {
-        Ok(_) => log("Simulation parameters initialized successfully."),
-        Err(_) => log("Simulation parameters already initialized."),
+    if let Err(_) = params::init_params(params) {
+        log("Simulation parameters already initialized.");
     }
 
     log(&format!("Running simulation with {:?}", params));
@@ -47,13 +46,15 @@ pub fn run_simulation(
     let starship = Starship::new(2500, 2700, 5500, 0, 0, 0., 0.);
 
     let points = "
-    (0, 100)
-(1000, 500)
-(1500, 1500)
-(3000, 1000)
-(4000, 150)
-(5500, 150)
-(6999, 800)";
+        (0, 100)
+    (1000, 500)
+    (1500, 1500)
+    (3000, 1000)
+    (4000, 150)
+    (5500, 150)
+    (6999, 800)
+    ";
+
     let points = points.replace(|c: char| !c.is_ascii_digit(), " ");
     let points = points
         .split_whitespace()
@@ -74,15 +75,21 @@ pub fn run_simulation(
 
     let mut new_population = population.clone();
 
-    for _ in 0..params.nb_generations {
-        elitiste_new_population(
+    let mut first_ok = -1;
+    for generation in 0..params.nb_generations {
+        let found_solution = elitiste_new_population(
             &mut population,
             &mut new_population,
             params.elite_count,
             params.crossover_rate,
         );
+
+        if first_ok == -1 && found_solution {
+            first_ok = generation + 1;
+        }
         returned.push(population_to_svg(&population));
         std::mem::swap(&mut population, &mut new_population);
     }
+    log(&format!("First ok: {}", first_ok));
     returned
 }

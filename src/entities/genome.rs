@@ -80,14 +80,6 @@ impl<'a> DNA<'a> {
         }
     }
 
-    pub fn get_genome(&self) -> &Genome {
-        &self.genome
-    }
-
-    pub fn get_starship(&self) -> &Starship {
-        &self.starship
-    }
-
     pub fn get_game(&self) -> &Game {
         self.game
     }
@@ -95,7 +87,7 @@ impl<'a> DNA<'a> {
     pub fn to_svg(&self) -> String {
         let mut str = String::new();
         str.push_str(&format!(
-            "<polyline points=\"{},{} ",
+            r#"<polyline points="{},{} "#,
             self.starship.get_x(),
             HEIGHT as i32 - self.starship.get_y()
         ));
@@ -108,37 +100,24 @@ impl<'a> DNA<'a> {
             s.apply_movement();
             str.push_str(&format!("{},{} ", s.get_x(), HEIGHT as i32 - s.get_y()));
             if self.game.starship_is_landing(&s) {
-                str.push_str(&format!("\" fill=\"none\" stroke=\"green\" stroke-width=\"{}\" />",10));
+                str.push_str(&format!(r#"" fill="none" stroke="green" stroke-width="{}" />"#,10));
                 str.push_str(&format!(
-                    "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"none\" stroke=\"green\" stroke-width=\"1\" />",
+                    r#"<circle cx="{}" cy="{}" r="{}" fill="none" stroke="green" stroke-width="1" />"#,
                     s.get_x(), HEIGHT as i32 - s.get_y(), 10 + s.get_fuel() as u32 / 200 
                 ));
                 return str;
             }
             if self.game.starship_is_crash(&s) {
-                str.push_str("\" fill=\"none\" stroke=\"white\" />");
+                str.push_str(r#"" fill="none" stroke="white" />"#);
                 str.push_str(&format!(
-                    "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"none\" stroke=\"white\" stroke-width=\"1\" />",
+                    r#"<circle cx="{}" cy="{}" r="{}" fill="none" stroke="white" stroke-width="1" />"#,
                     s.get_x(), HEIGHT as i32 - s.get_y(), 3 
                 ));
-                return str;
+                return str   ;
             }
         }
-        str.push_str("\" fill=\"none\" stroke=\"white\" />");
+        str.push_str(r#"" fill="none" stroke="white" />"#);
         str
-    }
-
-    pub fn update_with_new_starship(&mut self, starship: Starship) {
-        self.starship = starship;
-        // Reset fitness to -1 to force recalculation
-        self.fitness = -1;
-        // Move DNA array to left by 1
-        for i in 0..GENOME_SIZE - 1 {
-            self.genome[i] = self.genome[i + 1];
-        }
-        // Set last element to random value
-        self.genome[GENOME_SIZE - 1] = ((rand::random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS)
-            | (rand::random::<u8>() % 3);
     }
 }
 
@@ -206,6 +185,6 @@ pub fn population_to_svg(population: &[DNA]) -> String {
         svg.push_str(&dna.to_svg());
     }
     svg.push_str("</g>\n");
-    svg.push_str(r#"</svg>"#);
+    svg.push_str("</svg>");
     svg
 }
