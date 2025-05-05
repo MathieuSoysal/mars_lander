@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="styles.css">
   <meta name="theme-color" content="#000824">
   <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 
 <body>
@@ -110,17 +110,18 @@
         </div>
 
         <div class="param-group">
-          <label for="elite-count">Elite count:</label>
-          <input type="number" id="elite-count" min="1" value="20">
-        </div>
-
-        <div class="param-group">
           <label for="selection-mode">Selection Mode:</label>
           <select id="selection-mode">
             <option value="tournament">Tournament</option>
             <option value="roulette">Roulette Wheel</option>
             <option value="rank">Rank-based</option>
           </select>
+        </div>
+
+        <div class="param-group">
+          <label for="elite-count">Elite count:</label>
+          <input type="range" id="elite-count" min="0" value="20" max="100">
+          <span id="elite-count-value">20%</span>
         </div>
 
         <div class="param-group">
@@ -201,16 +202,17 @@
 
       try {
         // Get the number of generations and crossover rate from params
-        const populationSize = params.populationSize;
-        const nbGenerations = params.generationCount;
-        const crossoverRate = params.crossoverRate / 100;
-        const mutationRate = params.mutationRate / 100;
-        const eliteCount = params.eliteCount;
+        let populationSize = params.populationSize;
+        let nbGenerations = params.generationCount;
+        let crossoverRate = params.crossoverRate / 100.;
+        let mutationRate = params.mutationRate / 100.;
+        let eliteCount = params.eliteCount / 100.;
 
         console.log(`Calling WASM function 'run_simulation' with ${populationSize} population size, ${nbGenerations} generations, ${crossoverRate} crossover rate, ${mutationRate} mutation rate, ${eliteCount} elite count...`);
 
         // Call the run_simulation function which returns array of SVG strings
         // Pass both required parameters to the run_simulation function
+        eliteCount = Math.floor(populationSize * eliteCount);
         svgData = run_simulation(populationSize, nbGenerations, crossoverRate, mutationRate, eliteCount);
 
         // Update the viewer with the new SVG data
@@ -249,12 +251,12 @@
   <script>
     (function () {
       let crossoverRateInput = document.getElementById('crossover-rate');
-        let crossoverRateValue = document.getElementById('crossover-rate-value');
-        let mutationRateInput = document.getElementById('mutation-rate');
-        let mutationRateValue = document.getElementById('mutation-rate-value');
-        let runGaButton = document.getElementById('run-ga');
-        let populationSizeInput = document.getElementById('population-size');
-        let eliteCountInput = document.getElementById('elite-count');
+      let crossoverRateValue = document.getElementById('crossover-rate-value');
+      let mutationRateInput = document.getElementById('mutation-rate');
+      let mutationRateValue = document.getElementById('mutation-rate-value');
+      let runGaButton = document.getElementById('run-ga');
+      let populationSizeInput = document.getElementById('population-size');
+      let eliteCountInput = document.getElementById('elite-count');
 
       // Hide the seek input as a progress bar since we don't have a dedicated progress element
       const seek = document.getElementById('seek');
@@ -374,7 +376,7 @@
         if (!isAutoScrolling && current >= total - 1) {
           show(0);
         }
-        
+
         isAutoScrolling ? stopAutoScroll() : startAutoScroll();
 
         // Update play/pause button to match state
@@ -461,7 +463,7 @@
       // Dashboard toggle functionality for responsive design
       const dashboardToggle = document.getElementById('dashboard-toggle');
       const dashboardElement = document.querySelector('.dashboard');
-      
+
       // Function to check screen size and show/hide toggle button
       function checkScreenSize() {
         if (window.innerWidth <= 1300) {
@@ -477,17 +479,17 @@
           dashboardElement.classList.remove('active');
         }
       }
-      
+
       // Toggle dashboard visibility
       dashboardToggle.addEventListener('click', () => {
         dashboardElement.classList.toggle('active');
         const isActive = dashboardElement.classList.contains('active');
-        
+
         // Update toggle button icons
         dashboardToggle.querySelector('.open-icon').classList.toggle('hidden', isActive);
         dashboardToggle.querySelector('.close-icon').classList.toggle('hidden', !isActive);
       });
-      
+
       // Check screen size on load and resize
       window.addEventListener('load', checkScreenSize);
       window.addEventListener('resize', checkScreenSize);
@@ -514,6 +516,10 @@
 
       mutationRateInput.addEventListener('input', () => {
         mutationRateValue.textContent = `${mutationRateInput.value}%`;
+      });
+
+      eliteCountInput.addEventListener('input', () => {
+        document.getElementById('elite-count-value').textContent = `${eliteCountInput.value}%`;
       });
 
       runGaButton.addEventListener('click', () => {
