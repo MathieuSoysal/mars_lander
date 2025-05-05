@@ -25,15 +25,15 @@ pub fn run_simulation(
     pop_size: usize,
     nb_generations: i32,
     crossover_rate: f64,
-    mutation_rate: f32,
-    elite_count: usize,
+    mutation_rate: f64,
+    elite_rate: f64,
 ) -> Vec<String> {
     let params = SimulationParams {
         pop_size,
         nb_generations,
         crossover_rate,
         mutation_rate,
-        elite_count,
+        elite_rate,
     };
     params::set_params(params);
 
@@ -81,7 +81,7 @@ pub fn run_simulation(
         let found_solution = elitiste_new_population(
             &mut population,
             &mut new_population,
-            params.elite_count,
+            (params.elite_rate * params.pop_size as f64).floor() as usize, // TODO Check
             params.crossover_rate,
         );
 

@@ -157,7 +157,7 @@ impl<'a> Phenotype<i32> for DNA<'a> {
         let mut mutated = *self;
         mutated.fitness = -1;
         for i in 0..GENOME_SIZE {
-            if rand::random::<f32>() <= params::get_params().mutation_rate {
+            if rand::random::<f64>() <= params::get_params().mutation_rate {
                 mutated.genome[i] = rand::random::<u8>();
             }
         }

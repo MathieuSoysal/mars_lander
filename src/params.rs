@@ -7,8 +7,8 @@ pub struct SimulationParams {
     pub pop_size: usize,
     pub nb_generations: i32,
     pub crossover_rate: f64,
-    pub mutation_rate: f32,
-    pub elite_count: usize,
+    pub mutation_rate: f64,
+    pub elite_rate: f64,
 }
 
 // Global static variable to hold the simulation parameters.

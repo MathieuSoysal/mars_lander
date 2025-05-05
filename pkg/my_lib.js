@@ -61,11 +61,11 @@ function getArrayJsValueFromWasm0(ptr, len) {
  * @param {number} nb_generations
  * @param {number} crossover_rate
  * @param {number} mutation_rate
- * @param {number} elite_count
+ * @param {number} elite_rate
  * @returns {string[]}
  */
-export function run_simulation(pop_size, nb_generations, crossover_rate, mutation_rate, elite_count) {
-    const ret = wasm.run_simulation(pop_size, nb_generations, crossover_rate, mutation_rate, elite_count);
+export function run_simulation(pop_size, nb_generations, crossover_rate, mutation_rate, elite_rate) {
+    const ret = wasm.run_simulation(pop_size, nb_generations, crossover_rate, mutation_rate, elite_rate);
     var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
     return v1;
@@ -143,15 +143,15 @@ export class SimulationParams {
     /**
      * @returns {number}
      */
-    get elite_count() {
-        const ret = wasm.__wbg_get_simulationparams_elite_count(this.__wbg_ptr);
-        return ret >>> 0;
+    get elite_rate() {
+        const ret = wasm.__wbg_get_simulationparams_elite_rate(this.__wbg_ptr);
+        return ret;
     }
     /**
      * @param {number} arg0
      */
-    set elite_count(arg0) {
-        wasm.__wbg_set_simulationparams_elite_count(this.__wbg_ptr, arg0);
+    set elite_rate(arg0) {
+        wasm.__wbg_set_simulationparams_elite_rate(this.__wbg_ptr, arg0);
     }
 }
 

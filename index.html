@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <meta name="theme-color" content="#000824">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 
@@ -119,9 +119,9 @@
         </div>
 
         <div class="param-group">
-          <label for="elite-count">Elite count:</label>
-          <input type="range" id="elite-count" min="0" value="20" max="100">
-          <span id="elite-count-value">20%</span>
+          <label for="elite-rate">Elite rate:</label>
+          <input type="range" id="elite-rate" min="0" value="20" max="100">
+          <span id="elite-rate-value">20%</span>
         </div>
 
         <div class="param-group">
@@ -206,14 +206,13 @@
         let nbGenerations = params.generationCount;
         let crossoverRate = params.crossoverRate / 100.;
         let mutationRate = params.mutationRate / 100.;
-        let eliteCount = params.eliteCount / 100.;
+        let eliteRate = params.eliteRate / 100.;
 
-        console.log(`Calling WASM function 'run_simulation' with ${populationSize} population size, ${nbGenerations} generations, ${crossoverRate} crossover rate, ${mutationRate} mutation rate, ${eliteCount} elite count...`);
+        console.log(`Calling WASM function 'run_simulation' with ${populationSize} population size, ${nbGenerations} generations, ${crossoverRate} crossover rate, ${mutationRate} mutation rate, ${eliteRate} elite rate...`);
 
         // Call the run_simulation function which returns array of SVG strings
         // Pass both required parameters to the run_simulation function
-        eliteCount = Math.floor(populationSize * eliteCount);
-        svgData = run_simulation(populationSize, nbGenerations, crossoverRate, mutationRate, eliteCount);
+        svgData = run_simulation(populationSize, nbGenerations, crossoverRate, mutationRate, eliteRate);
 
         // Update the viewer with the new SVG data
         if (Array.isArray(svgData) && svgData.length > 0) {
@@ -256,7 +255,7 @@
       let mutationRateValue = document.getElementById('mutation-rate-value');
       let runGaButton = document.getElementById('run-ga');
       let populationSizeInput = document.getElementById('population-size');
-      let eliteCountInput = document.getElementById('elite-count');
+      let eliteRateInput = document.getElementById('elite-rate');
 
       // Hide the seek input as a progress bar since we don't have a dedicated progress element
       const seek = document.getElementById('seek');
@@ -494,22 +493,6 @@
       window.addEventListener('load', checkScreenSize);
       window.addEventListener('resize', checkScreenSize);
 
-      // Function to update elite count max based on population size
-      function updateEliteCountMax() {
-        const currentPopulationSize = parseInt(populationSizeInput.value);
-        eliteCountInput.max = currentPopulationSize;
-        // Also adjust elite count value if it exceeds the new max
-        if (parseInt(eliteCountInput.value) > currentPopulationSize) {
-          eliteCountInput.value = currentPopulationSize;
-        }
-      }
-
-      // Initial setup
-      updateEliteCountMax();
-
-      // Update max when population size changes
-      populationSizeInput.addEventListener('input', updateEliteCountMax);
-
       crossoverRateInput.addEventListener('input', () => {
         crossoverRateValue.textContent = `${crossoverRateInput.value}%`;
       });
@@ -518,19 +501,13 @@
         mutationRateValue.textContent = `${mutationRateInput.value}%`;
       });
 
-      eliteCountInput.addEventListener('input', () => {
-        document.getElementById('elite-count-value').textContent = `${eliteCountInput.value}%`;
+      eliteRateInput.addEventListener('input', () => {
+        document.getElementById('elite-rate-value').textContent = `${eliteRateInput.value}%`;
       });
 
       runGaButton.addEventListener('click', () => {
         const populationSize = parseInt(populationSizeInput.value);
-        const eliteCount = parseInt(eliteCountInput.value);
-
-        // Validate elite count against population size before running
-        if (eliteCount > populationSize) {
-          alert(`Elite count (${eliteCount}) cannot be greater than Population Size (${populationSize}). Please adjust the values.`);
-          return; // Stop execution if validation fails
-        }
+        const eliteRate = parseInt(eliteRateInput.value);
 
         // Hide dashboard if screen is small
         if (window.innerWidth <= 1300) {
@@ -542,7 +519,7 @@
         const params = {
           populationSize: populationSize, // Use the already parsed value
           generationCount: parseInt(document.getElementById('generation-count').value),
-          eliteCount: eliteCount, // Use the already parsed value
+          eliteRate: eliteRate, // Use the already parsed value
           selectionMode: document.getElementById('selection-mode').value,
           crossoverRate: parseInt(crossoverRateInput.value),
           mutationRate: parseInt(mutationRateInput.value)
