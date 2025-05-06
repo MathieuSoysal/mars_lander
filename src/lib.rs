@@ -77,11 +77,12 @@ pub fn run_simulation(
     let mut new_population = population.clone();
 
     let mut first_ok = -1;
+    let elite_count = (params.elite_rate * params.pop_size as f64).floor() as usize;
     for generation in 0..params.nb_generations {
         let found_solution = elitiste_new_population(
             &mut population,
             &mut new_population,
-            (params.elite_rate * params.pop_size as f64).floor() as usize, // TODO Check
+            elite_count,
             params.crossover_rate,
         );
 

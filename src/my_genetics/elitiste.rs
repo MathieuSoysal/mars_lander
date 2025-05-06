@@ -1,4 +1,5 @@
 use crate::genetics::pheno::Phenotype;
+use itertools::Itertools;
 use rand::prelude::*;
 
 const WINNING_FITNESS: i32 = 7000 * 500 + 90 * 500 + 90 * 500 + 90 * 500;
@@ -15,9 +16,11 @@ where
 {
     let mut rng = thread_rng();
 
-    let mut indices: Vec<usize> = (0..population.len()).collect();
+    let n = population.len();
     // Need to sort using mutable references
-    indices.sort_by_key(|&i| -population[i].fitness());
+    let indices: Vec<usize> = (0..n)
+        .sorted_by_key(|&i| -population[i].fitness())
+        .collect();
 
     let solved = population[indices[0]].fitness() >= WINNING_FITNESS;
 
@@ -30,32 +33,25 @@ where
         *dst = population[src_idx].clone();
     }
 
-    let n = population.len();
+    let upper_bound = if elite_count == 0 { n } else { elite_count };
 
     // helper: tournament select one parent
-    let mut tournament = |rng: &mut ThreadRng| -> T {
+    let tournament = |rng: &mut ThreadRng| -> usize {
         const TOUR_SIZE: usize = 5;
-        let mut best_idx = indices[rng.gen_range(0..elite_count)];
-        let mut best_fitness = population[best_idx].fitness();
-
-        for _ in 1..TOUR_SIZE {
-            let contender_idx = indices[rng.gen_range(0..elite_count)];
-            let contender_fitness = population[contender_idx].fitness();
-
-            if contender_fitness > best_fitness {
-                best_idx = contender_idx;
-                best_fitness = contender_fitness;
-            }
-        }
-        population[best_idx].clone()
+        indices[(0..TOUR_SIZE)
+            .map(|_| rng.gen_range(0..upper_bound))
+            .min()
+            .unwrap()]
     };
 
     // 2) fill out the rest
     for i in elite_count..n {
-        let p1 = tournament(&mut rng);
+        let p1_idx = tournament(&mut rng);
+        let p1 = &population[p1_idx];
         if rng.gen_bool(crossover_rate) {
-            let p2 = tournament(&mut rng);
-            new_population[i] = p1.crossover(&p2).mutate();
+            let p2_idx = tournament(&mut rng);
+            let p2 = &population[p2_idx];
+            new_population[i] = p1.crossover(p2).mutate();
         } else {
             new_population[i] = p1.mutate();
         }
