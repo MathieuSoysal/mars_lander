@@ -37,6 +37,62 @@ function isLikeNone(x) {
     return x === undefined || x === null;
 }
 
+let WASM_VECTOR_LEN = 0;
+
+const cachedTextEncoder = (typeof TextEncoder !== 'undefined' ? new TextEncoder('utf-8') : { encode: () => { throw Error('TextEncoder not available') } } );
+
+const encodeString = (typeof cachedTextEncoder.encodeInto === 'function'
+    ? function (arg, view) {
+    return cachedTextEncoder.encodeInto(arg, view);
+}
+    : function (arg, view) {
+    const buf = cachedTextEncoder.encode(arg);
+    view.set(buf);
+    return {
+        read: arg.length,
+        written: buf.length
+    };
+});
+
+function passStringToWasm0(arg, malloc, realloc) {
+
+    if (realloc === undefined) {
+        const buf = cachedTextEncoder.encode(arg);
+        const ptr = malloc(buf.length, 1) >>> 0;
+        getUint8ArrayMemory0().subarray(ptr, ptr + buf.length).set(buf);
+        WASM_VECTOR_LEN = buf.length;
+        return ptr;
+    }
+
+    let len = arg.length;
+    let ptr = malloc(len, 1) >>> 0;
+
+    const mem = getUint8ArrayMemory0();
+
+    let offset = 0;
+
+    for (; offset < len; offset++) {
+        const code = arg.charCodeAt(offset);
+        if (code > 0x7F) break;
+        mem[ptr + offset] = code;
+    }
+
+    if (offset !== len) {
+        if (offset !== 0) {
+            arg = arg.slice(offset);
+        }
+        ptr = realloc(ptr, len, len = offset + arg.length * 3, 1) >>> 0;
+        const view = getUint8ArrayMemory0().subarray(ptr + offset, ptr + len);
+        const ret = encodeString(arg, view);
+
+        offset += ret.written;
+        ptr = realloc(ptr, len, offset, 1) >>> 0;
+    }
+
+    WASM_VECTOR_LEN = offset;
+    return ptr;
+}
+
 let cachedDataViewMemory0 = null;
 
 function getDataViewMemory0() {
@@ -57,6 +113,7 @@ function getArrayJsValueFromWasm0(ptr, len) {
     return result;
 }
 /**
+ * @param {string} map
  * @param {number} pop_size
  * @param {number} nb_generations
  * @param {number} crossover_rate
@@ -64,11 +121,13 @@ function getArrayJsValueFromWasm0(ptr, len) {
  * @param {number} elite_rate
  * @returns {string[]}
  */
-export function run_simulation(pop_size, nb_generations, crossover_rate, mutation_rate, elite_rate) {
-    const ret = wasm.run_simulation(pop_size, nb_generations, crossover_rate, mutation_rate, elite_rate);
-    var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+export function run_simulation(map, pop_size, nb_generations, crossover_rate, mutation_rate, elite_rate) {
+    const ptr0 = passStringToWasm0(map, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.run_simulation(ptr0, len0, pop_size, nb_generations, crossover_rate, mutation_rate, elite_rate);
+    var v2 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
-    return v1;
+    return v2;
 }
 
 const SimulationParamsFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -201,17 +260,17 @@ function __wbg_get_imports() {
         const ret = arg0.call(arg1, arg2);
         return ret;
     }, arguments) };
-    imports.wbg.__wbg_crypto_574e78ad8b13b65f = function(arg0) {
+    imports.wbg.__wbg_crypto_ed58b8e10a292839 = function(arg0) {
         const ret = arg0.crypto;
         return ret;
     };
-    imports.wbg.__wbg_getRandomValues_b8f5dbd5f3995a9e = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_getRandomValues_bcb4912f16000dc4 = function() { return handleError(function (arg0, arg1) {
         arg0.getRandomValues(arg1);
     }, arguments) };
     imports.wbg.__wbg_log_0a3953f5f89e18b5 = function(arg0, arg1) {
         console.log(getStringFromWasm0(arg0, arg1));
     };
-    imports.wbg.__wbg_msCrypto_a61aeb35a24c1329 = function(arg0) {
+    imports.wbg.__wbg_msCrypto_0a36e2ec3a343d26 = function(arg0) {
         const ret = arg0.msCrypto;
         return ret;
     };
@@ -231,18 +290,18 @@ function __wbg_get_imports() {
         const ret = new Uint8Array(arg0 >>> 0);
         return ret;
     };
-    imports.wbg.__wbg_node_905d3e251edff8a2 = function(arg0) {
+    imports.wbg.__wbg_node_02999533c4ea02e3 = function(arg0) {
         const ret = arg0.node;
         return ret;
     };
-    imports.wbg.__wbg_process_dc0fbacc7c1c06f7 = function(arg0) {
+    imports.wbg.__wbg_process_5c1d670bc53614b8 = function(arg0) {
         const ret = arg0.process;
         return ret;
     };
-    imports.wbg.__wbg_randomFillSync_ac0988aba3254290 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_randomFillSync_ab2cfe79ebbf2740 = function() { return handleError(function (arg0, arg1) {
         arg0.randomFillSync(arg1);
     }, arguments) };
-    imports.wbg.__wbg_require_60cc747a6bc5215a = function() { return handleError(function () {
+    imports.wbg.__wbg_require_79b1e9274cde3c87 = function() { return handleError(function () {
         const ret = module.require;
         return ret;
     }, arguments) };
@@ -269,7 +328,7 @@ function __wbg_get_imports() {
         const ret = arg0.subarray(arg1 >>> 0, arg2 >>> 0);
         return ret;
     };
-    imports.wbg.__wbg_versions_c01dfd4722a88165 = function(arg0) {
+    imports.wbg.__wbg_versions_c71aa1626a93e0a1 = function(arg0) {
         const ret = arg0.versions;
         return ret;
     };

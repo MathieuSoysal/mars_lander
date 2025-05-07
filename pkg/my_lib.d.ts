@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-export function run_simulation(pop_size: number, nb_generations: number, crossover_rate: number, mutation_rate: number, elite_rate: number): string[];
+export function run_simulation(map: string, pop_size: number, nb_generations: number, crossover_rate: number, mutation_rate: number, elite_rate: number): string[];
 export class SimulationParams {
   private constructor();
   free(): void;
@@ -26,10 +26,12 @@ export interface InitOutput {
   readonly __wbg_set_simulationparams_mutation_rate: (a: number, b: number) => void;
   readonly __wbg_get_simulationparams_elite_rate: (a: number) => number;
   readonly __wbg_set_simulationparams_elite_rate: (a: number, b: number) => void;
-  readonly run_simulation: (a: number, b: number, c: number, d: number, e: number) => [number, number];
+  readonly run_simulation: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
   readonly __wbindgen_exn_store: (a: number) => void;
   readonly __externref_table_alloc: () => number;
   readonly __wbindgen_export_2: WebAssembly.Table;
+  readonly __wbindgen_malloc: (a: number, b: number) => number;
+  readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __externref_drop_slice: (a: number, b: number) => void;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_start: () => void;

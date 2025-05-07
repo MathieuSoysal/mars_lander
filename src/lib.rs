@@ -22,6 +22,7 @@ extern "C" {
 
 #[wasm_bindgen]
 pub fn run_simulation(
+    map: &str,
     pop_size: usize,
     nb_generations: i32,
     crossover_rate: f64,
@@ -46,15 +47,7 @@ pub fn run_simulation(
     let mut game = Game::new(10);
     let starship = Starship::new(2500, 2700, 5500, 0, 0, 0., 0.);
 
-    let points = "
-        (0, 100)
-    (1000, 500)
-    (1500, 1500)
-    (3000, 1000)
-    (4000, 150)
-    (5500, 150)
-    (6999, 800)
-    ";
+    let points = map;
 
     let points = points.replace(|c: char| !c.is_ascii_digit(), " ");
     let points = points
