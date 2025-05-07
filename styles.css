@@ -320,6 +320,54 @@ h2 {
   font-weight: 500;
 }
 
+/* Info button styling */
+.info-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #0066cc;
+  color: white;
+  font-style: italic;
+  font-weight: bold;
+  border: none;
+  margin-left: 8px;
+  cursor: help;
+  box-shadow: 0 0 5px rgba(0, 102, 204, 0.5);
+  transition: all 0.2s ease;
+}
+
+.info-button:hover {
+  background-color: #0088ff;
+  box-shadow: 0 0 8px rgba(0, 136, 255, 0.7);
+  transform: scale(1.1);
+}
+
+/* Tooltip that appears when hovering over info button */
+.info-tooltip {
+  position: absolute;
+  background-color: rgba(10, 20, 40, 0.9);
+  color: #eee;
+  padding: 10px;
+  border-radius: 5px;
+  z-index: 100;
+  max-width: 250px;
+  box-shadow: 0 0 15px rgba(0, 136, 255, 0.5);
+  border: 1px solid rgba(0, 136, 255, 0.3);
+  font-size: 0.9rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.info-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .button-container {
   display: flex;
   gap: 15px;

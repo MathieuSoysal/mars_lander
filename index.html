@@ -119,19 +119,19 @@
         </div>
 
         <div class="param-group">
-          <label for="elite-rate">Elite rate:</label>
+          <label for="elite-rate">Elite rate: <button type="button" class="info-button" data-info="Percentage of best individuals that automatically survive to next generation unchanged">i</button></label>
           <input type="range" id="elite-rate" min="0" value="20" max="100">
           <span id="elite-rate-value">20%</span>
         </div>
 
         <div class="param-group">
-          <label for="crossover-rate">Crossover Rate:</label>
+          <label for="crossover-rate">Crossover Rate: <button type="button" class="info-button" data-info="Probability of genetic crossover between parents - controls how much genetic material is exchanged">i</button></label>
           <input type="range" id="crossover-rate" min="0" max="100" value="90">
           <span id="crossover-rate-value">90%</span>
         </div>
 
         <div class="param-group">
-          <label for="mutation-rate">Mutation Rate:</label>
+          <label for="mutation-rate">Mutation Rate: <button type="button" class="info-button" data-info="Probability of random mutations - higher values increase diversity but may disrupt good solutions">i</button></label>
           <input type="range" id="mutation-rate" min="0" max="100" value="10">
           <span id="mutation-rate-value">10%</span>
         </div>
@@ -147,7 +147,7 @@
     </div>
   </div>
 
-  <div class="seek-container">
+  <div class="seek-container"></div>
     <input type="range" id="seek" min="1" max="300" value="1" />
   </div>
 
@@ -557,6 +557,69 @@
 
       // Start preloading images
       window.addEventListener('load', preloadImages);
+
+      // Initialize info buttons with tooltips
+      function initializeInfoButtons() {
+        const infoButtons = document.querySelectorAll('.info-button');
+        let activeTooltip = null;
+
+        infoButtons.forEach(button => {
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove any existing tooltip
+            if (activeTooltip) {
+              document.body.removeChild(activeTooltip);
+              activeTooltip = null;
+            }
+            
+            // Create tooltip
+            const tooltip = document.createElement('div');
+            tooltip.className = 'info-tooltip';
+            tooltip.textContent = this.getAttribute('data-info');
+            document.body.appendChild(tooltip);
+            
+            // Position tooltip near the button
+            const buttonRect = this.getBoundingClientRect();
+            tooltip.style.left = `${buttonRect.left - (tooltip.offsetWidth / 2) + (buttonRect.width / 2)}px`;
+            tooltip.style.top = `${buttonRect.top - tooltip.offsetHeight - 10}px`;
+            
+            // Make tooltip visible
+            setTimeout(() => {
+              tooltip.classList.add('visible');
+            }, 10);
+            
+            activeTooltip = tooltip;
+            
+            // Hide tooltip when clicking elsewhere
+            function hideTooltip(e) {
+              if (activeTooltip && !button.contains(e.target)) {
+                activeTooltip.classList.remove('visible');
+                setTimeout(() => {
+                  if (activeTooltip && activeTooltip.parentNode) {
+                    document.body.removeChild(activeTooltip);
+                    activeTooltip = null;
+                  }
+                }, 300);
+                document.removeEventListener('click', hideTooltip);
+              }
+            }
+            
+            setTimeout(() => {
+              document.addEventListener('click', hideTooltip);
+            }, 10);
+          });
+        });
+      }
+
+      // Initialize all UI components
+      window.addEventListener('load', function() {
+        // Existing preloadImages call if present
+        preloadImages();
+        
+        // Initialize tooltips for info buttons
+        initializeInfoButtons();
+      });
     })();
   </script>
 </body>
