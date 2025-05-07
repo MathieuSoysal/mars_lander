@@ -1117,3 +1117,26 @@ h2 {
     width: 60px;
   }
 }
+
+/* Dashboard Section Styling */
+.dashboard-section {
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(77, 161, 255, 0.3);
+}
+
+.dashboard-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.dashboard-section h3 {
+  color: #4da1ff;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(77, 161, 255, 0.5);
+  position: relative;
+  display: inline-block;
+}
