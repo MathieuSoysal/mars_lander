@@ -3,9 +3,7 @@ use super::*;
 const MIN_SPEED: f32 = -500.;
 const MAX_SPEED: f32 = 500.;
 
-
 impl Starship {
-
     #[inline(always)]
     pub fn add_rotation(&mut self, rotation: i8) {
         let new_rotation = self.rotation + rotation;
@@ -53,15 +51,13 @@ impl Starship {
     }
 
     #[inline(always)]
-    pub fn add_power(&mut self, add_power: i32) {
+    pub fn add_power(&mut self, add_power: i16) {
         if add_power > 0 && self.power < MAX_POWER {
-            self.power += 1 as u8;
+            self.power += 1;
         } else if add_power < 0 && self.power > 0 {
-            self.power -= 1 as u8;
+            self.power -= 1;
         }
     }
-
-
 }
 
 #[cfg(test)]
@@ -75,7 +71,7 @@ mod tests {
         assert_eq!(starship.get_rotation(), 10);
         starship.add_rotation(-20);
         assert_eq!(starship.get_rotation(), -10);
-        starship.add_rotation(MAX_ROTATE +30);
+        starship.add_rotation(MAX_ROTATE + 30);
         assert_eq!(starship.get_rotation(), MAX_ROTATE);
     }
 
@@ -110,10 +106,10 @@ mod tests {
         starship.add_power(-5);
         assert_eq!(starship.get_power(), 0);
 
-        starship.add_power(MAX_POWER as i32 + 1);
+        starship.add_power(MAX_POWER as i16 + 1);
         assert_eq!(starship.get_power(), 1);
 
-        starship.add_power(0 as i32 - 1);
+        starship.add_power(0 as i16 - 1);
         assert_eq!(starship.get_power(), 0);
     }
 }

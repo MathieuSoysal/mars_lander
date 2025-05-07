@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::{genetics::pheno::Phenotype, params};
 
 use super::{
@@ -25,18 +27,12 @@ pub fn gen_init_rand() -> Genome {
 }
 
 pub fn gen_init_full() -> Genome {
-    let mut genome = [0; GENOME_SIZE];
-    for i in 0..GENOME_SIZE {
-        genome[i] = 2 << 2 | 2;
-    }
+    let genome = [2 << 2 | 2; GENOME_SIZE];
     genome
 }
 
 pub fn gen_init_semi_full() -> Genome {
-    let mut genome = [0; GENOME_SIZE];
-    for i in 0..GENOME_SIZE {
-        genome[i] = 2 << 2 | 1;
-    }
+    let genome = [2 << 2 | 1; GENOME_SIZE];
     genome
 }
 
@@ -95,7 +91,7 @@ impl<'a> DNA<'a> {
         for i in 0..GENOME_SIZE {
             let rotate = get_rotate_on_turn(&self.genome, i);
             let power = get_power_on_turn(&self.genome, i);
-            s.add_power(power as i32);
+            s.add_power(power as i16);
             s.add_rotation(rotate);
             s.apply_movement();
             str.push_str(&format!("{},{} ", s.get_x(), HEIGHT as i32 - s.get_y()));
@@ -126,38 +122,42 @@ impl<'a> Phenotype<i32> for DNA<'a> {
         if self.fitness != -1 {
             return self.fitness;
         }
+        self.fitness = 0;
         let mut s = self.starship.copy();
         for i in 0..GENOME_SIZE {
             let rotate = get_rotate_on_turn(&self.genome, i);
             let power = get_power_on_turn(&self.genome, i);
-            s.add_power(power as i32);
+            s.add_power(power as i16);
             s.add_rotation(rotate);
             s.apply_movement();
+
             if self.game.starship_is_landing(&s) {
                 self.fitness = 7000 *500 + 90 *500 + 90 *500 + 90 *500 + s.get_fuel() as i32 * 5000;
-                return self.fitness;
+                break;
             }
+
             if self.game.starship_is_crash(&s) {
-                if self.game.get_distance_to_landing(&s) == 0 {
+                let land_distance = self.game.get_distance_to_landing(&s);
+
+                if land_distance == 0 {
                     self.fitness = (7000 *500) + (90 - s.get_rotation().abs() as i32) * 500
-                    + (90 - s.get_x_speed().abs().min(90.).max(20.) as i32) * 500
-                    + (90 - s.get_y_speed().abs().min(90.).max(40.) as i32) * 500;
-                  
-                    return self.fitness;
+                    + (90 - s.get_x_speed().abs().clamp(20., 90.) as i32) * 500
+                    + (90 - s.get_y_speed().abs().clamp(40., 90.) as i32) * 500;
+                } else {
+                    self.fitness = (7000 - land_distance) * 500;
                 }
-                self.fitness = (7000 - self.game.get_distance_to_landing(&s)) * 500;
-                return self.fitness;
+
+                break;
             }
         }
-        self.fitness = 0;
-        0
+        self.fitness
     }
 
     fn mutate(&self) -> DNA<'a> {
         let mut mutated = *self;
         mutated.fitness = -1;
         for i in 0..GENOME_SIZE {
-            if rand::random::<f64>() <= params::get_params().mutation_rate {
+            if rand::thread_rng().gen_bool(params::get_params().mutation_rate) {
                 mutated.genome[i] = rand::random::<u8>();
             }
         }

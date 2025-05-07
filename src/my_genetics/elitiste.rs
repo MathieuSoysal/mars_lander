@@ -25,12 +25,8 @@ where
     let solved = population[indices[0]].fitness() >= WINNING_FITNESS;
 
     // 1) copy elites deterministically
-    for (dst, &src_idx) in new_population
-        .iter_mut()
-        .zip(indices.iter())
-        .take(elite_count)
-    {
-        *dst = population[src_idx].clone();
+    for i in 0..elite_count {
+        new_population[i] = population[i].clone();
     }
 
     let upper_bound = if elite_count == 0 { n } else { elite_count };

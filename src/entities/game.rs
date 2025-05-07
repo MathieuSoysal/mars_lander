@@ -51,9 +51,7 @@ impl Game {
 
     pub fn get_distance_to_landing(&self, starship: &Starship) -> i32 {
         let x = starship.get_x();
-        if x >= self.landing.start.x as i32
-            && x <= self.landing.end.x as i32
-        {
+        if x >= self.landing.start.x as i32 && x <= self.landing.end.x as i32 {
             return 0;
         }
         let d_start_x = (self.landing.start.x as i32 - x).abs();
@@ -71,10 +69,10 @@ impl Game {
         let is_on_landing = x as usize >= self.landing.start.x
             && x as usize <= self.landing.end.x
             && y as usize <= self.landing.start.y;
-        starship.get_x() < 0
+        x < 0
             || x > MAX_X
             || y > MAX_Y
-            || starship.get_y() < 0
+            || y < 0
             || self.crash_points[x as usize] >= y as u32
             || is_on_landing
     }
