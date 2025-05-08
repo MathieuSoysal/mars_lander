@@ -26,7 +26,7 @@ where
 
     // 1) copy elites deterministically
     for i in 0..elite_count {
-        new_population[i] = population[i].clone();
+        new_population[i] = population[indices[i]].clone();
     }
 
     let upper_bound = if elite_count == 0 { n } else { elite_count };
