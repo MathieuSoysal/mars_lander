@@ -1,757 +1,557 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mars Lander Viewer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-  <meta name="theme-color" content="#000824">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Lander Viewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <meta name="theme-color" content="#000824">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Mars Lander Viewer - A futuristic simulation environment for Mars landing missions.">
+    <meta name="keywords" content="Mars, Lander, Simulation, Genetic Algorithm, Space, Mission Control">
+    <meta name="author" content="Mathieu Soysal">
+    <meta name="robots" content="index, follow">
+    <meta name="revisit-after" content="1 days">
+    <meta http-equiv="Cache-Control" content="max-age=31536000, must-revalidate">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
 </head>
-
 <body>
-  <header>
-    <h1>Mars Lander Viewer</h1>
-  </header>
-
-  <div class="main-container">
-    <div class="viewer-container">
-      <div id="svg-container">
-        <div class="scanner-overlay"></div>
-        <div class="grid-overlay"></div>
-        <svg xmlns="http://www.w3.org/2000/svg" width="7000" height="3000" viewBox="0 0 7000 3000">
-          <!-- Starry background -->
-          <defs>
-            <radialGradient id="marsGlow" cx="50%" cy="100%" r="70%" fx="50%" fy="100%">
-              <stop offset="0%" stop-color="rgba(255, 60, 0, 0.2)" />
-              <stop offset="100%" stop-color="rgba(0, 0, 0, 0)" />
-            </radialGradient>
-
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-
-          <!-- Black background -->
-          <rect width="100%" height="100%" fill="black"></rect>
-
-          <!-- Mars atmospheric glow -->
-          <rect x="0" y="2500" width="7000" height="500" fill="url(#marsGlow)" opacity="0.7"></rect>
-
-          <!-- Surface terrain with enhanced visuals -->
-          <line x1="0" y1="1500" x2="1000" y2="1000" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
-          <line x1="1000" y1="1000" x2="2000" y2="2500" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
-          <line x1="3500" y1="2500" x2="5000" y2="1500" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
-          <line x1="5000" y1="1500" x2="6999" y2="2000" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
-          <line x1="2000" y1="2500" x2="3500" y2="2500" stroke="#00ff9d" stroke-width="8" filter="url(#glow)">
-            <title>Landing Zone</title>
-            <animate attributeName="stroke-opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" />
-          </line>
-
-          <g>
-            <!-- SVG content for Mars Lander simulation -->
-          </g>
-        </svg>
-      </div>
-
-      <!-- Fixed player controls -->
-      <div class="player-controls">
-        <button id="prev" class="player-button"><span>⏮</span></button>
-        <button id="play-pause" class="player-button">
-          <span class="play-icon">▶</span>
-          <span class="pause-icon hidden">⏸</span>
+    <header>
+        <h1>Mars Lander Viewer</h1>
+    </header>
+    <div class="main-container">
+        <div class="viewer-container">
+            <div id="svg-container">
+                <div class="scanner-overlay"></div>
+                <div class="grid-overlay"></div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="7000" height="3000" viewBox="0 0 7000 3000">
+                    <defs>
+                        <radialGradient id="marsGlow" cx="50%" cy="100%" r="70%" fx="50%" fy="100%">
+                            <stop offset="0%" stop-color="rgba(255, 60, 0, 0.2)" />
+                            <stop offset="100%" stop-color="rgba(0, 0, 0, 0)" />
+                        </radialGradient>
+                        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="2" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                    </defs>
+                    <rect width="100%" height="100%" fill="black"></rect>
+                    <rect x="0" y="2500" width="7000" height="500" fill="url(#marsGlow)" opacity="0.7"></rect>
+                    <line x1="0" y1="1500" x2="1000" y2="1000" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
+                    <line x1="1000" y1="1000" x2="2000" y2="2500" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
+                    <line x1="3500" y1="2500" x2="5000" y2="1500" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
+                    <line x1="5000" y1="1500" x2="6999" y2="2000" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
+                    <line x1="2000" y1="2500" x2="3500" y2="2500" stroke="#00ff9d" stroke-width="8" filter="url(#glow)">
+                        <title>Landing Zone</title>
+                        <animate attributeName="stroke-opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" />
+                    </line>
+                    <g></g>
+                </svg>
+            </div>
+            <div class="player-controls">
+                <button id="prev" class="player-button"><span>⏮</span></button>
+                <button id="play-pause" class="player-button"><span class="play-icon">▶</span><span class="pause-icon hidden">⏸</span></button>
+                <button id="next" class="player-button"><span>⏭</span></button>
+                <div class="speed-control-compact">
+                    <span class="speed-label">Speed</span>
+                    <input type="range" id="speed-compact" min="1" max="10" value="10" class="speed-slider">
+                    <span id="speed-value">10x</span>
+                </div>
+                <div class="mini-progress-container">
+                    <div class="mini-progress-bar">
+                        <div id="mini-progress" class="mini-progress-fill"></div>
+                    </div>
+                    <span id="progress-text">0%</span>
+                </div>
+            </div>
+            <div id="counter">1 / 300</div>
+            <div id="loader" class="loader hidden"></div>
+        </div>
+        <button id="dashboard-toggle" class="dashboard-toggle hidden">
+            <span class="open-icon">⚙️</span>
+            <span class="close-icon hidden">✕</span>
         </button>
-        <button id="next" class="player-button"><span>⏭</span></button>
-
-        <!-- Speed control -->
-        <div class="speed-control-compact">
-          <span class="speed-label">Speed</span>
-          <input type="range" id="speed-compact" min="1" max="10" value="10" class="speed-slider">
-          <span id="speed-value">10x</span>
+        <div class="dashboard futuristic">
+            <div class="dashboard-header">
+                <h2>Mission Control</h2>
+                <div class="glow-line"></div>
+            </div>
+            <div class="dashboard-section">
+                <h3>Simulation Environment</h3>
+                <div class="param-group">
+                    <label for="map-selection">Map Selection: <button type="button" class="info-button" data-info="Choose from different terrain configurations for the simulation">i</button></label>
+                    <select id="map-selection">
+                        <option value="default">Default Map</option>
+                        <option value="canyon">Deep Canyon</option>
+                        <option value="mountain">Mountain Range</option>
+                        <option value="plateau">High Plateau</option>
+                        <option value="valley">Narrow Valley</option>
+                    </select>
+                </div>
+            </div>
+            <div class="dashboard-section">
+                <h3>Genetic Algorithm Configuration</h3>
+                <form id="ga-params">
+                    <div class="param-group">
+                        <label for="population-size">Population Size:</label>
+                        <input type="number" id="population-size" min="10" max="1000" value="100">
+                    </div>
+                    <div class="param-group">
+                        <label for="generation-count">Number of Generations:</label>
+                        <input type="number" id="generation-count" min="1" max="1000" value="200">
+                    </div>
+                    <div class="param-group">
+                        <label for="selection-mode">Selection Mode:</label>
+                        <select id="selection-mode">
+                            <option value="tournament">Tournament</option>
+                            <option value="roulette">Roulette Wheel</option>
+                            <option value="rank">Rank-based</option>
+                        </select>
+                    </div>
+                    <div class="param-group">
+                        <label for="elite-rate">Elite rate: <button type="button" class="info-button" data-info="Percentage of best individuals that automatically survive to next generation unchanged">i</button></label>
+                        <input type="range" id="elite-rate" min="0" value="20" max="100">
+                        <span id="elite-rate-value">20%</span>
+                    </div>
+                    <div class="param-group">
+                        <label for="crossover-rate">Crossover Rate: <button type="button" class="info-button" data-info="Probability of genetic crossover between parents - controls how much genetic material is exchanged">i</button></label>
+                        <input type="range" id="crossover-rate" min="0" max="100" value="90">
+                        <span id="crossover-rate-value">90%</span>
+                    </div>
+                    <div class="param-group">
+                        <label for="mutation-rate">Mutation Rate: <button type="button" class="info-button" data-info="Probability of random mutations - higher values increase diversity but may disrupt good solutions">i</button></label>
+                        <input type="range" id="mutation-rate" min="0" max="100" value="10">
+                        <span id="mutation-rate-value">10%</span>
+                    </div>
+                    <div class="button-container">
+                        <button type="button" id="run-ga" class="primary-button">
+                            <span class="button-text">Run Algorithm</span>
+                            <span class="button-glow"></span>
+                            <span class="holographic-scan"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <!-- Mini progress indicator -->
-        <div class="mini-progress-container">
-          <div class="mini-progress-bar">
-            <div id="mini-progress" class="mini-progress-fill"></div>
-          </div>
-          <span id="progress-text">0%</span>
-        </div>
-      </div>
-
-      <div id="counter">1 / 300</div>
-      <div id="loader" class="loader hidden"></div>
+        <div class="seek-container"></div>
+        <input type="range" id="seek" min="1" max="300" value="1" />
     </div>
-
-    <!-- Add dashboard toggle button for small screens -->
-    <button id="dashboard-toggle" class="dashboard-toggle hidden">
-      <span class="open-icon">⚙️</span>
-      <span class="close-icon hidden">✕</span>
-    </button>
-
-    <div class="dashboard futuristic">
-      <div class="dashboard-header">
-        <h2>Mission Control</h2>
-        <div class="glow-line"></div>
-      </div>
-      
-      <!-- Add Simulation Environment section -->
-      <div class="dashboard-section">
-        <h3>Simulation Environment</h3>
-        <div class="param-group">
-          <label for="map-selection">Map Selection: <button type="button" class="info-button" data-info="Choose from different terrain configurations for the simulation">i</button></label>
-          <select id="map-selection">
-            <option value="default">Default Map</option>
-            <option value="canyon">Deep Canyon</option>
-            <option value="mountain">Mountain Range</option>
-            <option value="plateau">High Plateau</option>
-            <option value="valley">Narrow Valley</option>
-          </select>
-        </div>
-      </div>
-      
-      <!-- Genetic Algorithm Configuration section -->
-      <div class="dashboard-section">
-        <h3>Genetic Algorithm Configuration</h3>
-        <form id="ga-params">
-          <div class="param-group">
-            <label for="population-size">Population Size:</label>
-            <input type="number" id="population-size" min="10" max="1000" value="100">
-          </div>
-
-          <div class="param-group">
-            <label for="generation-count">Number of Generations:</label>
-            <input type="number" id="generation-count" min="1" max="1000" value="200">
-          </div>
-
-          <div class="param-group">
-            <label for="selection-mode">Selection Mode:</label>
-            <select id="selection-mode">
-              <option value="tournament">Tournament</option>
-              <option value="roulette">Roulette Wheel</option>
-              <option value="rank">Rank-based</option>
-            </select>
-          </div>
-
-          <div class="param-group">
-            <label for="elite-rate">Elite rate: <button type="button" class="info-button" data-info="Percentage of best individuals that automatically survive to next generation unchanged">i</button></label>
-            <input type="range" id="elite-rate" min="0" value="20" max="100">
-            <span id="elite-rate-value">20%</span>
-          </div>
-
-          <div class="param-group">
-            <label for="crossover-rate">Crossover Rate: <button type="button" class="info-button" data-info="Probability of genetic crossover between parents - controls how much genetic material is exchanged">i</button></label>
-            <input type="range" id="crossover-rate" min="0" max="100" value="90">
-            <span id="crossover-rate-value">90%</span>
-          </div>
-
-          <div class="param-group">
-            <label for="mutation-rate">Mutation Rate: <button type="button" class="info-button" data-info="Probability of random mutations - higher values increase diversity but may disrupt good solutions">i</button></label>
-            <input type="range" id="mutation-rate" min="0" max="100" value="10">
-            <span id="mutation-rate-value">10%</span>
-          </div>
-
-          <div class="button-container">
-            <button type="button" id="run-ga" class="primary-button">
-              <span class="button-text">Run Algorithm</span>
-              <span class="button-glow"></span>
-              <span class="holographic-scan"></span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div class="seek-container"></div>
-    <input type="range" id="seek" min="1" max="300" value="1" />
-  </div>
-
-  <script type="module">
-    import init, { run_simulation } from "./pkg/my_lib.js";
-
-    // Global reference to store SVG data
-    let svgData = [];
-    let wasmReady = false;
-    
-    // Predefined map configurations
-    const predefinedMaps = {
-      default: `
-    (0, 100)
-    (1000, 500)
-    (1500, 1500)
-    (3000, 1000)
-    (4000, 150)
-    (5500, 150)
-    (6999, 800)
-      `,
-      canyon: `
-    (0, 1000) 
-    (1000, 2000) 
-    (2000, 200) 
-    (3000, 200) 
-    (4000, 2000) 
-    (5000, 1500) 
-    (6999, 1000)
-      `,
-      mountain: `
-    (0, 500) 
-    (1000, 800) 
-    (2000, 1800) 
-    (3000, 2500) 
-    (4000, 1800) 
-    (5000, 800) 
-    (6999, 600)
-      `,
-      plateau: `
-    (0, 1500) 
-    (1500, 1500) 
-    (2000, 2200) 
-    (4500, 2200) 
-    (5000, 1500) 
-    (6999, 1000)
-      `,
-      valley: `
-    (0, 2000) 
-    (1000, 2000) 
-    (2000, 500) 
-    (3500, 500) 
-    (5000, 2000) 
-    (6999, 2000)
-      `
-    };
-
-    async function run() {
-      try {
-        await init(); // Load and initialize WebAssembly module
-        wasmReady = true;
-        console.log("WASM module initialized successfully");
-      } catch (error) {
-        console.error("Failed to initialize WASM module:", error);
-        document.getElementById('error-message').innerText = `WASM initialization error: ${error.message}`;
-      }
-    }
-
-    // Start loading WASM module
-    run();
-
-    // Function to clean SVG string by unescaping quotes and newlines
-    function cleanSvgString(svgString) {
-      // First check if the string is wrapped in quotes
-      let cleaned = svgString;
-
-      // Remove surrounding quotes if present
-      if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
-        cleaned = cleaned.substring(1, cleaned.length - 1);
-      }
-
-      // Replace escaped quotes with actual quotes
-      cleaned = cleaned.replace(/\\"/g, '"');
-
-      // Remove newline characters completely (they're just formatting)
-      cleaned = cleaned.replace(/\\n/g, '');
-
-      return cleaned;
-    }
-
-    // Function to run Mars Lander simulation with genetic algorithm parameters
-    window.runMarsLanderSimulation = (params) => {
-      if (!wasmReady) {
-        const error = "WASM module not ready yet. Please wait for initialization to complete.";
-        console.error(error);
-        document.getElementById('error-message').innerText = error;
-        return false;
-      }
-
-      try {
-        // Get the number of generations and crossover rate from params
-        let populationSize = params.populationSize;
-        let nbGenerations = params.generationCount;
-        let crossoverRate = params.crossoverRate / 100.;
-        let mutationRate = params.mutationRate / 100.;
-        let eliteRate = params.eliteRate / 100.;
-
-        // Get the selected map from predefined maps
-        let map = predefinedMaps[params.mapSelection] || predefinedMaps.default;
-
-        console.log(`Calling WASM function 'run_simulation' with ${populationSize} population size, ${nbGenerations} generations, ${crossoverRate} crossover rate, ${mutationRate} mutation rate, ${eliteRate} elite rate, using map: ${params.mapSelection}`);
-
-        // Call the run_simulation function which returns array of SVG strings
-        // Pass both required parameters to the run_simulation function
-        svgData = run_simulation(map, populationSize, nbGenerations, crossoverRate, mutationRate, eliteRate);
-
-        // Update the viewer with the new SVG data
-        if (Array.isArray(svgData) && svgData.length > 0) {
-          console.log(`Received ${svgData.length} SVG frames from simulation`);
-
-          // Clean SVG strings (unescape quotes and remove newlines)
-          svgData = svgData.map(cleanSvgString);
-
-          // Update the progress and seek inputs to match the new number of frames
-          const total = svgData.length;
-          document.getElementById('seek').max = total;
-          document.getElementById('counter').textContent = `1 / ${total}`;
-
-          // Insert the first SVG content directly into the container
-          document.getElementById('svg-container').innerHTML = svgData[0];
-
-          // Set SVG data globally for dynamic usage
-          window.setSvgData(svgData);
-
-          return true;
-        } else {
-          const error = "No valid SVG data received from simulation. Check WASM function output.";
-          console.error(error);
-          document.getElementById('error-message').innerText = error;
-          return false;
-        }
-      } catch (error) {
-        console.error("Error running Mars Lander simulation:", error);
-        document.getElementById('error-message').innerText = `Simulation error: ${error.message}`;
-        return false;
-      }
-    };
-  </script>
-
-  <script>
-    (function () {
-      let crossoverRateInput = document.getElementById('crossover-rate');
-      let crossoverRateValue = document.getElementById('crossover-rate-value');
-      let mutationRateInput = document.getElementById('mutation-rate');
-      let mutationRateValue = document.getElementById('mutation-rate-value');
-      let runGaButton = document.getElementById('run-ga');
-      let populationSizeInput = document.getElementById('population-size');
-      let eliteRateInput = document.getElementById('elite-rate');
-
-      // Hide the seek input as a progress bar since we don't have a dedicated progress element
-      const seek = document.getElementById('seek');
-      const loader = document.getElementById('loader');
-      const svgContainer = document.getElementById('svg-container');
-      const prev = document.getElementById('prev');
-      const next = document.getElementById('next');
-      const playPauseBtn = document.getElementById('play-pause');
-      const counter = document.getElementById('counter');
-      const speedControl = document.getElementById('speed-compact');
-      const speedValue = document.getElementById('speed-value');
-      const miniProgress = document.getElementById('mini-progress');
-      const progressText = document.getElementById('progress-text');
-      let total = 0; // Default value, will be updated with actual SVG count
-      let current = 0;
-      let autoScrollInterval = null;
-      let preloadedImages = [];
-      let isAutoScrolling = false;
-      let svgDataFromWasm = []; // Store SVG data from WASM
-
-      // Précharger toutes les images
-      function preloadImages() {
-        loader.classList.remove('hidden');
-        let loadedCount = 0;
-
-        // If we have SVG data from WASM, use that instead of loading from files
-        if (svgDataFromWasm.length > 0) {
-          total = svgDataFromWasm.length;
-
-          // Update UI elements to match new total
-          seek.max = total;
-          counter.textContent = `1 / ${total}`;
-
-          // No need for preloading when we have SVG strings directly
-          loader.classList.add('hidden');
-          show(0, true);
-          return;
-        }
-
-        // If no WASM data, load from files as before
-        for (let i = 0; i < total; i++) {
-          // Create a new XMLHttpRequest to fetch the SVG file
-          const xhr = new XMLHttpRequest();
-          xhr.open('GET', `all_svg/output${i}.svg`, true);
-          xhr.onload = () => {
-            if (xhr.status === 200) {
-              // Store the SVG content string
-              svgDataFromWasm[i] = xhr.responseText;
-
-              loadedCount++;
-              const percentLoaded = Math.floor((loadedCount / total) * 100);
-              // Update mini progress instead of non-existent progress element
-              updateMiniProgress(percentLoaded);
-
-              if (loadedCount === total) {
-                loader.classList.add('hidden');
-                show(0, true);
-              }
-            }
-          };
-          xhr.send();
-        }
-      }
-
-      // Update mini progress display
-      function updateMiniProgress(percent) {
-        if (miniProgress) {
-          miniProgress.style.width = `${percent}%`;
-        }
-        if (progressText) {
-          progressText.textContent = `${percent}%`;
-        }
-      }
-
-      function show(n, skipPreloadCheck = false) {
-        if (!skipPreloadCheck && svgDataFromWasm.length === 0) return;
-
-        current = (n + total) % total;
-        counter.textContent = `${current + 1} / ${total}`;
-
-        if (seek) seek.value = current + 1;
-
-        // Update mini progress
-        const percentComplete = Math.floor(((current + 1) / total) * 100);
-        updateMiniProgress(percentComplete);
-
-        // Insert SVG content directly into the DOM
-        if (svgDataFromWasm[current]) {
-          // Use the cleaned SVG string
-          svgContainer.innerHTML = svgDataFromWasm[current];
-        } else {
-          // Fallback to show an error or placeholder
-          svgContainer.innerHTML = '<div class="error-placeholder">SVG data not available</div>';
-        }
-      }
-
-      // Global function to set SVG data from WASM
-      window.setSvgData = (data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          svgDataFromWasm = data;
-          total = data.length;
-
-          // Update UI elements
-          if (seek) seek.max = total;
-          counter.textContent = `1 / ${total}`;
-
-          // Preload the new images
-          preloadImages();
-
-          return true;
-        }
-        return false;
-      };
-
-      function toggleAutoScroll() {
-        // If we're at the last frame and trying to play, reset to the first frame
-        if (!isAutoScrolling && current >= total - 1) {
-          show(0);
-        }
-
-        isAutoScrolling ? stopAutoScroll() : startAutoScroll();
-
-        // Update play/pause button to match state
-        if (isAutoScrolling) {
-          playPauseBtn.querySelector('.play-icon').classList.add('hidden');
-          playPauseBtn.querySelector('.pause-icon').classList.remove('hidden');
-        } else {
-          playPauseBtn.querySelector('.play-icon').classList.remove('hidden');
-          playPauseBtn.querySelector('.pause-icon').classList.add('hidden');
-        }
-      }
-
-      function startAutoScroll() {
-        if (autoScrollInterval) clearInterval(autoScrollInterval);
-
-        isAutoScrolling = true;
-
-        // Update the player controls
-        playPauseBtn.querySelector('.play-icon').classList.add('hidden');
-        playPauseBtn.querySelector('.pause-icon').classList.remove('hidden');
-        playPauseBtn.classList.add('active');
-
-        const speed = 11 - speedControl.value;
-        autoScrollInterval = setInterval(() => {
-          // Check if we've reached the end
-          if (current >= total - 1) {
-            stopAutoScroll();
-            return;
-          }
-          show(current + 1);
-        }, speed * 100);
-      }
-
-      function stopAutoScroll() {
-        clearInterval(autoScrollInterval);
-        autoScrollInterval = null;
-        isAutoScrolling = false;
-
-        // Update the player controls
-        playPauseBtn.querySelector('.play-icon').classList.remove('hidden');
-        playPauseBtn.querySelector('.pause-icon').classList.add('hidden');
-        playPauseBtn.classList.remove('active');
-      }
-
-      // Event listeners
-      prev.addEventListener('click', () => {
-        stopAutoScroll();
-        show(current - 1);
-      });
-
-      next.addEventListener('click', () => {
-        stopAutoScroll();
-        show(current + 1);
-      });
-
-      playPauseBtn.addEventListener('click', toggleAutoScroll);
-
-      document.addEventListener('keydown', e => {
-        if (e.key === 'ArrowLeft') {
-          stopAutoScroll();
-          show(current - 1);
-        }
-        if (e.key === 'ArrowRight') {
-          stopAutoScroll();
-          show(current + 1);
-        }
-        if (e.key === ' ') {
-          toggleAutoScroll();
-          e.preventDefault();
-        }
-      });
-
-      seek.addEventListener('input', () => {
-        stopAutoScroll();
-        show(seek.value - 1);
-      });
-
-      // Update speed display when slider changes
-      speedControl.addEventListener('input', () => {
-        speedValue.textContent = `${speedControl.value}x`;
-        if (isAutoScrolling) startAutoScroll();
-      });
-
-      // Dashboard toggle functionality for responsive design
-      const dashboardToggle = document.getElementById('dashboard-toggle');
-      const dashboardElement = document.querySelector('.dashboard');
-
-      // Function to check screen size and show/hide toggle button
-      function checkScreenSize() {
-        if (window.innerWidth <= 1300) {
-          dashboardToggle.classList.remove('hidden');
-          // Make dashboard expanded by default on small screens
-          dashboardElement.classList.add('active');
-          // Update toggle button icons to show close icon by default
-          dashboardToggle.querySelector('.open-icon').classList.add('hidden');
-          dashboardToggle.querySelector('.close-icon').classList.remove('hidden');
-        } else {
-          dashboardToggle.classList.add('hidden');
-          // Make sure dashboard is visible when screen is large
-          dashboardElement.classList.remove('active');
-        }
-      }
-
-      // Toggle dashboard visibility
-      dashboardToggle.addEventListener('click', () => {
-        dashboardElement.classList.toggle('active');
-        const isActive = dashboardElement.classList.contains('active');
-
-        // Update toggle button icons
-        dashboardToggle.querySelector('.open-icon').classList.toggle('hidden', isActive);
-        dashboardToggle.querySelector('.close-icon').classList.toggle('hidden', !isActive);
-      });
-
-      // Check screen size on load and resize
-      window.addEventListener('load', checkScreenSize);
-      window.addEventListener('resize', checkScreenSize);
-
-      crossoverRateInput.addEventListener('input', () => {
-        crossoverRateValue.textContent = `${crossoverRateInput.value}%`;
-      });
-
-      mutationRateInput.addEventListener('input', () => {
-        mutationRateValue.textContent = `${mutationRateInput.value}%`;
-      });
-
-      eliteRateInput.addEventListener('input', () => {
-        document.getElementById('elite-rate-value').textContent = `${eliteRateInput.value}%`;
-      });
-
-      // Function to update the terrain visualization based on the selected map
-      function updateTerrainVisualization(mapSelection) {
-        const map = predefinedMaps[mapSelection] || predefinedMaps.default;
-        // Parse the map string to extract points
-        const points = map.replace(/[^0-9\s]/g, ' ')
-          .trim()
-          .split(/\s+/)
-          .map(s => parseInt(s))
-          .filter(n => !isNaN(n));
-        
-        // Create SVG elements for the terrain
-        let terrainSVG = '';
-        let landingZoneFound = false;
-        
-        // Create lines between points
-        for (let i = 0; i < points.length - 3; i += 2) {
-          const x1 = points[i];
-          const y1 = points[i+1];
-          const x2 = points[i+2];
-          const y2 = points[i+3];
-          
-          // Check if this segment is a flat one (potential landing zone)
-          const isLandingZone = y1 === y2;
-          
-          if (isLandingZone && !landingZoneFound) {
-            // This is likely the landing zone (flat segment)
-            terrainSVG += `<line x1="${x1}" y1="${3000-y1}" x2="${x2}" y2="${3000-y2}" 
-                           stroke="#00ff9d" stroke-width="8" filter="url(#glow)">
-                           <title>Landing Zone</title>
-                           <animate attributeName="stroke-opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" />
-                           </line>`;
-            landingZoneFound = true;
-          } else {
-            // Regular terrain segment
-            terrainSVG += `<line x1="${x1}" y1="${3000-y1}" x2="${x2}" y2="${3000-y2}" 
-                           stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>`;
-          }
-        }
-        
-        // Update the SVG container with new terrain
-        const svg = document.querySelector('#svg-container svg');
-        if (svg) {
-          // Clear existing terrain lines but keep the defs and background elements
-          const existingElements = svg.innerHTML.split('<g>')[0];
-          svg.innerHTML = existingElements + '<g>' + terrainSVG + '</g>';
-        }
-      }
-
-      // Add event listener for map selection change
-      document.getElementById('map-selection').addEventListener('change', function() {
-        updateTerrainVisualization(this.value);
-      });
-
-      // Initialize terrain visualization with default map
-      window.addEventListener('load', function() {
-        updateTerrainVisualization('default');
-      });
-
-      runGaButton.addEventListener('click', () => {
-        const populationSize = parseInt(populationSizeInput.value);
-        const eliteRate = parseInt(eliteRateInput.value);
-        const mapSelection = document.getElementById('map-selection').value;
-
-        // Hide dashboard if screen is small
-        if (window.innerWidth <= 1300) {
-          dashboardElement.classList.remove('active');
-          dashboardToggle.querySelector('.open-icon').classList.remove('hidden');
-          dashboardToggle.querySelector('.close-icon').classList.add('hidden');
-        }
-
-        const params = {
-          populationSize: populationSize,
-          generationCount: parseInt(document.getElementById('generation-count').value),
-          eliteRate: eliteRate,
-          selectionMode: document.getElementById('selection-mode').value,
-          crossoverRate: parseInt(crossoverRateInput.value),
-          mutationRate: parseInt(mutationRateInput.value),
-          mapSelection: mapSelection
+    <script type="module">
+        import init, { run_simulation } from "./pkg/my_lib.js";
+        let svgData = [];
+        let wasmReady = false;
+        const predefinedMaps = {
+            default: `(0, 100)(1000, 500)(1500, 1500)(3000, 1000)(4000, 150)(5500, 150)(6999, 800)`,
+            canyon: `(0, 1000)(1000, 2000)(2000, 200)(3000, 200)(4000, 2000)(5000, 1500)(6999, 1000)`,
+            mountain: `(0, 500)(1000, 800)(2000, 1800)(3000, 2500)(4000, 1800)(5000, 800)(6999, 600)`,
+            plateau: `(0, 1500)(1500, 1500)(2000, 2200)(4500, 2200)(5000, 1500)(6999, 1000)`,
+            valley: `(0, 2000)(1000, 2000)(2000, 500)(3500, 500)(5000, 2000)(6999, 2000)`
         };
 
-        console.log('Running genetic algorithm with parameters:', params);
-
-        // Add loading class to button for futuristic animation
-        runGaButton.classList.add('loading');
-
-        // Show loading indicator
-        loader.classList.remove('hidden');
-
-        // Call the WASM function through the wrapper
-        const success = window.runMarsLanderSimulation(params);
-
-        if (success) {
-          // Hide loading indicator when done
-          loader.classList.add('hidden');
-          // Remove loading class from button
-          runGaButton.classList.remove('loading');
-          runGaButton.disabled = false;
-          // Reset to the first frame and start auto-scrolling to show the simulation
-          current = 0;
-          show(0, true);
-          startAutoScroll();
-        } else {
-          loader.classList.add('hidden');
-          // Remove loading class from button
-          runGaButton.classList.remove('loading');
-          runGaButton.disabled = false;
-          alert('Failed to run the simulation. Check the console for more details.');
+        async function run() {
+            try {
+                await init();
+                wasmReady = true;
+                console.log("WASM module initialized successfully");
+            } catch (error) {
+                console.error("Failed to initialize WASM module:", error);
+                document.getElementById('error-message').innerText = `WASM initialization error: ${error.message}`;
+            }
         }
-      });
+        run();
 
-      // Start preloading images
-      window.addEventListener('load', preloadImages);
-
-      // Initialize info buttons with tooltips
-      function initializeInfoButtons() {
-        const infoButtons = document.querySelectorAll('.info-button');
-        let activeTooltip = null;
-
-        infoButtons.forEach(button => {
-          button.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Remove any existing tooltip
-            if (activeTooltip) {
-              document.body.removeChild(activeTooltip);
-              activeTooltip = null;
+        function cleanSvgString(svgString) {
+            let cleaned = svgString;
+            if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+                cleaned = cleaned.substring(1, cleaned.length - 1);
             }
-            
-            // Create tooltip
-            const tooltip = document.createElement('div');
-            tooltip.className = 'info-tooltip';
-            tooltip.textContent = this.getAttribute('data-info');
-            document.body.appendChild(tooltip);
-            
-            // Position tooltip near the button
-            const buttonRect = this.getBoundingClientRect();
-            tooltip.style.left = `${buttonRect.left - (tooltip.offsetWidth / 2) + (buttonRect.width / 2)}px`;
-            tooltip.style.top = `${buttonRect.top - tooltip.offsetHeight - 10}px`;
-            
-            // Make tooltip visible
-            setTimeout(() => {
-              tooltip.classList.add('visible');
-            }, 10);
-            
-            activeTooltip = tooltip;
-            
-            // Hide tooltip when clicking elsewhere
-            function hideTooltip(e) {
-              if (activeTooltip && !button.contains(e.target)) {
-                activeTooltip.classList.remove('visible');
-                setTimeout(() => {
-                  if (activeTooltip && activeTooltip.parentNode) {
-                    document.body.removeChild(activeTooltip);
-                    activeTooltip = null;
-                  }
-                }, 300);
-                document.removeEventListener('click', hideTooltip);
-              }
-            }
-            
-            setTimeout(() => {
-              document.addEventListener('click', hideTooltip);
-            }, 10);
-          });
-        });
-      }
+            cleaned = cleaned.replace(/\\"/g, '"');
+            cleaned = cleaned.replace(/\\n/g, '');
+            return cleaned;
+        }
 
-      // Initialize all UI components
-      window.addEventListener('load', function() {
-        // Existing preloadImages call if present
-        preloadImages();
-        
-        // Initialize tooltips for info buttons
-        initializeInfoButtons();
-      });
-    })();
-  </script>
+        window.runMarsLanderSimulation = (params) => {
+            if (!wasmReady) {
+                const error = "WASM module not ready yet. Please wait for initialization to complete.";
+                console.error(error);
+                document.getElementById('error-message').innerText = error;
+                return false;
+            }
+            try {
+                let populationSize = params.populationSize;
+                let nbGenerations = params.generationCount;
+                let crossoverRate = params.crossoverRate / 100.;
+                let mutationRate = params.mutationRate / 100.;
+                let eliteRate = params.eliteRate / 100.;
+                let map = predefinedMaps[params.mapSelection] || predefinedMaps.default;
+
+                console.log(`Calling WASM function 'run_simulation' with ${populationSize} population size, ${nbGenerations} generations, ${crossoverRate} crossover rate, ${mutationRate} mutation rate, ${eliteRate} elite rate, using map: ${params.mapSelection}`);
+
+                svgData = run_simulation(map, populationSize, nbGenerations, crossoverRate, mutationRate, eliteRate);
+
+                if (Array.isArray(svgData) && svgData.length > 0) {
+                    console.log(`Received ${svgData.length} SVG frames from simulation`);
+                    svgData = svgData.map(cleanSvgString);
+                    const total = svgData.length;
+                    document.getElementById('seek').max = total;
+                    document.getElementById('counter').textContent = `1 / ${total}`;
+                    document.getElementById('svg-container').innerHTML = svgData[0];
+                    window.setSvgData(svgData);
+                    return true;
+                } else {
+                    const error = "No valid SVG data received from simulation. Check WASM function output.";
+                    console.error(error);
+                    document.getElementById('error-message').innerText = error;
+                    return false;
+                }
+            } catch (error) {
+                console.error("Error running Mars Lander simulation:", error);
+                document.getElementById('error-message').innerText = `Simulation error: ${error.message}`;
+                return false;
+            }
+        };
+    </script>
+    <script>
+        (function () {
+            let crossoverRateInput = document.getElementById('crossover-rate');
+            let crossoverRateValue = document.getElementById('crossover-rate-value');
+            let mutationRateInput = document.getElementById('mutation-rate');
+            let mutationRateValue = document.getElementById('mutation-rate-value');
+            let runGaButton = document.getElementById('run-ga');
+            let populationSizeInput = document.getElementById('population-size');
+            let eliteRateInput = document.getElementById('elite-rate');
+            const seek = document.getElementById('seek');
+            const loader = document.getElementById('loader');
+            const svgContainer = document.getElementById('svg-container');
+            const prev = document.getElementById('prev');
+            const next = document.getElementById('next');
+            const playPauseBtn = document.getElementById('play-pause');
+            const counter = document.getElementById('counter');
+            const speedControl = document.getElementById('speed-compact');
+            const speedValue = document.getElementById('speed-value');
+            const miniProgress = document.getElementById('mini-progress');
+            const progressText = document.getElementById('progress-text');
+            let total = 0;
+            let current = 0;
+            let autoScrollInterval = null;
+            let preloadedImages = [];
+            let isAutoScrolling = false;
+            let svgDataFromWasm = [];
+
+            function preloadImages() {
+                loader.classList.remove('hidden');
+                let loadedCount = 0;
+                if (svgDataFromWasm.length > 0) {
+                    total = svgDataFromWasm.length;
+                    seek.max = total;
+                    counter.textContent = `1 / ${total}`;
+                    loader.classList.add('hidden');
+                    show(0, true);
+                    return;
+                }
+                for (let i = 0; i < total; i++) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', `all_svg/output${i}.svg`, true);
+                    xhr.onload = () => {
+                        if (xhr.status === 200) {
+                            svgDataFromWasm[i] = xhr.responseText;
+                            loadedCount++;
+                            const percentLoaded = Math.floor(loadedCount / total * 100);
+                            updateMiniProgress(percentLoaded);
+                            if (loadedCount === total) {
+                                loader.classList.add('hidden');
+                                show(0, true);
+                            }
+                        }
+                    };
+                    xhr.send();
+                }
+            }
+
+            function updateMiniProgress(percent) {
+                if (miniProgress) {
+                    miniProgress.style.width = `${percent}%`;
+                }
+                if (progressText) {
+                    progressText.textContent = `${percent}%`;
+                }
+            }
+
+            function show(n, skipPreloadCheck = false) {
+                if (!skipPreloadCheck && svgDataFromWasm.length === 0) return;
+                current = (n + total) % total;
+                counter.textContent = `${current + 1} / ${total}`;
+                if (seek) seek.value = current + 1;
+                const percentComplete = Math.floor((current + 1) / total * 100);
+                updateMiniProgress(percentComplete);
+                if (svgDataFromWasm[current]) {
+                    svgContainer.innerHTML = svgDataFromWasm[current];
+                } else {
+                    svgContainer.innerHTML = '<div class="error-placeholder">SVG data not available</div>';
+                }
+            }
+
+            window.setSvgData = (data) => {
+                if (Array.isArray(data) && data.length > 0) {
+                    svgDataFromWasm = data;
+                    total = data.length;
+                    if (seek) seek.max = total;
+                    counter.textContent = `1 / ${total}`;
+                    preloadImages();
+                    return true;
+                }
+                return false;
+            };
+
+            function toggleAutoScroll() {
+                if (!isAutoScrolling && current >= total - 1) {
+                    show(0);
+                }
+                isAutoScrolling ? stopAutoScroll() : startAutoScroll();
+                if (isAutoScrolling) {
+                    playPauseBtn.querySelector('.play-icon').classList.add('hidden');
+                    playPauseBtn.querySelector('.pause-icon').classList.remove('hidden');
+                } else {
+                    playPauseBtn.querySelector('.play-icon').classList.remove('hidden');
+                    playPauseBtn.querySelector('.pause-icon').classList.add('hidden');
+                }
+            }
+
+            function startAutoScroll() {
+                if (autoScrollInterval) clearInterval(autoScrollInterval);
+                isAutoScrolling = true;
+                playPauseBtn.querySelector('.play-icon').classList.add('hidden');
+                playPauseBtn.querySelector('.pause-icon').classList.remove('hidden');
+                playPauseBtn.classList.add('active');
+                const speed = 11 - speedControl.value;
+                autoScrollInterval = setInterval(() => {
+                    if (current >= total - 1) {
+                        stopAutoScroll();
+                        return;
+                    }
+                    show(current + 1);
+                }, speed * 100);
+            }
+
+            function stopAutoScroll() {
+                clearInterval(autoScrollInterval);
+                autoScrollInterval = null;
+                isAutoScrolling = false;
+                playPauseBtn.querySelector('.play-icon').classList.remove('hidden');
+                playPauseBtn.querySelector('.pause-icon').classList.add('hidden');
+                playPauseBtn.classList.remove('active');
+            }
+
+            prev.addEventListener('click', () => {
+                stopAutoScroll();
+                show(current - 1);
+            });
+
+            next.addEventListener('click', () => {
+                stopAutoScroll();
+                show(current + 1);
+            });
+
+            playPauseBtn.addEventListener('click', toggleAutoScroll);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    stopAutoScroll();
+                    show(current - 1);
+                }
+                if (e.key === 'ArrowRight') {
+                    stopAutoScroll();
+                    show(current + 1);
+                }
+                if (e.key === ' ') {
+                    toggleAutoScroll();
+                    e.preventDefault();
+                }
+            });
+
+            seek.addEventListener('input', () => {
+                stopAutoScroll();
+                show(seek.value - 1);
+            });
+
+            speedControl.addEventListener('input', () => {
+                speedValue.textContent = `${speedControl.value}x`;
+                if (isAutoScrolling) startAutoScroll();
+            });
+
+            const dashboardToggle = document.getElementById('dashboard-toggle');
+            const dashboardElement = document.querySelector('.dashboard');
+
+            function checkScreenSize() {
+                if (window.innerWidth <= 1300) {
+                    dashboardToggle.classList.remove('hidden');
+                    dashboardElement.classList.add('active');
+                    dashboardToggle.querySelector('.open-icon').classList.add('hidden');
+                    dashboardToggle.querySelector('.close-icon').classList.remove('hidden');
+                } else {
+                    dashboardToggle.classList.add('hidden');
+                    dashboardElement.classList.remove('active');
+                }
+            }
+
+            dashboardToggle.addEventListener('click', () => {
+                dashboardElement.classList.toggle('active');
+                const isActive = dashboardElement.classList.contains('active');
+                dashboardToggle.querySelector('.open-icon').classList.toggle('hidden', isActive);
+                dashboardToggle.querySelector('.close-icon').classList.toggle('hidden', !isActive);
+            });
+
+            window.addEventListener('load', checkScreenSize);
+            window.addEventListener('resize', checkScreenSize);
+
+            crossoverRateInput.addEventListener('input', () => {
+                crossoverRateValue.textContent = `${crossoverRateInput.value}%`;
+            });
+
+            mutationRateInput.addEventListener('input', () => {
+                mutationRateValue.textContent = `${mutationRateInput.value}%`;
+            });
+
+            eliteRateInput.addEventListener('input', () => {
+                document.getElementById('elite-rate-value').textContent = `${eliteRateInput.value}%`;
+            });
+
+            function updateTerrainVisualization(mapSelection) {
+                const map = predefinedMaps[mapSelection] || predefinedMaps.default;
+                const points = map.replace(/[^0-9\s]/g, ' ').trim().split(/\s+/).map(s => parseInt(s)).filter(n => !isNaN(n));
+                let terrainSVG = '';
+                let landingZoneFound = false;
+                for (let i = 0; i < points.length - 3; i += 2) {
+                    const x1 = points[i];
+                    const y1 = points[i + 1];
+                    const x2 = points[i + 2];
+                    const y2 = points[i + 3];
+                    const isLandingZone = y1 === y2;
+                    if (isLandingZone && !landingZoneFound) {
+                        terrainSVG += `<line x1="${x1}" y1="${3000 - y1}" x2="${x2}" y2="${3000 - y2}" stroke="#00ff9d" stroke-width="8" filter="url(#glow)"><title>Landing Zone</title><animate attributeName="stroke-opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" /></line>`;
+                        landingZoneFound = true;
+                    } else {
+                        terrainSVG += `<line x1="${x1}" y1="${3000 - y1}" x2="${x2}" y2="${3000 - y2}" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>`;
+                    }
+                }
+                const svg = document.querySelector('#svg-container svg');
+                if (svg) {
+                    const existingElements = svg.innerHTML.split('<g>')[0];
+                    svg.innerHTML = existingElements + '<g>' + terrainSVG + '</g>';
+                }
+            }
+
+            document.getElementById('map-selection').addEventListener('change', function () {
+                updateTerrainVisualization(this.value);
+            });
+
+            window.addEventListener('load', function () {
+                updateTerrainVisualization('default');
+            });
+
+            runGaButton.addEventListener('click', () => {
+                const populationSize = parseInt(populationSizeInput.value);
+                const eliteRate = parseInt(eliteRateInput.value);
+                const mapSelection = document.getElementById('map-selection').value;
+
+                if (window.innerWidth <= 1300) {
+                    dashboardElement.classList.remove('active');
+                    dashboardToggle.querySelector('.open-icon').classList.remove('hidden');
+                    dashboardToggle.querySelector('.close-icon').classList.add('hidden');
+                }
+
+                const params = {
+                    populationSize: populationSize,
+                    generationCount: parseInt(document.getElementById('generation-count').value),
+                    eliteRate: eliteRate,
+                    selectionMode: document.getElementById('selection-mode').value,
+                    crossoverRate: parseInt(crossoverRateInput.value),
+                    mutationRate: parseInt(mutationRateInput.value),
+                    mapSelection: mapSelection
+                };
+
+                console.log('Running genetic algorithm with parameters:', params);
+
+                runGaButton.classList.add('loading');
+                loader.classList.remove('hidden');
+
+                const success = window.runMarsLanderSimulation(params);
+
+                if (success) {
+                    loader.classList.add('hidden');
+                    runGaButton.classList.remove('loading');
+                    runGaButton.disabled = false;
+                    current = 0;
+                    show(0, true);
+                    startAutoScroll();
+                } else {
+                    loader.classList.add('hidden');
+                    runGaButton.classList.remove('loading');
+                    runGaButton.disabled = false;
+                    alert('Failed to run the simulation. Check the console for more details.');
+                }
+            });
+
+            window.addEventListener('load', preloadImages);
+
+            function initializeInfoButtons() {
+                const infoButtons = document.querySelectorAll('.info-button');
+                let activeTooltip = null;
+
+                infoButtons.forEach(button => {
+                    button.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        if (activeTooltip) {
+                            document.body.removeChild(activeTooltip);
+                            activeTooltip = null;
+                        }
+
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'info-tooltip';
+                        tooltip.textContent = this.getAttribute('data-info');
+                        document.body.appendChild(tooltip);
+
+                        const buttonRect = this.getBoundingClientRect();
+                        tooltip.style.left = `${buttonRect.left - (tooltip.offsetWidth / 2) + (buttonRect.width / 2)}px`;
+                        tooltip.style.top = `${buttonRect.top - tooltip.offsetHeight - 10}px`;
+
+                        setTimeout(() => {
+                            tooltip.classList.add('visible');
+                        }, 10);
+
+                        activeTooltip = tooltip;
+
+                        function hideTooltip(e) {
+                            if (activeTooltip && !button.contains(e.target)) {
+                                activeTooltip.classList.remove('visible');
+                                setTimeout(() => {
+                                    if (activeTooltip && activeTooltip.parentNode) {
+                                        document.body.removeChild(activeTooltip);
+                                        activeTooltip = null;
+                                    }
+                                }, 300);
+                                document.removeEventListener('click', hideTooltip);
+                            }
+                        }
+
+                        setTimeout(() => {
+                            document.addEventListener('click', hideTooltip);
+                        }, 10);
+                    });
+                });
+            }
+
+            window.addEventListener('load', function () {
+                preloadImages();
+                initializeInfoButtons();
+            });
+        })();
+    </script>
+    <script defer src="mars_lander/pkg/my_lib.js"></script>
 </body>
-
 </html>
