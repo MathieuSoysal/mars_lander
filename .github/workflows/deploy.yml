@@ -55,7 +55,20 @@ jobs:
       - name: Prepare deployment directory
         run: |
           mkdir -p dist
-          cp -r index.html styles.css js/ pkg/ favicon/ site.webmanifest dist/
+          cp index.html styles.css site.webmanifest dist/ || true
+          # Copy directories only if they exist
+          [ -d "js" ] && cp -r js/ dist/ || echo "js directory not found, skipping"
+          [ -d "pkg" ] && cp -r pkg/ dist/ || echo "pkg directory not found, skipping"
+          [ -d "favicon" ] && cp -r favicon/ dist/ || echo "favicon directory not found, skipping"
+          
+          # Ensure we have the WASM files in the dist directory
+          if [ ! -d "dist/pkg" ] && [ -d "target/wasm32-unknown-unknown/release" ]; then
+            mkdir -p dist/pkg
+            cp -r target/wasm32-unknown-unknown/release/*.wasm dist/pkg/ || true
+          fi
+          
+          # Make sure the dist directory has content
+          find dist -type f | head -n 5
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
