@@ -5,6 +5,12 @@ on:
     branches:
       - master
 
+# Add explicit permissions for the GITHUB_TOKEN
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
