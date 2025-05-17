@@ -10,6 +10,17 @@
   <meta name="theme-color" content="#000824">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description"
+    content="Mars Lander Viewer - A futuristic simulation environment for Mars landing missions.">
+  <meta name="keywords" content="Mars, Lander, Simulation, Genetic Algorithm, Space, Mission Control">
+  <meta name="author" content="Mathieu Soysal">
+  <meta name="robots" content="index, follow">
+  <meta name="revisit-after" content="1 days">
+  <meta http-equiv="Cache-Control" content="max-age=31536000, must-revalidate">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="//fonts.googleapis.com">
+  <link rel="dns-prefetch" href="//fonts.gstatic.com">
 </head>
 
 <body>
@@ -98,12 +109,13 @@
         <h2>Mission Control</h2>
         <div class="glow-line"></div>
       </div>
-      
+
       <!-- Add Simulation Environment section -->
       <div class="dashboard-section">
         <h3>Simulation Environment</h3>
         <div class="param-group">
-          <label for="map-selection">Map Selection: <button type="button" class="info-button" data-info="Choose from different terrain configurations for the simulation">i</button></label>
+          <label for="map-selection">Map Selection: <button type="button" class="info-button"
+              data-info="Choose from different terrain configurations for the simulation">i</button></label>
           <select id="map-selection">
             <option value="default">Default Map</option>
             <option value="canyon">Deep Canyon</option>
@@ -113,7 +125,7 @@
           </select>
         </div>
       </div>
-      
+
       <!-- Genetic Algorithm Configuration section -->
       <div class="dashboard-section">
         <h3>Genetic Algorithm Configuration</h3>
@@ -138,19 +150,22 @@
           </div>
 
           <div class="param-group">
-            <label for="elite-rate">Elite rate: <button type="button" class="info-button" data-info="Percentage of best individuals that automatically survive to next generation unchanged">i</button></label>
+            <label for="elite-rate">Elite rate: <button type="button" class="info-button"
+                data-info="Percentage of best individuals that automatically survive to next generation unchanged">i</button></label>
             <input type="range" id="elite-rate" min="0" value="20" max="100">
             <span id="elite-rate-value">20%</span>
           </div>
 
           <div class="param-group">
-            <label for="crossover-rate">Crossover Rate: <button type="button" class="info-button" data-info="Probability of genetic crossover between parents - controls how much genetic material is exchanged">i</button></label>
+            <label for="crossover-rate">Crossover Rate: <button type="button" class="info-button"
+                data-info="Probability of genetic crossover between parents - controls how much genetic material is exchanged">i</button></label>
             <input type="range" id="crossover-rate" min="0" max="100" value="90">
             <span id="crossover-rate-value">90%</span>
           </div>
 
           <div class="param-group">
-            <label for="mutation-rate">Mutation Rate: <button type="button" class="info-button" data-info="Probability of random mutations - higher values increase diversity but may disrupt good solutions">i</button></label>
+            <label for="mutation-rate">Mutation Rate: <button type="button" class="info-button"
+                data-info="Probability of random mutations - higher values increase diversity but may disrupt good solutions">i</button></label>
             <input type="range" id="mutation-rate" min="0" max="100" value="10">
             <span id="mutation-rate-value">10%</span>
           </div>
@@ -168,7 +183,7 @@
   </div>
 
   <div class="seek-container"></div>
-    <input type="range" id="seek" min="1" max="300" value="1" />
+  <input type="range" id="seek" min="1" max="300" value="1" />
   </div>
 
   <script type="module">
@@ -177,7 +192,7 @@
     // Global reference to store SVG data
     let svgData = [];
     let wasmReady = false;
-    
+
     // Predefined map configurations
     const predefinedMaps = {
       default: `
@@ -584,24 +599,24 @@
           .split(/\s+/)
           .map(s => parseInt(s))
           .filter(n => !isNaN(n));
-        
+
         // Create SVG elements for the terrain
         let terrainSVG = '';
         let landingZoneFound = false;
-        
+
         // Create lines between points
         for (let i = 0; i < points.length - 3; i += 2) {
           const x1 = points[i];
-          const y1 = points[i+1];
-          const x2 = points[i+2];
-          const y2 = points[i+3];
-          
+          const y1 = points[i + 1];
+          const x2 = points[i + 2];
+          const y2 = points[i + 3];
+
           // Check if this segment is a flat one (potential landing zone)
           const isLandingZone = y1 === y2;
-          
+
           if (isLandingZone && !landingZoneFound) {
             // This is likely the landing zone (flat segment)
-            terrainSVG += `<line x1="${x1}" y1="${3000-y1}" x2="${x2}" y2="${3000-y2}" 
+            terrainSVG += `<line x1="${x1}" y1="${3000 - y1}" x2="${x2}" y2="${3000 - y2}" 
                            stroke="#00ff9d" stroke-width="8" filter="url(#glow)">
                            <title>Landing Zone</title>
                            <animate attributeName="stroke-opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" />
@@ -609,11 +624,11 @@
             landingZoneFound = true;
           } else {
             // Regular terrain segment
-            terrainSVG += `<line x1="${x1}" y1="${3000-y1}" x2="${x2}" y2="${3000-y2}" 
+            terrainSVG += `<line x1="${x1}" y1="${3000 - y1}" x2="${x2}" y2="${3000 - y2}" 
                            stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>`;
           }
         }
-        
+
         // Update the SVG container with new terrain
         const svg = document.querySelector('#svg-container svg');
         if (svg) {
@@ -624,12 +639,12 @@
       }
 
       // Add event listener for map selection change
-      document.getElementById('map-selection').addEventListener('change', function() {
+      document.getElementById('map-selection').addEventListener('change', function () {
         updateTerrainVisualization(this.value);
       });
 
       // Initialize terrain visualization with default map
-      window.addEventListener('load', function() {
+      window.addEventListener('load', function () {
         updateTerrainVisualization('default');
       });
 
@@ -694,33 +709,33 @@
         let activeTooltip = null;
 
         infoButtons.forEach(button => {
-          button.addEventListener('click', function(e) {
+          button.addEventListener('click', function (e) {
             e.preventDefault();
-            
+
             // Remove any existing tooltip
             if (activeTooltip) {
               document.body.removeChild(activeTooltip);
               activeTooltip = null;
             }
-            
+
             // Create tooltip
             const tooltip = document.createElement('div');
             tooltip.className = 'info-tooltip';
             tooltip.textContent = this.getAttribute('data-info');
             document.body.appendChild(tooltip);
-            
+
             // Position tooltip near the button
             const buttonRect = this.getBoundingClientRect();
             tooltip.style.left = `${buttonRect.left - (tooltip.offsetWidth / 2) + (buttonRect.width / 2)}px`;
             tooltip.style.top = `${buttonRect.top - tooltip.offsetHeight - 10}px`;
-            
+
             // Make tooltip visible
             setTimeout(() => {
               tooltip.classList.add('visible');
             }, 10);
-            
+
             activeTooltip = tooltip;
-            
+
             // Hide tooltip when clicking elsewhere
             function hideTooltip(e) {
               if (activeTooltip && !button.contains(e.target)) {
@@ -734,7 +749,7 @@
                 document.removeEventListener('click', hideTooltip);
               }
             }
-            
+
             setTimeout(() => {
               document.addEventListener('click', hideTooltip);
             }, 10);
@@ -743,15 +758,16 @@
       }
 
       // Initialize all UI components
-      window.addEventListener('load', function() {
+      window.addEventListener('load', function () {
         // Existing preloadImages call if present
         preloadImages();
-        
+
         // Initialize tooltips for info buttons
         initializeInfoButtons();
       });
     })();
   </script>
+  <script defer src="mars_lander/pkg/my_lib.js"></script>
 </body>
 
 </html>
