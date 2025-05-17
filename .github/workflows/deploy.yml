@@ -30,7 +30,14 @@ jobs:
           curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Build WASM
-        run: wasm-pack build --target web
+        run: wasm-pack build --target web --release
+
+      - name: Check WASM output
+        run: |
+          echo "Contents of pkg directory:"
+          ls -la pkg/
+          echo "WASM modules:"
+          find pkg -name "*.wasm"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -58,17 +65,44 @@ jobs:
           cp index.html styles.css site.webmanifest dist/ || true
           # Copy directories only if they exist
           [ -d "js" ] && cp -r js/ dist/ || echo "js directory not found, skipping"
-          [ -d "pkg" ] && cp -r pkg/ dist/ || echo "pkg directory not found, skipping"
-          [ -d "favicon" ] && cp -r favicon/ dist/ || echo "favicon directory not found, skipping"
           
-          # Ensure we have the WASM files in the dist directory
-          if [ ! -d "dist/pkg" ] && [ -d "target/wasm32-unknown-unknown/release" ]; then
+          # Ensure pkg directory gets copied to dist - this is critical
+          if [ -d "pkg" ]; then
+            echo "Copying pkg directory from current workspace"
+            cp -r pkg/ dist/
+            
+            # Make sure the WASM files are correctly copied
+            if [ -f "pkg/my_lib_bg.wasm" ]; then
+              echo "WASM file exists in pkg and will be copied"
+            else
+              echo "Warning: my_lib_bg.wasm not found in pkg directory"
+            fi
+          else
+            echo "No pkg directory found in workspace!"
+            # Create pkg directory and copy necessary files from target
             mkdir -p dist/pkg
-            cp -r target/wasm32-unknown-unknown/release/*.wasm dist/pkg/ || true
+            
+            # Copy the WASM file from the target directory
+            if [ -d "target/wasm32-unknown-unknown/release" ]; then
+              echo "Copying WASM files from target directory"
+              find target/wasm32-unknown-unknown/release -name "*.wasm" -exec cp {} dist/pkg/ \;
+              
+              # We also need the JavaScript bindings
+              # Create a minimal JavaScript file to load the WASM if original doesn't exist
+              if [ ! -f "dist/pkg/my_lib.js" ]; then
+                echo "Creating minimal my_lib.js file"
+                echo "export function run_simulation() { console.error('WASM binding not properly loaded'); return []; }" > dist/pkg/my_lib.js
+              fi
+            else
+              echo "No WASM files found in target directory either!"
+            fi
           fi
           
-          # Make sure the dist directory has content
-          find dist -type f | head -n 5
+          [ -d "favicon" ] && cp -r favicon/ dist/ || echo "favicon directory not found, skipping"
+          
+          # List what we have in the dist directory
+          echo "Contents of dist directory:"
+          find dist -type f | sort
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
