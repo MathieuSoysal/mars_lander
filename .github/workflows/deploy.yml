@@ -67,19 +67,27 @@ jobs:
         run: |
           mkdir -p dist
           cp index.html styles.css site.webmanifest dist/ || true
+          echo "Files copied to dist:"
+          ls -la dist/
+          
           # Copy directories only if they exist
+          echo "Copying JS files..."
           [ -d "js" ] && cp -r js/ dist/ || echo "js directory not found, skipping"
           
           # Ensure pkg directory gets copied to dist - this is critical
           if [ -d "pkg" ]; then
-            echo "Copying pkg directory from current workspace"
-            cp -r pkg/ dist/
+            echo "Copying pkg directory from current workspace..."
+            mkdir -p dist/pkg
+            cp -r pkg/* dist/pkg/
+            
+            echo "Verifying pkg contents in dist directory..."
+            ls -la dist/pkg/
             
             # Make sure the WASM files are correctly copied
-            if [ -f "pkg/my_lib_bg.wasm" ]; then
-              echo "WASM file exists in pkg and will be copied"
+            if [ -f "dist/pkg/my_lib_bg.wasm" ]; then
+              echo "✅ WASM file exists in dist/pkg and is correctly copied"
             else
-              echo "Warning: my_lib_bg.wasm not found in pkg directory"
+              echo "⚠️ Warning: my_lib_bg.wasm not found in dist/pkg directory"
             fi
           else
             echo "No pkg directory found in workspace!"
@@ -88,13 +96,16 @@ jobs:
             
             # Copy the WASM file from the target directory
             if [ -d "target/wasm32-unknown-unknown/release" ]; then
-              echo "Copying WASM files from target directory"
+              echo "Copying WASM files from target directory..."
               find target/wasm32-unknown-unknown/release -name "*.wasm" -exec cp {} dist/pkg/ \;
               
-              # We also need the JavaScript bindings
-              # Create a minimal JavaScript file to load the WASM if original doesn't exist
-              if [ ! -f "dist/pkg/my_lib.js" ]; then
-                echo "Creating minimal my_lib.js file"
+              # Create JavaScript bindings from wasm-pack output
+              if [ -d "target/wasm32-unknown-unknown/release/build" ]; then
+                echo "Copying JS binding files from build directory..."
+                find target/wasm32-unknown-unknown/release/build -name "*.js" -exec cp {} dist/pkg/ \;
+              else
+                # Create a minimal JavaScript file if original doesn't exist
+                echo "Creating minimal my_lib.js file..."
                 echo "export function run_simulation() { console.error('WASM binding not properly loaded'); return []; }" > dist/pkg/my_lib.js
               fi
             else
@@ -102,17 +113,26 @@ jobs:
             fi
           fi
           
+          echo "Copying favicon directory..."
           [ -d "favicon" ] && cp -r favicon/ dist/ || echo "favicon directory not found, skipping"
           
+          # Create a simple marker file to ensure the WASM is properly processed
+          echo "Creating .nojekyll file to prevent Jekyll processing..."
+          touch dist/.nojekyll
+          
           # List what we have in the dist directory
-          echo "Contents of dist directory:"
+          echo "Contents of dist directory (files):"
           find dist -type f | sort
+          
+          echo "Contents of dist directory (structure):"
+          find dist -type d | sort
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           publish_branch: gh-pages
           force_orphan: true
-          clean: true
+          # Keep files option helps ensure all necessary files are included
+          keep_files: false
