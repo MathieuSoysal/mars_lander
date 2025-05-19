@@ -100,7 +100,8 @@
     <link rel="stylesheet" href="styles.css">
   </noscript>
   <!-- Preload Google Fonts -->
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" as="style"
+  <link rel="preload"
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap&font-display=swap" as="style"
     onload="this.onload=null;this.rel='stylesheet'">
   <noscript>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
@@ -282,15 +283,9 @@
     </div>
   </div>
 
-  <div class="seek-container"></div>
-  <input type="range" id="seek" min="1" max="300" value="1" />
+  <div class="seek-container">
+    <input type="range" id="seek" min="1" max="300" value="1" />
   </div>
-
-  <!-- Small script to load CSS asynchronously -->
-  <script>
-    // Tiny helper function for loading CSS asynchronously
-    !function (e) { var n = function (n, t) { "use strict"; if (!document.getElementById(n)) { var o = e.createElement("link"); o.id = n, o.rel = "stylesheet", o.href = t, e.getElementsByTagName("head")[0].appendChild(o) } }; n("roboto-font", "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"), n("main-css", "styles.css") }(document);
-  </script>
 
   <!-- Load the JavaScript files with defer attribute -->
   <script type="module" src="js/wasm-interface.js" defer></script>
