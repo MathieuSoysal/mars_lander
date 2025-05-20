@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, viewport-fit=cover">
   <title>Mars Lander Viewer</title>
   <!-- Preconnect to required domains -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -92,6 +92,7 @@
       height: 100%;
       position: relative;
       overflow: hidden;
+      aspect-ratio: 7/3;
     }
   </style>
   <!-- Non-critical CSS loaded asynchronously -->
@@ -99,10 +100,15 @@
   <noscript>
     <link rel="stylesheet" href="styles.css">
   </noscript>
-  <!-- Preload Google Fonts -->
-  <link rel="preload"
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap&font-display=swap" as="style"
-    onload="this.onload=null;this.rel='stylesheet'">
+  <!-- Preload specific font files to avoid layout shifts -->
+  <link rel="preload" as="font" type="font/woff2"
+    href="https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmSU5fBBc4.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2"
+    href="https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2"
+    href="https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmEU9fBBc4.woff2" crossorigin>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap&font-display=swap">
   <noscript>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   </noscript>
@@ -122,6 +128,16 @@
   <meta name="robots" content="index, follow">
   <meta name="revisit-after" content="1 days">
   <meta http-equiv="Cache-Control" content="public, max-age=31536000, must-revalidate">
+  <!-- Font Loading API for better control -->
+  <script>
+    if ('fonts' in document) {
+      Promise.all([
+        document.fonts.load('300 1em Roboto'),
+        document.fonts.load('400 1em Roboto'),
+        document.fonts.load('500 1em Roboto')
+      ]).catch(err => console.log('Font loading failed:', err));
+    }
+  </script>
 </head>
 
 <body>
@@ -134,7 +150,7 @@
       <div id="svg-container">
         <div class="scanner-overlay"></div>
         <div class="grid-overlay"></div>
-        <svg xmlns="http://www.w3.org/2000/svg" width="7000" height="3000" viewBox="0 0 7000 3000">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7000 3000" width="100%" height="100%">
           <!-- Starry background -->
           <defs>
             <radialGradient id="marsGlow" cx="50%" cy="100%" r="70%" fx="50%" fy="100%">
@@ -286,10 +302,9 @@
   <div class="seek-container">
     <input type="range" id="seek" min="1" max="300" value="1" />
   </div>
-
-  <!-- Load the JavaScript files with defer attribute -->
-  <script type="module" src="js/wasm-interface.js" defer></script>
-  <script type="module" src="js/ui-controller.js" defer></script>
+  <!-- Load JavaScript modules (module scripts are deferred by default) -->
+  <script type="module" src="js/wasm-interface.js"></script>
+  <script type="module" src="js/ui-controller.js"></script>
 </body>
 
 </html>
