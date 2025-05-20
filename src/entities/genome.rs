@@ -117,6 +117,14 @@ impl<'a> DNA<'a> {
     }
 }
 
+/*
+TODO Adjust weights
+Order of importance:
+ - land_distance (if we take account of y, put 8000 instead of 7000)
+ - rotation
+ - x & y speed
+ - fuel (take account of it only for thoose who succeed)
+*/
 impl<'a> Phenotype<i32> for DNA<'a> {
     fn fitness(&mut self) -> i32 {
         if self.fitness != -1 {
@@ -146,7 +154,6 @@ impl<'a> Phenotype<i32> for DNA<'a> {
                 } else {
                     self.fitness = (7000 - land_distance) * 500;
                 }
-
                 break;
             }
         }
