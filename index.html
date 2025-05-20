@@ -41,7 +41,8 @@
     }
 
     body {
-      font-family: 'Roboto', sans-serif;
+      /* Use a fallback font stack with similar metrics to Roboto to prevent layout shifts */
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
       background-color: var(--background-dark);
       color: var(--text-primary);
       line-height: 1.6;
@@ -94,21 +95,37 @@
       overflow: hidden;
       aspect-ratio: 7/3;
     }
+    
+    /* Font loading optimization */
+    .fonts-loaded h1,
+    .fonts-loaded h2,
+    .fonts-loaded h3,
+    .fonts-loaded .dashboard-header,
+    .fonts-loaded .button-text {
+      /* Enhance text rendering once fonts are loaded */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+    
+    /* Small animation when fonts are loaded */
+    .fonts-loaded {
+      animation: text-focus 0.2s ease-out forwards;
+    }
+    
+    @keyframes text-focus {
+      0% { opacity: 0.98; }
+      100% { opacity: 1; }
+    }
   </style>
   <!-- Non-critical CSS loaded asynchronously -->
   <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript>
     <link rel="stylesheet" href="styles.css">
   </noscript>
-  <!-- Preload specific font files to avoid layout shifts -->
-  <link rel="preload" as="font" type="font/woff2"
-    href="https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmSU5fBBc4.woff2" crossorigin>
-  <link rel="preload" as="font" type="font/woff2"
-    href="https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2" crossorigin>
-  <link rel="preload" as="font" type="font/woff2"
-    href="https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmEU9fBBc4.woff2" crossorigin>
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap&font-display=swap">
+  <!-- Font loading - simplified strategy with display=swap for best performance -->
+  <link rel="stylesheet" 
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap">
   <noscript>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   </noscript>
@@ -128,14 +145,42 @@
   <meta name="robots" content="index, follow">
   <meta name="revisit-after" content="1 days">
   <meta http-equiv="Cache-Control" content="public, max-age=31536000, must-revalidate">
-  <!-- Font Loading API for better control -->
+  <!-- Simple Font Loading API implementation - no warnings approach -->
   <script>
+    // Flag for tracking font loading state
+    let fontsLoaded = false;
+    
+    // Function to apply the fonts-loaded class
+    function markFontsAsLoaded() {
+      if (!fontsLoaded) {
+        document.documentElement.classList.add('fonts-loaded');
+        fontsLoaded = true;
+      }
+    }
+    
+    // Check if fonts are ready when the page becomes visible
+    // This catches cases where fonts were loaded while the page was in background
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && !fontsLoaded) {
+        markFontsAsLoaded();
+      }
+    });
+    
+    // Apply when page loads (regardless of font state)
+    window.addEventListener('load', () => {
+      // Use a small delay to allow the browser to render with fonts if available
+      setTimeout(markFontsAsLoaded, 100);
+    });
+    
+    // If the browser supports the Font Loading API, use it
     if ('fonts' in document) {
-      Promise.all([
-        document.fonts.load('300 1em Roboto'),
-        document.fonts.load('400 1em Roboto'),
-        document.fonts.load('500 1em Roboto')
-      ]).catch(err => console.log('Font loading failed:', err));
+      // Handle both states - already loaded or will be loaded
+      if (document.fonts.ready) {
+        document.fonts.ready.then(markFontsAsLoaded);
+      } else {
+        // Fallback for older implementations
+        document.fonts.addEventListener('loadingdone', markFontsAsLoaded);
+      }
     }
   </script>
 </head>

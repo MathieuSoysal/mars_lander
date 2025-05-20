@@ -49,6 +49,13 @@ import { predefinedMaps } from './wasm-interface.js';
 
     // Précharger toutes les images
     function preloadImages() {
+        // Safety check to ensure loader is defined
+        if (!loader) {
+            console.warn('Loader element not initialized yet. Waiting for DOM to be ready...');
+            setTimeout(preloadImages, 100); // Try again in 100ms
+            return;
+        }
+        
         loader.classList.remove('hidden');
         let loadedCount = 0;
 
@@ -56,9 +63,9 @@ import { predefinedMaps } from './wasm-interface.js';
         if (svgDataFromWasm.length > 0) {
             total = svgDataFromWasm.length;
 
-            // Update UI elements to match new total
-            seek.max = total;
-            counter.textContent = `1 / ${total}`;
+            // Update UI elements to match new total - with safety checks
+            if (seek) seek.max = total;
+            if (counter) counter.textContent = `1 / ${total}`;
 
             // No need for preloading when we have SVG strings directly
             loader.classList.add('hidden');
@@ -102,7 +109,12 @@ import { predefinedMaps } from './wasm-interface.js';
     }
 
     function show(n, skipPreloadCheck = false) {
+        // Safety checks for elements and data
         if (!skipPreloadCheck && svgDataFromWasm.length === 0) return;
+        if (!counter || !svgContainer) {
+            console.warn('UI elements not initialized yet. Cannot show frame.');
+            return;
+        }
 
         current = (n + total) % total;
         counter.textContent = `${current + 1} / ${total}`;
@@ -416,8 +428,8 @@ import { predefinedMaps } from './wasm-interface.js';
         });
     }
 
-    // Start preloading images
-    window.addEventListener('load', preloadImages);
+    // DO NOT call preloadImages directly here - it's called in the main initialization routine
+    // This prevents timing issues with loader element not being initialized
 
     // Initialize info buttons with tooltips
     function initializeInfoButtons() {
