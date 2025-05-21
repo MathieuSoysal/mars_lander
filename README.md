@@ -20,6 +20,8 @@ The challenge mirrors real-world space exploration problems, making it both prac
 
 ## Genetic Algorithms: Evolution-Inspired Problem Solving 🧪
 
+![Genetic Algorithm Simulation](simulation_algo_genetic.gif)
+
 Genetic algorithms (GAs) are search and optimization techniques inspired by the process of natural selection. They work by:
 
 1. **Population Generation**: Creating a group of potential solutions (individuals)
@@ -57,8 +59,6 @@ This project implements a genetic algorithm to solve the Mars Lander challenge:
 - Multiple terrain configurations for testing different scenarios
 
 ## Getting Started 🚀
-
-![Genetic Algorithm Simulation](simulation_algo_genetic.gif)
 
 ### Running the Simulator 💻
 
