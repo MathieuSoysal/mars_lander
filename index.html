@@ -5,11 +5,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, viewport-fit=cover">
   <title>Mars Lander Viewer</title>
-  <!-- Preconnect to required domains -->
+  
+  <!-- Resource hints for faster loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="//fonts.googleapis.com">
   <link rel="dns-prefetch" href="//fonts.gstatic.com">
+  
+  <!-- Preload critical assets -->
+  <link rel="preload" href="styles.css" as="style">
   <style>
     /* Critical CSS for above-the-fold content */
     :root {
@@ -40,7 +44,6 @@
     }
 
     body {
-      /* Use a fallback font stack with similar metrics to Roboto to prevent layout shifts */
       font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
       background-color: var(--background-dark);
       color: var(--text-primary);
@@ -80,7 +83,6 @@
       height: calc(100svh - 120px)
     }
 
-    /* Minimal styles for the viewer container to ensure it's visible immediately */
     .viewer-container {
       flex: 1;
       position: relative;
@@ -95,19 +97,16 @@
       aspect-ratio: 7/3;
     }
     
-    /* Font loading optimization */
     .fonts-loaded h1,
     .fonts-loaded h2,
     .fonts-loaded h3,
     .fonts-loaded .dashboard-header,
     .fonts-loaded .button-text {
-      /* Enhance text rendering once fonts are loaded */
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
     }
     
-    /* Small animation when fonts are loaded */
     .fonts-loaded {
       animation: text-focus 0.2s ease-out forwards;
     }
@@ -117,14 +116,22 @@
       100% { opacity: 1; }
     }
   </style>
-  <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="favicon/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
-  <link rel="manifest" href="site.webmanifest">
+  
+  <!-- Non-blocking CSS loading -->
+  <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="styles.css"></noscript>
+  
+  <!-- Optimized font loading with display swap -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" crossorigin>
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
+  
+  <!-- Favicon with cache control -->
+  <link rel="icon" type="image/x-icon" href="favicon/favicon.ico?v=1.0.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png?v=1.0.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png?v=1.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png?v=1.0.0">
+  <link rel="manifest" href="site.webmanifest?v=1.0.0">
+  
   <meta name="theme-color" content="#000824">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -134,8 +141,11 @@
   <meta name="author" content="Mathieu Soysal">
   <meta name="robots" content="index, follow">
   <meta name="revisit-after" content="1 days">
-  <meta http-equiv="Cache-Control" content="public, max-age=31536000, must-revalidate">
-  <!-- Simple Font Loading API implementation - no warnings approach -->
+  
+  <!-- Cache control - Note: Should be implemented server-side as well -->
+  <meta http-equiv="Cache-Control" content="public, max-age=31536000, immutable">
+  
+  <!-- Improved font loading strategy -->
   <script>
     // Flag for tracking font loading state
     let fontsLoaded = false;
@@ -148,30 +158,31 @@
       }
     }
     
-    // Check if fonts are ready when the page becomes visible
-    // This catches cases where fonts were loaded while the page was in background
+    // Check if Font Loading API is supported
+    if ('fonts' in document) {
+      Promise.all([
+        document.fonts.load('300 1em Roboto'),
+        document.fonts.load('400 1em Roboto'),
+        document.fonts.load('500 1em Roboto')
+      ]).then(markFontsAsLoaded)
+      .catch(() => {
+        setTimeout(markFontsAsLoaded, 1000);
+      });
+      
+      document.fonts.addEventListener('loadingdone', markFontsAsLoaded);
+    } else {
+      setTimeout(markFontsAsLoaded, 1000);
+    }
+    
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && !fontsLoaded) {
         markFontsAsLoaded();
       }
     });
     
-    // Apply when page loads (regardless of font state)
     window.addEventListener('load', () => {
-      // Use a small delay to allow the browser to render with fonts if available
       setTimeout(markFontsAsLoaded, 100);
     });
-    
-    // If the browser supports the Font Loading API, use it
-    if ('fonts' in document) {
-      // Handle both states - already loaded or will be loaded
-      if (document.fonts.ready) {
-        document.fonts.ready.then(markFontsAsLoaded);
-      } else {
-        // Fallback for older implementations
-        document.fonts.addEventListener('loadingdone', markFontsAsLoaded);
-      }
-    }
   </script>
 </head>
 
@@ -186,7 +197,6 @@
         <div class="scanner-overlay"></div>
         <div class="grid-overlay"></div>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7000 3000" width="100%" height="100%">
-          <!-- Starry background -->
           <defs>
             <radialGradient id="marsGlow" cx="50%" cy="100%" r="70%" fx="50%" fy="100%">
               <stop offset="0%" stop-color="rgba(255, 60, 0, 0.2)" />
@@ -199,13 +209,10 @@
             </filter>
           </defs>
 
-          <!-- Black background -->
           <rect width="100%" height="100%" fill="black"></rect>
 
-          <!-- Mars atmospheric glow -->
           <rect x="0" y="2500" width="7000" height="500" fill="url(#marsGlow)" opacity="0.7"></rect>
 
-          <!-- Surface terrain with enhanced visuals -->
           <line x1="0" y1="1500" x2="1000" y2="1000" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
           <line x1="1000" y1="1000" x2="2000" y2="2500" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
           <line x1="3500" y1="2500" x2="5000" y2="1500" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
@@ -216,12 +223,10 @@
           </line>
 
           <g>
-            <!-- SVG content for Mars Lander simulation -->
           </g>
         </svg>
       </div>
 
-      <!-- Fixed player controls -->
       <div class="player-controls">
         <button id="prev" class="player-button"><span>⏮</span></button>
         <button id="play-pause" class="player-button">
@@ -230,14 +235,12 @@
         </button>
         <button id="next" class="player-button"><span>⏭</span></button>
 
-        <!-- Speed control -->
         <div class="speed-control-compact">
           <span class="speed-label">Speed</span>
           <input type="range" id="speed-compact" min="1" max="10" value="10" class="speed-slider">
           <span id="speed-value">10x</span>
         </div>
 
-        <!-- Mini progress indicator -->
         <div class="mini-progress-container">
           <div class="mini-progress-bar">
             <div id="mini-progress" class="mini-progress-fill"></div>
@@ -250,7 +253,6 @@
       <div id="loader" class="loader hidden"></div>
     </div>
 
-    <!-- Add dashboard toggle button for small screens -->
     <button id="dashboard-toggle" class="dashboard-toggle hidden">
       <span class="open-icon">⚙️</span>
       <span class="close-icon hidden">✕</span>
@@ -262,7 +264,6 @@
         <div class="glow-line"></div>
       </div>
 
-      <!-- Add Simulation Environment section -->
       <div class="dashboard-section">
         <h3>Simulation Environment</h3>
         <div class="param-group">
@@ -278,7 +279,6 @@
         </div>
       </div>
 
-      <!-- Genetic Algorithm Configuration section -->
       <div class="dashboard-section">
         <h3>Genetic Algorithm Configuration</h3>
         <form id="ga-params">
@@ -337,18 +337,10 @@
   <div class="seek-container">
     <input type="range" id="seek" min="1" max="300" value="1" />
   </div>
-  <script>
-    // Defer non-critical JS loading to improve initial page rendering
-    document.addEventListener('DOMContentLoaded', function() {
-        const wasmInterface = document.createElement('script');
-        wasmInterface.type = 'module';
-        wasmInterface.src = 'js/wasm-interface.js?v=1.0.0';
-        document.body.appendChild(wasmInterface);
-        
-        const uiController = document.createElement('script');
-        uiController.type = 'module';
-        uiController.src = 'js/ui-controller.js?v=1.0.0';
-        document.body.appendChild(uiController);
+  
+  <script type="module">
+    window.addEventListener('DOMContentLoaded', () => {
+      import('./js/ui-controller.js?v=1.0.0').catch(e => console.error('Failed to load UI controller:', e));
     });
   </script>
 </body>
