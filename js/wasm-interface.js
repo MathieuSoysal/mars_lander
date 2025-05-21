@@ -63,7 +63,9 @@ async function run() {
 }
 
 // Start loading WASM module
-run();
+document.addEventListener('DOMContentLoaded', () => {
+  run();
+});
 
 // Function to clean SVG string by unescaping quotes and newlines
 function cleanSvgString(svgString) {
