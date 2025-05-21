@@ -10,7 +10,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="//fonts.googleapis.com">
   <link rel="dns-prefetch" href="//fonts.gstatic.com">
-  <!-- Inline critical CSS -->
   <style>
     /* Critical CSS for above-the-fold content */
     :root {
@@ -118,17 +117,8 @@
       100% { opacity: 1; }
     }
   </style>
-  <!-- Non-critical CSS loaded asynchronously -->
-  <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript>
-    <link rel="stylesheet" href="styles.css">
-  </noscript>
-  <!-- Font loading - simplified strategy with display=swap for best performance -->
-  <link rel="stylesheet" 
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap">
-  <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  </noscript>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="favicon/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
@@ -347,9 +337,8 @@
   <div class="seek-container">
     <input type="range" id="seek" min="1" max="300" value="1" />
   </div>
-  <!-- Load JavaScript modules (module scripts are deferred by default) -->
-  <script type="module" src="js/wasm-interface.js"></script>
-  <script type="module" src="js/ui-controller.js"></script>
+  <script type="module" src="js/wasm-interface.js" defer></script>
+  <script type="module" src="js/ui-controller.js" defer></script>
 </body>
 
 </html>
