@@ -262,9 +262,14 @@ import { predefinedMaps } from './wasm-interface.js';
             dashboardToggle.classList.remove('hidden');
             // Make dashboard expanded by default on small screens
             dashboardElement.classList.add('active');
+            
+            // Check if icon elements exist before manipulating them
+            const openIcon = dashboardToggle.querySelector('.open-icon');
+            const closeIcon = dashboardToggle.querySelector('.close-icon');
+            
             // Update toggle button icons to show close icon by default
-            dashboardToggle.querySelector('.open-icon').classList.add('hidden');
-            dashboardToggle.querySelector('.close-icon').classList.remove('hidden');
+            if (openIcon) openIcon.classList.add('hidden');
+            if (closeIcon) closeIcon.classList.remove('hidden');
         } else {
             dashboardToggle.classList.add('hidden');
             // Make sure dashboard is visible when screen is large
@@ -284,10 +289,21 @@ import { predefinedMaps } from './wasm-interface.js';
         dashboardToggle.addEventListener('click', () => {
             dashboardElement.classList.toggle('active');
             const isActive = dashboardElement.classList.contains('active');
-
-            // Update toggle button icons
-            dashboardToggle.querySelector('.open-icon').classList.toggle('hidden', isActive);
-            dashboardToggle.querySelector('.close-icon').classList.toggle('hidden', !isActive);
+            
+            // Get icon elements safely
+            const openIcon = dashboardToggle.querySelector('.open-icon');
+            const closeIcon = dashboardToggle.querySelector('.close-icon');
+            
+            // Make sure the elements exist before toggling classes
+            if (openIcon && closeIcon) {
+                openIcon.classList.toggle('hidden', isActive);
+                closeIcon.classList.toggle('hidden', !isActive);
+                
+                // Ensure the gear icon is visible and clickable when needed
+                if (!isActive) {
+                    openIcon.style.display = 'inline-block';
+                }
+            }
         });
 
         // Input range event listeners
@@ -311,23 +327,19 @@ import { predefinedMaps } from './wasm-interface.js';
     // Function to update the terrain visualization based on the selected map
     function updateTerrainVisualization(mapSelection) {
         const map = predefinedMaps[mapSelection] || predefinedMaps.default;
-        // Parse the map string to extract points
-        const points = map.replace(/[^0-9\s]/g, ' ')
-            .trim()
-            .split(/\s+/)
-            .map(s => parseInt(s))
-            .filter(n => !isNaN(n));
-
+        // Check if map exists and is an array
+        if (!map || !Array.isArray(map) || map.length < 2) {
+            console.error('Invalid map structure. Expected array of coordinate pairs.');
+            return;
+        }
         // Create SVG elements for the terrain
         let terrainSVG = '';
         let landingZoneFound = false;
-
-        // Create lines between points
-        for (let i = 0; i < points.length - 3; i += 2) {
-            const x1 = points[i];
-            const y1 = points[i + 1];
-            const x2 = points[i + 2];
-            const y2 = points[i + 3];
+        // Create lines between consecutive points
+        for (let i = 0; i < map.length - 1; i++) {
+            // Get current and next point coordinates
+            const [x1, y1] = map[i];
+            const [x2, y2] = map[i + 1];
 
             // Check if this segment is a flat one (potential landing zone)
             const isLandingZone = y1 === y2;

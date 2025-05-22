@@ -2,18 +2,18 @@
 <html lang="en">
 
 <head>
+  <link rel="stylesheet" href="styles.css">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, viewport-fit=cover">
   <title>Mars Lander Viewer</title>
-  
+
   <!-- Resource hints for faster loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="//fonts.googleapis.com">
   <link rel="dns-prefetch" href="//fonts.gstatic.com">
-  
+
   <!-- Preload critical assets -->
-  <link rel="preload" href="styles.css" as="style">
   <style>
     /* Critical CSS for above-the-fold content */
     :root {
@@ -96,7 +96,7 @@
       overflow: hidden;
       aspect-ratio: 7/3;
     }
-    
+
     .fonts-loaded h1,
     .fonts-loaded h2,
     .fonts-loaded h3,
@@ -106,32 +106,42 @@
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
     }
-    
+
     .fonts-loaded {
       animation: text-focus 0.2s ease-out forwards;
     }
-    
+
     @keyframes text-focus {
-      0% { opacity: 0.98; }
-      100% { opacity: 1; }
+      0% {
+        opacity: 0.98;
+      }
+
+      100% {
+        opacity: 1;
+      }
     }
   </style>
-  
+
   <!-- Non-blocking CSS loading -->
   <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="styles.css"></noscript>
-  
+  <noscript>
+    <link rel="stylesheet" href="styles.css">
+  </noscript>
+
   <!-- Optimized font loading with display swap -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" crossorigin>
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
-  
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"
+    media="print" onload="this.media='all'" crossorigin>
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  </noscript>
+
   <!-- Favicon with cache control -->
   <link rel="icon" type="image/x-icon" href="favicon/favicon.ico?v=1.0.0">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png?v=1.0.0">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png?v=1.0.0">
   <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png?v=1.0.0">
   <link rel="manifest" href="site.webmanifest?v=1.0.0">
-  
+
   <meta name="theme-color" content="#000824">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -141,15 +151,15 @@
   <meta name="author" content="Mathieu Soysal">
   <meta name="robots" content="index, follow">
   <meta name="revisit-after" content="1 days">
-  
+
   <!-- Cache control - Note: Should be implemented server-side as well -->
   <meta http-equiv="Cache-Control" content="public, max-age=31536000, immutable">
-  
+
   <!-- Improved font loading strategy -->
   <script>
     // Flag for tracking font loading state
     let fontsLoaded = false;
-    
+
     // Function to apply the fonts-loaded class
     function markFontsAsLoaded() {
       if (!fontsLoaded) {
@@ -157,7 +167,7 @@
         fontsLoaded = true;
       }
     }
-    
+
     // Check if Font Loading API is supported
     if ('fonts' in document) {
       Promise.all([
@@ -165,21 +175,21 @@
         document.fonts.load('400 1em Roboto'),
         document.fonts.load('500 1em Roboto')
       ]).then(markFontsAsLoaded)
-      .catch(() => {
-        setTimeout(markFontsAsLoaded, 1000);
-      });
-      
+        .catch(() => {
+          setTimeout(markFontsAsLoaded, 1000);
+        });
+
       document.fonts.addEventListener('loadingdone', markFontsAsLoaded);
     } else {
       setTimeout(markFontsAsLoaded, 1000);
     }
-    
+
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && !fontsLoaded) {
         markFontsAsLoaded();
       }
     });
-    
+
     window.addEventListener('load', () => {
       setTimeout(markFontsAsLoaded, 100);
     });
@@ -337,7 +347,7 @@
   <div class="seek-container">
     <input type="range" id="seek" min="1" max="300" value="1" />
   </div>
-  
+
   <script type="module">
     window.addEventListener('DOMContentLoaded', () => {
       import('./js/ui-controller.js?v=1.0.0').catch(e => console.error('Failed to load UI controller:', e));
