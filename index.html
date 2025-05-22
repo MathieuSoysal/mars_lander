@@ -348,10 +348,8 @@
     <input type="range" id="seek" min="1" max="300" value="1" />
   </div>
 
-  <script type="module">
-    window.addEventListener('DOMContentLoaded', () => {
+  <script type="module" fetchpriority="low" defer>
       import('./js/ui-controller.js?v=1.0.0').catch(e => console.error('Failed to load UI controller:', e));
-    });
   </script>
 </body>
 
