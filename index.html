@@ -153,7 +153,7 @@
   <meta name="revisit-after" content="1 days">
 
   <!-- Cache control - Note: Should be implemented server-side as well -->
-  <meta http-equiv="Cache-Control" content="public, max-age=31536000, immutable">
+  <meta http-equiv="Cache-Control" content="public, max-age=31536000, must-revalidate">
 
   <!-- Improved font loading strategy -->
   <script>
@@ -347,9 +347,11 @@
   <div class="seek-container">
     <input type="range" id="seek" min="1" max="300" value="1" />
   </div>
-
-  <script type="module" fetchpriority="low" defer>
-      import('./js/ui-controller.js?v=1.0.0').catch(e => console.error('Failed to load UI controller:', e));
+  
+  <script type="module">
+    window.addEventListener('DOMContentLoaded', () => {
+      import('./js/ui-controller.js').catch(e => console.error('Failed to load UI controller:', e));
+    });
   </script>
 </body>
 
