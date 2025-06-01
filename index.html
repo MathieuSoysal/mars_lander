@@ -347,12 +347,8 @@
   <div class="seek-container">
     <input type="range" id="seek" min="1" max="300" value="1" />
   </div>
-  
-  <script type="module">
-    window.addEventListener('DOMContentLoaded', () => {
-      import('./js/ui-controller.js').catch(e => console.error('Failed to load UI controller:', e));
-    });
-  </script>
+
+  <script type="module" src="js/ui-controller.js"></script>
 </body>
 
 </html>
