@@ -89,6 +89,7 @@ pub fn run_simulation(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use colored::*;
     use rayon::prelude::*;
 
     fn test_one() -> i32 {
@@ -159,13 +160,102 @@ mod tests {
 
         const N_TESTS: usize = 15000;
         let res: Vec<i32> = (0..N_TESTS).into_par_iter().map(|_| test_one()).collect();
+
+        // Calculate statistics
         let failed = res.iter().filter(|&&x| x == -1).count();
+        let successful: Vec<i32> = res.iter().filter(|&&x| x != -1).cloned().collect();
+        let success_rate = (N_TESTS - failed) as f64 * 100.0 / N_TESTS as f64;
+
+        println!("\n{}", "=".repeat(60).bright_cyan());
+
+        // Overall results
+        println!("\n{}", "📊 OVERALL RESULTS:".bright_green().bold());
         println!(
-            "Results: {:?} \n({}/{} failed ({:.1}%))",
-            res,
-            failed,
-            N_TESTS,
-            failed as f64 * 100.0 / N_TESTS as f64
+            "  Total runs: {}",
+            N_TESTS.to_string().bright_white().bold()
         );
+        println!(
+            "  Successful: {}",
+            (N_TESTS - failed).to_string().bright_green().bold()
+        );
+        println!("  Failed: {}", failed.to_string().bright_red().bold());
+        println!(
+            "  Success rate: {}%",
+            format!("{:.2}", success_rate).bright_cyan().bold()
+        );
+
+        if !successful.is_empty() {
+            // Success statistics
+            let min_gen = *successful.iter().min().unwrap();
+            let max_gen = *successful.iter().max().unwrap();
+            let avg_gen = successful.iter().sum::<i32>() as f64 / successful.len() as f64;
+
+            // Calculate median
+            let mut sorted_successful = successful.clone();
+            sorted_successful.sort();
+            let median_gen = if sorted_successful.len() % 2 == 0 {
+                (sorted_successful[sorted_successful.len() / 2 - 1]
+                    + sorted_successful[sorted_successful.len() / 2]) as f64
+                    / 2.0
+            } else {
+                sorted_successful[sorted_successful.len() / 2] as f64
+            };
+
+            // Calculate standard deviation
+            let variance = successful
+                .iter()
+                .map(|&x| (x as f64 - avg_gen).powi(2))
+                .sum::<f64>()
+                / successful.len() as f64;
+            let std_dev = variance.sqrt();
+
+            println!(
+                "\n{}",
+                "📈 SUCCESS STATISTICS (generations to solution):"
+                    .bright_green()
+                    .bold()
+            );
+            println!(
+                "  Fastest: {} generations",
+                min_gen.to_string().bright_green().bold()
+            );
+            println!(
+                "  Slowest: {} generations",
+                max_gen.to_string().bright_yellow()
+            );
+            println!(
+                "  Average: {:.2} generations",
+                format!("{:.2}", avg_gen).bright_blue().bold()
+            );
+            println!(
+                "  Median: {:.2} generations",
+                format!("{:.2}", median_gen).bright_purple().bold()
+            );
+            println!("  Std Dev: {:.2}", format!("{:.2}", std_dev).bright_white());
+
+            // Performance quality assessment
+            println!("\n{}", "🎯 PERFORMANCE ASSESSMENT:".bright_magenta().bold());
+            if success_rate >= 95.0 {
+                println!("  Quality: {}", "EXCELLENT 🌟".bright_green().bold());
+            } else if success_rate >= 70.0 {
+                println!("  Quality: {}", "GOOD ✅".bright_blue().bold());
+            } else if success_rate >= 50.0 {
+                println!("  Quality: {}", "FAIR ⚠️".bright_yellow().bold());
+            } else {
+                println!("  Quality: {}", "POOR ❌".bright_red().bold());
+            }
+
+            if avg_gen <= 10.0 {
+                println!("  Speed: {}", "VERY FAST ⚡".bright_green().bold());
+            } else if avg_gen <= 20.0 {
+                println!("  Speed: {}", "FAST 🏃".bright_blue().bold());
+            } else if avg_gen <= 35.0 {
+                println!("  Speed: {}", "MODERATE 🚶".bright_yellow().bold());
+            } else {
+                println!("  Speed: {}", "SLOW 🐌".bright_red().bold());
+            }
+        }
+
+        println!("{}", "=".repeat(60).bright_cyan());
     }
 }
