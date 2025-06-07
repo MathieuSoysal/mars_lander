@@ -1,8 +1,6 @@
-use crate::genetics::pheno::Phenotype;
+use crate::{entities::genome::WINNING_FITNESS, genetics::pheno::Phenotype};
 use itertools::Itertools;
 use rand::prelude::*;
-
-const WINNING_FITNESS: i32 = 7000 * 500 + 90 * 500 + 90 * 500 + 90 * 500;
 
 // Returns true if any individual solved the problem
 pub fn elitiste_new_population<T>(
@@ -10,6 +8,7 @@ pub fn elitiste_new_population<T>(
     new_population: &mut [T],
     elite_count: usize,
     crossover_rate: f64,
+    mutation_rate: f64,
 ) -> bool
 where
     T: Phenotype<i32> + Clone,
@@ -47,9 +46,9 @@ where
         if rng.gen_bool(crossover_rate) {
             let p2_idx = tournament(&mut rng);
             let p2 = &population[p2_idx];
-            new_population[i] = p1.crossover(p2).mutate();
+            new_population[i] = p1.crossover(p2).mutate(mutation_rate);
         } else {
-            new_population[i] = p1.mutate();
+            new_population[i] = p1.mutate(mutation_rate);
         }
     }
     solved

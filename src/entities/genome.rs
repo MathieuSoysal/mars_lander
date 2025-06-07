@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::{genetics::pheno::Phenotype, params};
+use crate::{genetics::pheno::Phenotype};
 
 use super::{
     game::{Game, HEIGHT},
@@ -117,6 +117,13 @@ impl<'a> DNA<'a> {
     }
 }
 
+pub const WINNING_FITNESS: i32 = 7000 * 500 + 90 * 500 + 500 * 500 + 500 * 500;
+
+#[inline(always)]
+fn calc_fitness(land_dist: i32, rot: i32, x_speed: i32, y_speed: i32, fuel: i32) -> i32 {
+    (7000 - land_dist) * 500 + (90 - rot.abs()) * 500
+        + (500 - x_speed.abs()) * 500 + (500 - y_speed.abs()) * 500 + fuel * 5000
+}
 /*
 TODO Adjust weights
 Order of importance:
@@ -140,7 +147,7 @@ impl<'a> Phenotype<i32> for DNA<'a> {
             s.apply_movement();
 
             if self.game.starship_is_landing(&s) {
-                self.fitness = 7000 *500 + 90 *500 + 90 *500 + 90 *500 + s.get_fuel() as i32 * 5000;
+                self.fitness = calc_fitness(0, 0, 0, 0, s.get_fuel() as i32);
                 break;
             }
 
@@ -148,11 +155,9 @@ impl<'a> Phenotype<i32> for DNA<'a> {
                 let land_distance = self.game.get_distance_to_landing(&s);
 
                 if land_distance == 0 {
-                    self.fitness = (7000 *500) + (90 - s.get_rotation().abs() as i32) * 500
-                    + (90 - s.get_x_speed().abs().clamp(20., 90.) as i32) * 500
-                    + (90 - s.get_y_speed().abs().clamp(40., 90.) as i32) * 500;
+                    self.fitness = calc_fitness(0, s.get_rotation() as i32, s.get_x_speed() as i32, s.get_y_speed() as i32, 0);
                 } else {
-                    self.fitness = (7000 - land_distance) * 500;
+                    self.fitness = calc_fitness(land_distance, 90, 500, 500, 0);
                 }
                 break;
             }
@@ -160,11 +165,11 @@ impl<'a> Phenotype<i32> for DNA<'a> {
         self.fitness
     }
 
-    fn mutate(&self) -> DNA<'a> {
+    fn mutate(&self, mutation_rate: f64) -> DNA<'a> {
         let mut mutated = *self;
         mutated.fitness = -1;
         for i in 0..GENOME_SIZE {
-            if rand::thread_rng().gen_bool(params::get_params().mutation_rate) {
+            if rand::thread_rng().gen_bool(mutation_rate) {
                 mutated.genome[i] = rand::random::<u8>();
             }
         }

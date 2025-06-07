@@ -103,7 +103,7 @@ where
                 // Create children from the selected parents and mutate them.
                 children = parents
                     .iter()
-                    .map(|&(a, b)| a.crossover(b).mutate())
+                    .map(|&(a, b)| a.crossover(b).mutate(0.0))
                     .collect();
             }
             // Kill off parts of the population at random to make room for the children
@@ -113,12 +113,12 @@ where
             if let Some(ref mut stopper) = self.earlystopper {
                 // Create clones and get fitness since we need mutability
                 let mut highest_fitness: Option<F> = None;
-                
+
                 // Find the highest fitness directly by calculating for each individual
                 for x in self.population.iter() {
                     let mut clone = x.clone();
                     let fitness = clone.fitness();
-                    
+
                     if highest_fitness.is_none() {
                         highest_fitness = Some(fitness);
                     } else if let Some(ref current_best) = highest_fitness {
@@ -127,7 +127,7 @@ where
                         }
                     }
                 }
-                
+
                 // Use the calculated value directly without dereferencing
                 if let Some(highest) = highest_fitness {
                     stopper.update(highest); // Pass by value, no dereferencing needed
@@ -179,11 +179,11 @@ where
                 // Find the individual with the highest fitness by creating clones
                 let mut best_idx = 0;
                 let mut best_fitness: Option<F> = None;
-                
+
                 for (i, x) in self.population.iter().enumerate() {
                     let mut clone = x.clone();
                     let fitness = clone.fitness();
-                    
+
                     if best_fitness.is_none() {
                         best_fitness = Some(fitness);
                         best_idx = i;
@@ -194,7 +194,7 @@ where
                         }
                     }
                 }
-                
+
                 Ok(&self.population[best_idx])
             }
         }

@@ -8,5 +8,5 @@ where
 {
     fn fitness(&mut self) -> F;
     fn crossover(&self, other: &Self) -> Self;
-    fn mutate(&self) -> Self;
+    fn mutate(&self, mutation_rate: f64) -> Self;
 }

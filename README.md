@@ -92,6 +92,11 @@ This project applies these GA principles as follows:
    http://localhost:8000/
    ```
 
+4. Test performances
+    ```
+    cargo test --release -- --nocapture test_perfs
+    ```
+
 ### Using the Interface 🎮
 
 1. Select a terrain configuration

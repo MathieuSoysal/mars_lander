@@ -36,12 +36,8 @@ pub fn run_simulation(
         mutation_rate,
         elite_rate,
     };
-    params::set_params(params);
 
-    log(&format!(
-        "Running simulation with {:?}",
-        params::get_params()
-    ));
+    log(&format!("Running simulation with {:?}", params));
 
     let mut returned: Vec<String> = Vec::new();
     let mut game = Game::new(10);
@@ -77,6 +73,7 @@ pub fn run_simulation(
             &mut new_population,
             elite_count,
             params.crossover_rate,
+            params.mutation_rate,
         );
 
         if first_ok == -1 && found_solution {
@@ -87,4 +84,85 @@ pub fn run_simulation(
     }
     log(&format!("First ok: {}", first_ok));
     returned
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rayon::prelude::*;
+
+    fn test_one() -> i32 {
+        let params = SimulationParams {
+            pop_size: 100,
+            nb_generations: 200,
+            crossover_rate: 0.96,
+            mutation_rate: 0.03,
+            elite_rate: 0.05,
+        };
+
+        let mut game = Game::new(10);
+        let starship = Starship::new(2500, 2700, 5500, 0, 0, 0., 0.);
+
+        let points = "(0, 100)
+        (1000, 500)
+        (1500, 1500)
+        (3000, 1000)
+        (4000, 150)
+        (5500, 150)
+        (6999, 800)
+        ";
+
+        let points = points.replace(|c: char| !c.is_ascii_digit(), " ");
+        let points = points
+            .split_whitespace()
+            .map(|s| s.parse::<usize>().unwrap())
+            .collect_vec();
+
+        for i in (0..points.len()).step_by(2) {
+            game.add_point(points[i], points[i + 1]);
+        }
+
+        let mut population = (0..params.pop_size)
+            .map(|_| {
+                let genome = gen_init_rand();
+                DNA::new(genome, &game, starship.copy())
+            })
+            .collect_vec();
+
+        let mut new_population = population.clone();
+
+        let mut first_ok = -1;
+        let elite_count = (params.elite_rate * params.pop_size as f64).floor() as usize;
+        for generation in 0..params.nb_generations {
+            let found_solution = elitiste_new_population(
+                &mut population,
+                &mut new_population,
+                elite_count,
+                params.crossover_rate,
+                params.mutation_rate,
+            );
+
+            if first_ok == -1 && found_solution {
+                first_ok = generation + 1;
+            }
+            std::mem::swap(&mut population, &mut new_population);
+        }
+        first_ok
+    }
+
+    #[test]
+    fn test_perfs() {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(8)
+            .build_global()
+            .unwrap();
+
+        let res: Vec<i32> = (0..2000)
+            .into_par_iter()
+            .map(|_| test_one())
+            .filter(|&first_ok| first_ok >= 0)
+            .collect();
+
+        println!("Results: {:?}", res);
+    }
 }
