@@ -94,10 +94,10 @@ mod tests {
     fn test_one() -> i32 {
         let params = SimulationParams {
             pop_size: 100,
-            nb_generations: 200,
+            nb_generations: 50,
             crossover_rate: 0.96,
-            mutation_rate: 0.03,
-            elite_rate: 0.05,
+            mutation_rate: 0.045,
+            elite_rate: 0.045,
         };
 
         let mut game = Game::new(10);
@@ -153,16 +153,19 @@ mod tests {
     #[test]
     fn test_perfs() {
         rayon::ThreadPoolBuilder::new()
-            .num_threads(8)
+            .num_threads(20)
             .build_global()
             .unwrap();
 
-        let res: Vec<i32> = (0..2000)
-            .into_par_iter()
-            .map(|_| test_one())
-            .filter(|&first_ok| first_ok >= 0)
-            .collect();
-
-        println!("Results: {:?}", res);
+        const N_TESTS: usize = 15000;
+        let res: Vec<i32> = (0..N_TESTS).into_par_iter().map(|_| test_one()).collect();
+        let failed = res.iter().filter(|&&x| x == -1).count();
+        println!(
+            "Results: {:?} \n({}/{} failed ({:.1}%))",
+            res,
+            failed,
+            N_TESTS,
+            failed as f64 * 100.0 / N_TESTS as f64
+        );
     }
 }
