@@ -15,6 +15,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly run_simulation: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
   readonly __wbg_simulationparams_free: (a: number, b: number) => void;
   readonly __wbg_get_simulationparams_pop_size: (a: number) => number;
   readonly __wbg_set_simulationparams_pop_size: (a: number, b: number) => void;
@@ -26,7 +27,6 @@ export interface InitOutput {
   readonly __wbg_set_simulationparams_mutation_rate: (a: number, b: number) => void;
   readonly __wbg_get_simulationparams_elite_rate: (a: number) => number;
   readonly __wbg_set_simulationparams_elite_rate: (a: number, b: number) => void;
-  readonly run_simulation: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number];
   readonly __wbindgen_exn_store: (a: number) => void;
   readonly __externref_table_alloc: () => number;
   readonly __wbindgen_export_2: WebAssembly.Table;

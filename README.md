@@ -79,7 +79,7 @@ This project applies these GA principles as follows:
 
 1. Build the Rust WASM:
    ```sh
-   wasm-pack build --target web
+   wasm-pack build --release --target web
    ```
 
 2. Run a local server:

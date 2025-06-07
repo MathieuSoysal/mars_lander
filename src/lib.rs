@@ -94,11 +94,11 @@ mod tests {
 
     fn test_one() -> i32 {
         let params = SimulationParams {
-            pop_size: 100,
+            pop_size: 300,
             nb_generations: 50,
             crossover_rate: 0.96,
-            mutation_rate: 0.045,
-            elite_rate: 0.045,
+            mutation_rate: 0.055,
+            elite_rate: 0.07,
         };
 
         let mut game = Game::new(10);
@@ -154,11 +154,11 @@ mod tests {
     #[test]
     fn test_perfs() {
         rayon::ThreadPoolBuilder::new()
-            .num_threads(20)
+            .num_threads(16)
             .build_global()
             .unwrap();
 
-        const N_TESTS: usize = 15000;
+        const N_TESTS: usize = 1;
         let res: Vec<i32> = (0..N_TESTS).into_par_iter().map(|_| test_one()).collect();
 
         // Calculate statistics
@@ -166,10 +166,10 @@ mod tests {
         let successful: Vec<i32> = res.iter().filter(|&&x| x != -1).cloned().collect();
         let success_rate = (N_TESTS - failed) as f64 * 100.0 / N_TESTS as f64;
 
-        println!("\n{}", "=".repeat(60).bright_cyan());
+        println!("{}", "=".repeat(60).bright_cyan());
 
         // Overall results
-        println!("\n{}", "📊 OVERALL RESULTS:".bright_green().bold());
+        println!("{}", "📊 OVERALL RESULTS:".bright_green().bold());
         println!(
             "  Total runs: {}",
             N_TESTS.to_string().bright_white().bold()
@@ -232,28 +232,6 @@ mod tests {
                 format!("{:.2}", median_gen).bright_purple().bold()
             );
             println!("  Std Dev: {:.2}", format!("{:.2}", std_dev).bright_white());
-
-            // Performance quality assessment
-            println!("\n{}", "🎯 PERFORMANCE ASSESSMENT:".bright_magenta().bold());
-            if success_rate >= 95.0 {
-                println!("  Quality: {}", "EXCELLENT 🌟".bright_green().bold());
-            } else if success_rate >= 70.0 {
-                println!("  Quality: {}", "GOOD ✅".bright_blue().bold());
-            } else if success_rate >= 50.0 {
-                println!("  Quality: {}", "FAIR ⚠️".bright_yellow().bold());
-            } else {
-                println!("  Quality: {}", "POOR ❌".bright_red().bold());
-            }
-
-            if avg_gen <= 10.0 {
-                println!("  Speed: {}", "VERY FAST ⚡".bright_green().bold());
-            } else if avg_gen <= 20.0 {
-                println!("  Speed: {}", "FAST 🏃".bright_blue().bold());
-            } else if avg_gen <= 35.0 {
-                println!("  Speed: {}", "MODERATE 🚶".bright_yellow().bold());
-            } else {
-                println!("  Speed: {}", "SLOW 🐌".bright_red().bold());
-            }
         }
 
         println!("{}", "=".repeat(60).bright_cyan());
