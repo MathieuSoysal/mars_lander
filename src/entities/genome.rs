@@ -1,6 +1,5 @@
+use std::ops::Div as _;
 use rand::Rng;
-
-use crate::{genetics::pheno::Phenotype};
 
 use super::{
     game::{Game, HEIGHT},
@@ -63,7 +62,7 @@ pub struct DNA<'a> {
     genome: Genome,
     game: &'a Game,
     starship: Starship,
-    fitness: i32,
+    fitness: f64,
 }
 
 impl<'a> DNA<'a> {
@@ -72,7 +71,7 @@ impl<'a> DNA<'a> {
             genome,
             game,
             starship,
-            fitness: -1,
+            fitness: -1.,
         }
     }
 
@@ -117,27 +116,52 @@ impl<'a> DNA<'a> {
     }
 }
 
-pub const WINNING_FITNESS: i32 = 7000 * 500 + 90 * 500 + 500 * 500 + 500 * 500;
-
-#[inline(always)]
-fn calc_fitness(land_dist: i32, rot: i32, x_speed: i32, y_speed: i32, fuel: i32) -> i32 {
-    (7000 - land_dist) * 500 + (90 - rot.abs()) * 500
-        + (500 - x_speed.abs()) * 500 + (500 - y_speed.abs()) * 500 + fuel * 5000
-}
 /*
 TODO Adjust weights
 Order of importance:
  - land_distance (if we take account of y, put 8000 instead of 7000)
+    goal: 0
+    range: [0, 7000]
+    nval: 7001 (2**13)
  - rotation
- - x & y speed
+    goal: 0
+    range: [0, 90]
+    nval: 91 (2**7)
+- x speed
+    goal: abs <= 20
+    mx_val: [0, 4 * GENOME_SIZE]
+    nval: 4 * GENOME_SIZE + 1 (2**9)
+ - y speed
+    goal: abs <= 40
+    mx_val: [0, 4 * GENOME_SIZE]
+    nval: 4 * GENOME_SIZE + 1 (2**9)
  - fuel (take account of it only for thoose who succeed)
+    range: [0, 2000]
+    nval: 2001 (2**11)
 */
-impl<'a> Phenotype<i32> for DNA<'a> {
-    fn fitness(&mut self) -> i32 {
-        if self.fitness != -1 {
+const LAND_DISTANCE_WEIGHT: f64 = 10.0;
+const ROTATION_WEIGHT: f64 = 5.0;
+const X_SPEED_WEIGHT: f64 = 4.0;
+const Y_SPEED_WEIGHT: f64 = 3.0;
+const FUEL_WEIGHT: f64 = 100.0;
+
+pub const WINNING_FITNESS: f64 = LAND_DISTANCE_WEIGHT + ROTATION_WEIGHT + X_SPEED_WEIGHT + Y_SPEED_WEIGHT;
+
+#[inline(always)]
+fn calc_fit(land_dist: i32, rot: i8, x_speed: f32, y_speed: f32, fuel: u16) -> f64 {
+    (7000.0 - land_dist as f64).div(7000.) * LAND_DISTANCE_WEIGHT + 
+    (90.0 - rot.abs() as f64).div(90.) * ROTATION_WEIGHT +
+    (500.0 - x_speed.abs() as f64).div(500.) * X_SPEED_WEIGHT +
+    (500.0 - y_speed.abs() as f64).div(500.) * Y_SPEED_WEIGHT +
+    (fuel as f64).div(2000.) * FUEL_WEIGHT
+}
+
+impl<'a> DNA<'a> {
+    pub fn fitness(&mut self) -> f64 {
+        if self.fitness != -1.0 {
             return self.fitness;
         }
-        self.fitness = 0;
+        self.fitness = 0.0;
         let mut s = self.starship.copy();
         for i in 0..GENOME_SIZE {
             let rotate = get_rotate_on_turn(&self.genome, i);
@@ -147,27 +171,22 @@ impl<'a> Phenotype<i32> for DNA<'a> {
             s.apply_movement();
 
             if self.game.starship_is_landing(&s) {
-                self.fitness = calc_fitness(0, 0, 0, 0, s.get_fuel() as i32);
+                self.fitness = calc_fit(0, 0, 0., 0., s.get_fuel());
                 break;
             }
 
             if self.game.starship_is_crash(&s) {
                 let land_distance = self.game.get_distance_to_landing(&s);
-
-                if land_distance == 0 {
-                    self.fitness = calc_fitness(0, s.get_rotation() as i32, s.get_x_speed() as i32, s.get_y_speed() as i32, 0);
-                } else {
-                    self.fitness = calc_fitness(land_distance, 90, 500, 500, 0);
-                }
+                self.fitness = calc_fit(land_distance, s.get_rotation(), s.get_x_speed(), s.get_y_speed(), 0);
                 break;
             }
         }
         self.fitness
     }
 
-    fn mutate(&self, mutation_rate: f64) -> DNA<'a> {
+    pub fn mutate(&self, mutation_rate: f64) -> DNA<'a> {
         let mut mutated = *self;
-        mutated.fitness = -1;
+        mutated.fitness = -1.;
         for i in 0..GENOME_SIZE {
             if rand::thread_rng().gen_bool(mutation_rate) {
                 mutated.genome[i] = rand::random::<u8>();
@@ -176,9 +195,9 @@ impl<'a> Phenotype<i32> for DNA<'a> {
         mutated
     }
 
-    fn crossover(&self, other: &Self) -> Self {
+    pub fn crossover(&self, other: &Self) -> Self {
         let mut child = *self;
-        child.fitness = -1;
+        child.fitness = -1.;
         let crossover_point = rand::random::<usize>() % GENOME_SIZE;
         for i in crossover_point..GENOME_SIZE {
             child.genome[i] = other.genome[i];

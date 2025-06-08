@@ -1,18 +1,17 @@
-pub mod my_genetics;
+pub mod algorithms;
 pub mod params;
 
+use algorithms::elitiste::elitiste_new_population;
 use entities::{
     game::Game,
     genome::{DNA, gen_init_rand, population_to_svg},
     starship::Starship,
 };
 use itertools::Itertools;
-use my_genetics::elitiste::elitiste_new_population;
 use params::SimulationParams;
 use wasm_bindgen::prelude::*;
 
 pub mod entities;
-pub mod genetics;
 
 #[wasm_bindgen]
 extern "C" {
@@ -158,7 +157,7 @@ mod tests {
             .build_global()
             .unwrap();
 
-        const N_TESTS: usize = 1;
+        const N_TESTS: usize = 10000;
         let res: Vec<i32> = (0..N_TESTS).into_par_iter().map(|_| test_one()).collect();
 
         // Calculate statistics

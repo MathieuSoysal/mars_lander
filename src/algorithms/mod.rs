@@ -1,13 +1,9 @@
-use crate::genetics::pheno::Phenotype;
+use crate::entities::genome::DNA;
 
-pub mod crossovers;
 pub mod elitiste;
-pub mod populations;
-pub mod selectors;
-pub mod statistics;
 pub mod roulette;
 
-pub fn random_new_population<T: Phenotype<i32>>(population: &[T], new_population: &mut [T]) {
+pub fn random_new_population<'a>(population: &[DNA<'a>], new_population: &mut [DNA<'a>]) {
     for i in 0..population.len() {
         let parent_1 = &population[rand::random::<usize>() % population.len()];
         let parent_2 = &population[rand::random::<usize>() % population.len()];

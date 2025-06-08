@@ -1,24 +1,26 @@
-use crate::{entities::genome::WINNING_FITNESS, genetics::pheno::Phenotype};
+use crate::entities::genome::{DNA, WINNING_FITNESS};
 use itertools::Itertools;
 use rand::prelude::*;
 
 // Returns true if any individual solved the problem
-pub fn elitiste_new_population<T>(
-    population: &mut [T],
-    new_population: &mut [T],
+pub fn elitiste_new_population<'a>(
+    population: &mut [DNA<'a>],
+    new_population: &mut [DNA<'a>],
     elite_count: usize,
     crossover_rate: f64,
     mutation_rate: f64,
-) -> bool
-where
-    T: Phenotype<i32> + Clone,
-{
+) -> bool {
     let mut rng = thread_rng();
 
     let n = population.len();
     // Need to sort using mutable references
     let indices: Vec<usize> = (0..n)
-        .sorted_by_key(|&i| -population[i].fitness())
+        .sorted_by(|&i, &j| {
+            population[j]
+                .fitness()
+                .partial_cmp(&population[i].fitness())
+                .unwrap_or(std::cmp::Ordering::Equal)
+        })
         .collect();
 
     let solved = population[indices[0]].fitness() >= WINNING_FITNESS;
