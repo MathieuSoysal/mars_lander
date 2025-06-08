@@ -1,15 +1,16 @@
-use crate::entities::genome::{DNA, WINNING_FITNESS};
+use crate::entities::{game::Game, genome::DNA};
 use itertools::Itertools;
 use rand::prelude::*;
 
 // Returns true if any individual solved the problem
-pub fn elitiste_new_population<'a>(
-    population: &mut [DNA<'a>],
-    new_population: &mut [DNA<'a>],
+pub fn elitiste_new_population(
+    population: &mut [DNA],
+    new_population: &mut [DNA],
     elite_count: usize,
     crossover_rate: f64,
     mutation_rate: f64,
-) -> bool {
+    game: &Game,
+) -> DNA {
     let mut rng = thread_rng();
 
     let n = population.len();
@@ -17,13 +18,13 @@ pub fn elitiste_new_population<'a>(
     let indices: Vec<usize> = (0..n)
         .sorted_by(|&i, &j| {
             population[j]
-                .fitness()
-                .partial_cmp(&population[i].fitness())
+                .fitness(game)
+                .partial_cmp(&population[i].fitness(game))
                 .unwrap_or(std::cmp::Ordering::Equal)
         })
         .collect();
 
-    let solved = population[indices[0]].fitness() >= WINNING_FITNESS;
+    let solved = population[indices[0]];
 
     // 1) copy elites deterministically
     for i in 0..elite_count {

@@ -11,6 +11,8 @@ use itertools::Itertools;
 use params::SimulationParams;
 use wasm_bindgen::prelude::*;
 
+use crate::entities::genome::WINNING_FITNESS;
+
 pub mod entities;
 
 #[wasm_bindgen]
@@ -58,7 +60,7 @@ pub fn run_simulation(
     let mut population = (0..params.pop_size)
         .map(|_| {
             let genome = gen_init_rand();
-            DNA::new(genome, &game, starship.copy())
+            DNA::new(genome, starship.copy())
         })
         .collect_vec();
 
@@ -67,18 +69,19 @@ pub fn run_simulation(
     let mut first_ok = -1;
     let elite_count = (params.elite_rate * params.pop_size as f64).floor() as usize;
     for generation in 0..params.nb_generations {
-        let found_solution = elitiste_new_population(
+        let mut best_individual = elitiste_new_population(
             &mut population,
             &mut new_population,
             elite_count,
             params.crossover_rate,
             params.mutation_rate,
+            &game,
         );
 
-        if first_ok == -1 && found_solution {
+        if first_ok == -1 && best_individual.fitness(&game) >= WINNING_FITNESS {
             first_ok = generation + 1;
         }
-        returned.push(population_to_svg(&population));
+        returned.push(population_to_svg(&population, &game));
         std::mem::swap(&mut population, &mut new_population);
     }
     log(&format!("First ok: {}", first_ok));
@@ -87,21 +90,71 @@ pub fn run_simulation(
 
 #[cfg(test)]
 mod tests {
+    use crate::entities::genome::WINNING_FITNESS;
+
     use super::*;
     use colored::*;
     use rayon::prelude::*;
 
-    fn test_one() -> i32 {
+    fn test_one(params: &SimulationParams, game: &Game, starship: &Starship) -> (i32, Option<DNA>) {
+        let mut population = (0..params.pop_size)
+            .map(|_| {
+                let genome = gen_init_rand();
+                DNA::new(genome, starship.copy())
+            })
+            .collect_vec();
+
+        let mut new_population = population.clone();
+
+        let mut first_ok = -1;
+        let mut overall_best = Option::<DNA>::None;
+        let elite_count = (params.elite_rate * params.pop_size as f64).floor() as usize;
+        for generation in 0..params.nb_generations {
+            let mut best_individual = elitiste_new_population(
+                &mut population,
+                &mut new_population,
+                elite_count,
+                params.crossover_rate,
+                params.mutation_rate,
+                game,
+            );
+
+            if best_individual.fitness(game) >= WINNING_FITNESS {
+                if first_ok == -1 {
+                    first_ok = generation + 1;
+                }
+                if overall_best
+                    .is_none_or(|mut best| best.fitness(game) < best_individual.fitness(game))
+                {
+                    overall_best = Some(best_individual);
+                }
+            }
+            std::mem::swap(&mut population, &mut new_population);
+        }
+        (first_ok, overall_best)
+    }
+
+    #[test]
+    fn test_perfs() {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(16)
+            .build_global()
+            .unwrap();
+
+        const N_TESTS: usize = 10000;
+
         let params = SimulationParams {
-            pop_size: 300,
+            pop_size: 100,
             nb_generations: 50,
             crossover_rate: 0.96,
             mutation_rate: 0.055,
-            elite_rate: 0.07,
+            elite_rate: 0.06,
         };
 
+        const INITIAL_FUEL: u16 = 5500;
+        let starship = Starship::new(2500, 2700, INITIAL_FUEL, 0, 0, 0., 0.);
+
         let mut game = Game::new(10);
-        let starship = Starship::new(2500, 2700, 5500, 0, 0, 0., 0.);
 
         let points = "(0, 100)
         (1000, 500)
@@ -122,47 +175,28 @@ mod tests {
             game.add_point(points[i], points[i + 1]);
         }
 
-        let mut population = (0..params.pop_size)
-            .map(|_| {
-                let genome = gen_init_rand();
-                DNA::new(genome, &game, starship.copy())
-            })
-            .collect_vec();
-
-        let mut new_population = population.clone();
-
-        let mut first_ok = -1;
-        let elite_count = (params.elite_rate * params.pop_size as f64).floor() as usize;
-        for generation in 0..params.nb_generations {
-            let found_solution = elitiste_new_population(
-                &mut population,
-                &mut new_population,
-                elite_count,
-                params.crossover_rate,
-                params.mutation_rate,
-            );
-
-            if first_ok == -1 && found_solution {
-                first_ok = generation + 1;
-            }
-            std::mem::swap(&mut population, &mut new_population);
-        }
-        first_ok
-    }
-
-    #[test]
-    fn test_perfs() {
-        rayon::ThreadPoolBuilder::new()
-            .num_threads(16)
-            .build_global()
-            .unwrap();
-
-        const N_TESTS: usize = 10000;
-        let res: Vec<i32> = (0..N_TESTS).into_par_iter().map(|_| test_one()).collect();
+        let res: Vec<(i32, Option<DNA>)> = (0..N_TESTS)
+            .into_par_iter()
+            .map(|_| test_one(&params, &game, &starship))
+            .collect();
 
         // Calculate statistics
-        let failed = res.iter().filter(|&&x| x == -1).count();
-        let successful: Vec<i32> = res.iter().filter(|&&x| x != -1).cloned().collect();
+        let failed = res.iter().filter(|&&(x, _)| x == -1).count();
+        let successfull_bests: Vec<(i32, DNA)> = res
+            .into_iter()
+            .filter_map(|(x, dna)| {
+                if x != -1 {
+                    Some((x, dna.unwrap()))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        let successful: Vec<i32> = successfull_bests.iter().map(|&(x, _)| x).collect();
+        let successful_fuel: Vec<u16> = successfull_bests
+            .iter()
+            .map(|(_, dna)| INITIAL_FUEL - dna.fuel_left(&game))
+            .collect();
         let success_rate = (N_TESTS - failed) as f64 * 100.0 / N_TESTS as f64;
 
         println!("{}", "=".repeat(60).bright_cyan());
@@ -223,14 +257,64 @@ mod tests {
                 max_gen.to_string().bright_yellow()
             );
             println!(
-                "  Average: {:.2} generations",
+                "  Average: {} generations",
                 format!("{:.2}", avg_gen).bright_blue().bold()
             );
             println!(
-                "  Median: {:.2} generations",
+                "  Median: {} generations",
                 format!("{:.2}", median_gen).bright_purple().bold()
             );
-            println!("  Std Dev: {:.2}", format!("{:.2}", std_dev).bright_white());
+            println!("  Std Dev: {}", format!("{:.2}", std_dev).bright_white());
+        }
+
+        if !successful_fuel.is_empty() {
+            // Fuel statistics
+            let min_fuel = *successful_fuel.iter().min().unwrap();
+            let max_fuel = *successful_fuel.iter().max().unwrap();
+            let avg_fuel = successful_fuel.iter().map(|&x| x as u32).sum::<u32>() as f64
+                / successful_fuel.len() as f64;
+
+            // Calculate median for fuel
+            let mut sorted_successful_fuel = successful_fuel.clone();
+            sorted_successful_fuel.sort();
+            let median_fuel = if sorted_successful_fuel.len() % 2 == 0 {
+                (sorted_successful_fuel[sorted_successful_fuel.len() / 2 - 1] as u32
+                    + sorted_successful_fuel[sorted_successful_fuel.len() / 2] as u32)
+                    as f64
+                    / 2.0
+            } else {
+                sorted_successful_fuel[sorted_successful_fuel.len() / 2] as f64
+            };
+
+            // Calculate standard deviation for fuel
+            let fuel_variance = successful_fuel
+                .iter()
+                .map(|&x| (x as f64 - avg_fuel).powi(2))
+                .sum::<f64>()
+                / successful_fuel.len() as f64;
+            let fuel_std_dev = fuel_variance.sqrt();
+
+            println!(
+                "\n{}",
+                "⛽ FUEL STATISTICS (fuel used):".bright_green().bold()
+            );
+            println!(
+                "  Min Fuel: {} units",
+                min_fuel.to_string().bright_green().bold()
+            );
+            println!("  Max Fuel: {} units", max_fuel.to_string().bright_yellow());
+            println!(
+                "  Average Fuel: {} units",
+                format!("{:.2}", avg_fuel).bright_blue().bold()
+            );
+            println!(
+                "  Median Fuel: {} units",
+                format!("{:.2}", median_fuel).bright_purple().bold()
+            );
+            println!(
+                "  Std Dev Fuel: {}",
+                format!("{:.2}", fuel_std_dev).bright_white()
+            );
         }
 
         println!("{}", "=".repeat(60).bright_cyan());

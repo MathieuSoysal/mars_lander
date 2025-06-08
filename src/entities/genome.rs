@@ -58,28 +58,38 @@ pub fn get_power_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
 }
 
 #[derive(Clone, Copy)]
-pub struct DNA<'a> {
+pub struct DNA {
     genome: Genome,
-    game: &'a Game,
     starship: Starship,
     fitness: f64,
 }
 
-impl<'a> DNA<'a> {
-    pub fn new(genome: Genome, game: &'a Game, starship: Starship) -> Self {
+impl DNA {
+    pub fn new(genome: Genome, starship: Starship) -> Self {
         DNA {
             genome,
-            game,
             starship,
             fitness: -1.,
         }
     }
 
-    pub fn get_game(&self) -> &Game {
-        self.game
+    pub fn fuel_left(&self, game: &Game) -> u16 {
+        let mut s = self.starship.copy();
+        for i in 0..GENOME_SIZE {
+            let rotate = get_rotate_on_turn(&self.genome, i);
+            let power = get_power_on_turn(&self.genome, i);
+            s.add_power(power as i16);
+            s.add_rotation(rotate);
+            s.apply_movement();
+
+            if game.starship_is_landing(&s) || game.starship_is_crash(&s) {
+                break;
+            }
+        }
+        s.get_fuel()
     }
 
-    pub fn to_svg(&self) -> String {
+    pub fn to_svg(&self, game: &Game) -> String {
         let mut str = String::new();
         str.push_str(&format!(
             r#"<polyline points="{},{} "#,
@@ -94,7 +104,7 @@ impl<'a> DNA<'a> {
             s.add_rotation(rotate);
             s.apply_movement();
             str.push_str(&format!("{},{} ", s.get_x(), HEIGHT as i32 - s.get_y()));
-            if self.game.starship_is_landing(&s) {
+            if game.starship_is_landing(&s) {
                 str.push_str(&format!(r#"" fill="none" stroke="green" stroke-width="{}" />"#,10));
                 str.push_str(&format!(
                     r#"<circle cx="{}" cy="{}" r="{}" fill="none" stroke="green" stroke-width="1" />"#,
@@ -102,7 +112,7 @@ impl<'a> DNA<'a> {
                 ));
                 return str;
             }
-            if self.game.starship_is_crash(&s) {
+            if game.starship_is_crash(&s) {
                 str.push_str(r#"" fill="none" stroke="white" />"#);
                 str.push_str(&format!(
                     r#"<circle cx="{}" cy="{}" r="{}" fill="none" stroke="white" stroke-width="1" />"#,
@@ -140,9 +150,9 @@ Order of importance:
     nval: 2001 (2**11)
 */
 const LAND_DISTANCE_WEIGHT: f64 = 10.0;
-const ROTATION_WEIGHT: f64 = 5.0;
-const X_SPEED_WEIGHT: f64 = 4.0;
-const Y_SPEED_WEIGHT: f64 = 4.0;
+const ROTATION_WEIGHT: f64 = 0.0;
+const X_SPEED_WEIGHT: f64 = 2.0;
+const Y_SPEED_WEIGHT: f64 = 10.0;
 const FUEL_WEIGHT: f64 = 100.0;
 
 pub const WINNING_FITNESS: f64 = LAND_DISTANCE_WEIGHT + ROTATION_WEIGHT + X_SPEED_WEIGHT + Y_SPEED_WEIGHT;
@@ -156,8 +166,8 @@ fn calc_fit(land_dist: i32, rot: i8, x_speed: f32, y_speed: f32, fuel: u16) -> f
     (fuel as f64).div(2000.) * FUEL_WEIGHT
 }
 
-impl<'a> DNA<'a> {
-    pub fn fitness(&mut self) -> f64 {
+impl DNA {
+    pub fn fitness(&mut self, game: &Game) -> f64 {
         if self.fitness != -1.0 {
             return self.fitness;
         }
@@ -170,13 +180,13 @@ impl<'a> DNA<'a> {
             s.add_rotation(rotate);
             s.apply_movement();
 
-            if self.game.starship_is_landing(&s) {
+            if game.starship_is_landing(&s) {
                 self.fitness = calc_fit(0, 0, 0., 0., s.get_fuel());
                 break;
             }
 
-            if self.game.starship_is_crash(&s) {
-                let land_distance = self.game.get_distance_to_landing(&s);
+            if game.starship_is_crash(&s) {
+                let land_distance = game.get_distance_to_landing(&s);
                 self.fitness = calc_fit(land_distance, s.get_rotation(), s.get_x_speed(), s.get_y_speed(), 0);
                 break;
             }
@@ -184,7 +194,7 @@ impl<'a> DNA<'a> {
         self.fitness
     }
 
-    pub fn mutate(&self, mutation_rate: f64) -> DNA<'a> {
+    pub fn mutate(&self, mutation_rate: f64) -> DNA {
         let mut mutated = *self;
         mutated.fitness = -1.;
         for i in 0..GENOME_SIZE {
@@ -206,14 +216,14 @@ impl<'a> DNA<'a> {
     }
 }
 
-pub fn population_to_svg(population: &[DNA]) -> String {
+pub fn population_to_svg(population: &[DNA], game: &Game) -> String {
     let mut svg = String::new();
     svg.push_str(r#"<svg xmlns="http://www.w3.org/2000/svg" width="7000" height="3000" viewBox="0 0 7000 3000">"#);
     svg.push_str(r#"<rect width="100%" height="100%" fill="black" />"#);
-    svg.push_str(&population[0].get_game().to_svg());
+    svg.push_str(&game.to_svg());
     svg.push_str("<g>\n");
     for dna in population {
-        svg.push_str(&dna.to_svg());
+        svg.push_str(&dna.to_svg(game));
     }
     svg.push_str("</g>\n");
     svg.push_str("</svg>");

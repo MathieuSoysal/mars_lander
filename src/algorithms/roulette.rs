@@ -1,17 +1,19 @@
 use rand::distributions::Uniform;
 use rand::{Rng, thread_rng};
 
+use crate::entities::game::Game;
 use crate::entities::genome::DNA;
 
-pub fn roulette_new_population<'a>(
-    population: &[DNA<'a>],
-    new_population: &mut [DNA<'a>],
+pub fn roulette_new_population(
+    population: &[DNA],
+    new_population: &mut [DNA],
     crossover_rate: f64,
+    game: &Game,
 ) {
     // 1) Compute (non‐negative) fitnesses
     let fitnesses: Vec<f64> = population
         .iter()
-        .map(|ind| ind.clone().fitness().max(0.))
+        .map(|ind| ind.clone().fitness(game).max(0.))
         .collect();
     let total_fitness: f64 = fitnesses.iter().sum();
     let mut rng = thread_rng();
