@@ -67,6 +67,8 @@ pub fn run_simulation(
     let mut new_population = population.clone();
 
     let mut first_ok = -1;
+    let mut overall_best = Option::<DNA>::None;
+
     let elite_count = (params.elite_rate * params.pop_size as f64).floor() as usize;
     for generation in 0..params.nb_generations {
         let mut best_individual = elitiste_new_population(
@@ -78,13 +80,23 @@ pub fn run_simulation(
             &game,
         );
 
-        if first_ok == -1 && best_individual.fitness(&game) >= WINNING_FITNESS {
-            first_ok = generation + 1;
+        if best_individual.fitness(&game) >= WINNING_FITNESS {
+            if first_ok == -1 {
+                first_ok = generation + 1;
+            }
+            if overall_best
+                .is_none_or(|mut best| best.fitness(&game) < best_individual.fitness(&game))
+            {
+                overall_best = Some(best_individual);
+            }
         }
         returned.push(population_to_svg(&population, &game));
         std::mem::swap(&mut population, &mut new_population);
     }
     log(&format!("First ok: {}", first_ok));
+    if let Some(best) = overall_best {
+        log(&format!("Best fuel: {}", best.fuel_left(&game)));
+    }
     returned
 }
 
