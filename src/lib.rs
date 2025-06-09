@@ -9,11 +9,18 @@ use entities::{
 };
 use itertools::Itertools;
 use params::SimulationParams;
+use rand::distributions::Bernoulli;
 use wasm_bindgen::prelude::*;
 
 use crate::entities::genome::WINNING_FITNESS;
 
 pub mod entities;
+
+macro_rules! parse_input {
+    ($x:expr, $t:ident) => {
+        $x.trim().parse::<$t>().unwrap()
+    };
+}
 
 #[wasm_bindgen]
 extern "C" {
@@ -41,16 +48,32 @@ pub fn run_simulation(
     log(&format!("Running simulation with {:?}", params));
 
     let mut returned: Vec<String> = Vec::new();
-    let mut game = Game::new(10);
-    let starship = Starship::new(2500, 2700, 5500, 0, 0, 0., 0.);
-
-    let points = map;
-
-    let points = points.replace(|c: char| !c.is_ascii_digit(), " ");
-    let points = points
-        .split_whitespace()
-        .map(|s| s.parse::<usize>().unwrap())
+    let input = map.split("\n").collect_vec();
+    let n_points = parse_input!(input[0], usize);
+    let points = (1..=n_points)
+        .flat_map(|line| {
+            input[line]
+                .split_whitespace()
+                .map(|x| parse_input!(x, usize))
+        })
         .collect_vec();
+
+    let (x, y, h_speed, v_speed, fuel, rotate, power) = input[n_points + 1]
+        .split_whitespace()
+        .map(|x| parse_input!(x, i32))
+        .collect_tuple()
+        .unwrap();
+    let starship = Starship::new(
+        x,
+        y,
+        fuel as u16,
+        rotate as i8,
+        power as u8,
+        h_speed as f32,
+        v_speed as f32,
+    );
+
+    let mut game = Game::new(n_points);
 
     for i in (0..points.len()).step_by(2) {
         game.add_point(points[i], points[i + 1]);
@@ -70,13 +93,16 @@ pub fn run_simulation(
     let mut overall_best = Option::<DNA>::None;
 
     let elite_count = (params.elite_rate * params.pop_size as f64).floor() as usize;
+    let crossover_rate = Bernoulli::new(params.crossover_rate).unwrap();
+    let mutation_rate = Bernoulli::new(params.mutation_rate).unwrap();
+
     for generation in 0..params.nb_generations {
         let mut best_individual = elitiste_new_population(
             &mut population,
             &mut new_population,
             elite_count,
-            params.crossover_rate,
-            params.mutation_rate,
+            &crossover_rate,
+            &mutation_rate,
             &game,
         );
 
@@ -106,6 +132,7 @@ mod tests {
 
     use super::*;
     use colored::*;
+    use rand::distributions::Bernoulli;
     use rayon::prelude::*;
 
     fn test_one(params: &SimulationParams, game: &Game, starship: &Starship) -> (i32, Option<DNA>) {
@@ -121,13 +148,16 @@ mod tests {
         let mut first_ok = -1;
         let mut overall_best = Option::<DNA>::None;
         let elite_count = (params.elite_rate * params.pop_size as f64).floor() as usize;
+        let crossover_rate = Bernoulli::new(params.crossover_rate).unwrap();
+        let mutation_rate = Bernoulli::new(params.mutation_rate).unwrap();
+
         for generation in 0..params.nb_generations {
             let mut best_individual = elitiste_new_population(
                 &mut population,
                 &mut new_population,
                 elite_count,
-                params.crossover_rate,
-                params.mutation_rate,
+                &crossover_rate,
+                &mutation_rate,
                 game,
             );
 
@@ -163,25 +193,42 @@ mod tests {
             elite_rate: 0.06,
         };
 
-        const INITIAL_FUEL: u16 = 5500;
-        let starship = Starship::new(2500, 2700, INITIAL_FUEL, 0, 0, 0., 0.);
-
-        let mut game = Game::new(10);
-
-        let points = "(0, 100)
-        (1000, 500)
-        (1500, 1500)
-        (3000, 1000)
-        (4000, 150)
-        (5500, 150)
-        (6999, 800)
-        ";
-
-        let points = points.replace(|c: char| !c.is_ascii_digit(), " ");
-        let points = points
-            .split_whitespace()
-            .map(|s| s.parse::<usize>().unwrap())
+        let input = "7
+0 100
+1000 500
+1500 1500
+3000 1000
+4000 150
+5500 150
+6999 800
+2500 2700 0 0 550 0 0"
+            .split("\n")
             .collect_vec();
+        let n_points = parse_input!(input[0], usize);
+        let points = (1..=n_points)
+            .flat_map(|line| {
+                input[line]
+                    .split_whitespace()
+                    .map(|x| parse_input!(x, usize))
+            })
+            .collect_vec();
+
+        let (x, y, h_speed, v_speed, fuel, rotate, power) = input[n_points + 1]
+            .split_whitespace()
+            .map(|x| parse_input!(x, i32))
+            .collect_tuple()
+            .unwrap();
+        let starship = Starship::new(
+            x,
+            y,
+            fuel as u16,
+            rotate as i8,
+            power as u8,
+            h_speed as f32,
+            v_speed as f32,
+        );
+
+        let mut game = Game::new(n_points);
 
         for i in (0..points.len()).step_by(2) {
             game.add_point(points[i], points[i + 1]);
@@ -207,7 +254,7 @@ mod tests {
         let successful: Vec<i32> = successfull_bests.iter().map(|&(x, _)| x).collect();
         let successful_fuel: Vec<u16> = successfull_bests
             .iter()
-            .map(|(_, dna)| INITIAL_FUEL - dna.fuel_left(&game))
+            .map(|(_, dna)| fuel as u16 - dna.fuel_left(&game))
             .collect();
         let success_rate = (N_TESTS - failed) as f64 * 100.0 / N_TESTS as f64;
 

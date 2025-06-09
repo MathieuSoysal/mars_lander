@@ -1,14 +1,16 @@
 use crate::entities::{game::Game, genome::DNA};
 use itertools::Itertools;
-use rand::prelude::*;
+use rand::{distributions::Bernoulli, prelude::*};
+
+const TOUR_SIZE: usize = 5;
 
 // Returns true if any individual solved the problem
 pub fn elitiste_new_population(
     population: &mut [DNA],
     new_population: &mut [DNA],
     elite_count: usize,
-    crossover_rate: f64,
-    mutation_rate: f64,
+    crossover_rate: &Bernoulli,
+    mutation_rate: &Bernoulli,
     game: &Game,
 ) -> DNA {
     let mut rng = thread_rng();
@@ -35,7 +37,6 @@ pub fn elitiste_new_population(
 
     // helper: tournament select one parent
     let tournament = |rng: &mut ThreadRng| -> usize {
-        const TOUR_SIZE: usize = 5;
         indices[(0..TOUR_SIZE)
             .map(|_| rng.gen_range(0..upper_bound))
             .min()
@@ -46,13 +47,14 @@ pub fn elitiste_new_population(
     for i in elite_count..n {
         let p1_idx = tournament(&mut rng);
         let p1 = &population[p1_idx];
-        if rng.gen_bool(crossover_rate) {
+        if crossover_rate.sample(&mut rng) {
             let p2_idx = tournament(&mut rng);
             let p2 = &population[p2_idx];
-            new_population[i] = p1.crossover(p2).mutate(mutation_rate);
+            new_population[i] = p1.crossover(p2);
         } else {
-            new_population[i] = p1.mutate(mutation_rate);
+            new_population[i] = *p1;
         }
+        new_population[i] = new_population[i].mutate(mutation_rate)
     }
     solved
 }

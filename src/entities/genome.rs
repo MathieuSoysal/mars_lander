@@ -1,5 +1,5 @@
 use std::ops::Div as _;
-use rand::Rng;
+use rand::{distributions::Bernoulli, prelude::*};
 
 use super::{
     game::{Game, HEIGHT},
@@ -20,7 +20,7 @@ pub fn gen_init_rand() -> Genome {
     let mut genome = [0; GENOME_SIZE];
     for i in 0..GENOME_SIZE {
         genome[i] =
-            ((rand::random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS) | (rand::random::<u8>() % 3);
+            ((random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS) | (random::<u8>() % 3);
     }
     genome
 }
@@ -194,12 +194,12 @@ impl DNA {
         self.fitness
     }
 
-    pub fn mutate(&self, mutation_rate: f64) -> DNA {
+    pub fn mutate(&self, mutation_rate: &Bernoulli) -> DNA {
         let mut mutated = *self;
         mutated.fitness = -1.;
         for i in 0..GENOME_SIZE {
-            if rand::thread_rng().gen_bool(mutation_rate) {
-                mutated.genome[i] = rand::random::<u8>();
+            if mutation_rate.sample(&mut thread_rng()) {
+                mutated.genome[i] = random::<u8>();
             }
         }
         mutated
@@ -208,7 +208,7 @@ impl DNA {
     pub fn crossover(&self, other: &Self) -> Self {
         let mut child = *self;
         child.fitness = -1.;
-        let crossover_point = rand::random::<usize>() % GENOME_SIZE;
+        let crossover_point = random::<usize>() % GENOME_SIZE;
         for i in crossover_point..GENOME_SIZE {
             child.genome[i] = other.genome[i];
         }

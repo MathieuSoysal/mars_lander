@@ -1,4 +1,4 @@
-use rand::distributions::Uniform;
+use rand::distributions::{Bernoulli, Uniform};
 use rand::{Rng, thread_rng};
 
 use crate::entities::game::Game;
@@ -36,7 +36,7 @@ pub fn roulette_new_population(
         if rng.gen_bool(crossover_rate) {
             let p1 = new_population[i].clone();
             let p2 = new_population[i + 1].clone();
-            new_population[i] = p1.crossover(&p2).mutate(0.0);
+            new_population[i] = p1.crossover(&p2).mutate(&Bernoulli::new(0.0).unwrap());
             new_population[i + 1] = p2.crossover(&p1);
         }
     }
