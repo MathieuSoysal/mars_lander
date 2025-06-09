@@ -326,8 +326,15 @@ import { predefinedMaps } from './wasm-interface.js';
 
     // Function to update the terrain visualization based on the selected map
     function updateTerrainVisualization(mapSelection) {
-        const map = predefinedMaps[mapSelection] || predefinedMaps.default;
+        let smap = predefinedMaps[mapSelection] || predefinedMaps.default;
         // Check if map exists and is an array
+        smap = smap.split("\n");
+        let len = parseInt(smap[0]);
+        let map = [];
+        for (let i = 1; i <= len; i++) {
+            map.push(smap[i].split(" ").map(Number));
+        }
+
         if (!map || !Array.isArray(map) || map.length < 2) {
             console.error('Invalid map structure. Expected array of coordinate pairs.');
             return;
@@ -336,7 +343,7 @@ import { predefinedMaps } from './wasm-interface.js';
         let terrainSVG = '';
         let landingZoneFound = false;
         // Create lines between consecutive points
-        for (let i = 0; i < map.length - 1; i++) {
+        for (let i = 0; i < len - 1; i++) {
             // Get current and next point coordinates
             const [x1, y1] = map[i];
             const [x2, y2] = map[i + 1];
