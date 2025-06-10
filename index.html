@@ -206,35 +206,6 @@
       <div id="svg-container">
         <div class="scanner-overlay"></div>
         <div class="grid-overlay"></div>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7000 3000" width="100%" height="100%">
-          <defs>
-            <radialGradient id="marsGlow" cx="50%" cy="100%" r="70%" fx="50%" fy="100%">
-              <stop offset="0%" stop-color="rgba(255, 60, 0, 0.2)" />
-              <stop offset="100%" stop-color="rgba(0, 0, 0, 0)" />
-            </radialGradient>
-
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-
-          <rect width="100%" height="100%" fill="black"></rect>
-
-          <rect x="0" y="2500" width="7000" height="500" fill="url(#marsGlow)" opacity="0.7"></rect>
-
-          <line x1="0" y1="1500" x2="1000" y2="1000" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
-          <line x1="1000" y1="1000" x2="2000" y2="2500" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
-          <line x1="3500" y1="2500" x2="5000" y2="1500" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
-          <line x1="5000" y1="1500" x2="6999" y2="2000" stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>
-          <line x1="2000" y1="2500" x2="3500" y2="2500" stroke="#00ff9d" stroke-width="8" filter="url(#glow)">
-            <title>Landing Zone</title>
-            <animate attributeName="stroke-opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" />
-          </line>
-
-          <g>
-          </g>
-        </svg>
       </div>
 
       <div class="player-controls">
