@@ -1,6 +1,5 @@
-use rand::Rng;
-
-use crate::{genetics::pheno::Phenotype, params};
+use std::ops::Div as _;
+use rand::{distributions::Bernoulli, prelude::*};
 
 use super::{
     game::{Game, HEIGHT},
@@ -21,7 +20,7 @@ pub fn gen_init_rand() -> Genome {
     let mut genome = [0; GENOME_SIZE];
     for i in 0..GENOME_SIZE {
         genome[i] =
-            ((rand::random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS) | (rand::random::<u8>() % 3);
+            ((random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS) | (random::<u8>() % 3);
     }
     genome
 }
@@ -59,28 +58,38 @@ pub fn get_power_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
 }
 
 #[derive(Clone, Copy)]
-pub struct DNA<'a> {
+pub struct DNA {
     genome: Genome,
-    game: &'a Game,
     starship: Starship,
-    fitness: i32,
+    fitness: f64,
 }
 
-impl<'a> DNA<'a> {
-    pub fn new(genome: Genome, game: &'a Game, starship: Starship) -> Self {
+impl DNA {
+    pub fn new(genome: Genome, starship: Starship) -> Self {
         DNA {
             genome,
-            game,
             starship,
-            fitness: -1,
+            fitness: -1.,
         }
     }
 
-    pub fn get_game(&self) -> &Game {
-        self.game
+    pub fn fuel_left(&self, game: &Game) -> u16 {
+        let mut s = self.starship.copy();
+        for i in 0..GENOME_SIZE {
+            let rotate = get_rotate_on_turn(&self.genome, i);
+            let power = get_power_on_turn(&self.genome, i);
+            s.add_power(power as i16);
+            s.add_rotation(rotate);
+            s.apply_movement();
+
+            if game.starship_is_landing(&s) || game.starship_is_crash(&s) {
+                break;
+            }
+        }
+        s.get_fuel()
     }
 
-    pub fn to_svg(&self) -> String {
+    pub fn to_svg(&self, game: &Game) -> String {
         let mut str = String::new();
         str.push_str(&format!(
             r#"<polyline points="{},{} "#,
@@ -95,7 +104,7 @@ impl<'a> DNA<'a> {
             s.add_rotation(rotate);
             s.apply_movement();
             str.push_str(&format!("{},{} ", s.get_x(), HEIGHT as i32 - s.get_y()));
-            if self.game.starship_is_landing(&s) {
+            if game.starship_is_landing(&s) {
                 str.push_str(&format!(r#"" fill="none" stroke="green" stroke-width="{}" />"#,10));
                 str.push_str(&format!(
                     r#"<circle cx="{}" cy="{}" r="{}" fill="none" stroke="green" stroke-width="1" />"#,
@@ -103,7 +112,7 @@ impl<'a> DNA<'a> {
                 ));
                 return str;
             }
-            if self.game.starship_is_crash(&s) {
+            if game.starship_is_crash(&s) {
                 str.push_str(r#"" fill="none" stroke="white" />"#);
                 str.push_str(&format!(
                     r#"<circle cx="{}" cy="{}" r="{}" fill="none" stroke="white" stroke-width="1" />"#,
@@ -121,16 +130,48 @@ impl<'a> DNA<'a> {
 TODO Adjust weights
 Order of importance:
  - land_distance (if we take account of y, put 8000 instead of 7000)
+    goal: 0
+    range: [0, 7000]
+    nval: 7001 (2**13)
  - rotation
- - x & y speed
+    goal: 0
+    range: [0, 90]
+    nval: 91 (2**7)
+- x speed
+    goal: abs <= 20
+    mx_val: [0, 4 * GENOME_SIZE]
+    nval: 4 * GENOME_SIZE + 1 (2**9)
+ - y speed
+    goal: abs <= 40
+    mx_val: [0, 4 * GENOME_SIZE]
+    nval: 4 * GENOME_SIZE + 1 (2**9)
  - fuel (take account of it only for thoose who succeed)
+    range: [0, 2000]
+    nval: 2001 (2**11)
 */
-impl<'a> Phenotype<i32> for DNA<'a> {
-    fn fitness(&mut self) -> i32 {
-        if self.fitness != -1 {
+const LAND_DISTANCE_WEIGHT: f64 = 10.0;
+const ROTATION_WEIGHT: f64 = 0.0;
+const X_SPEED_WEIGHT: f64 = 2.0;
+const Y_SPEED_WEIGHT: f64 = 10.0;
+const FUEL_WEIGHT: f64 = 100.0;
+
+pub const WINNING_FITNESS: f64 = LAND_DISTANCE_WEIGHT + ROTATION_WEIGHT + X_SPEED_WEIGHT + Y_SPEED_WEIGHT;
+
+#[inline(always)]
+fn calc_fit(land_dist: i32, rot: i8, x_speed: f32, y_speed: f32, fuel: u16) -> f64 {
+    (7000.0 - land_dist as f64).div(7000.) * LAND_DISTANCE_WEIGHT + 
+    (90.0 - rot.abs() as f64).div(90.) * ROTATION_WEIGHT +
+    (500.0 - x_speed.abs() as f64).div(500.) * X_SPEED_WEIGHT +
+    (500.0 - y_speed.abs() as f64).div(500.) * Y_SPEED_WEIGHT +
+    (fuel as f64).div(2000.) * FUEL_WEIGHT
+}
+
+impl DNA {
+    pub fn fitness(&mut self, game: &Game) -> f64 {
+        if self.fitness != -1.0 {
             return self.fitness;
         }
-        self.fitness = 0;
+        self.fitness = 0.0;
         let mut s = self.starship.copy();
         for i in 0..GENOME_SIZE {
             let rotate = get_rotate_on_turn(&self.genome, i);
@@ -139,42 +180,35 @@ impl<'a> Phenotype<i32> for DNA<'a> {
             s.add_rotation(rotate);
             s.apply_movement();
 
-            if self.game.starship_is_landing(&s) {
-                self.fitness = 7000 *500 + 90 *500 + 90 *500 + 90 *500 + s.get_fuel() as i32 * 5000;
+            if game.starship_is_landing(&s) {
+                self.fitness = calc_fit(0, 0, 0., 0., s.get_fuel());
                 break;
             }
 
-            if self.game.starship_is_crash(&s) {
-                let land_distance = self.game.get_distance_to_landing(&s);
-
-                if land_distance == 0 {
-                    self.fitness = (7000 *500) + (90 - s.get_rotation().abs() as i32) * 500
-                    + (90 - s.get_x_speed().abs().clamp(20., 90.) as i32) * 500
-                    + (90 - s.get_y_speed().abs().clamp(40., 90.) as i32) * 500;
-                } else {
-                    self.fitness = (7000 - land_distance) * 500;
-                }
+            if game.starship_is_crash(&s) {
+                let land_distance = game.get_distance_to_landing(&s);
+                self.fitness = calc_fit(land_distance, s.get_rotation(), s.get_x_speed(), s.get_y_speed(), 0);
                 break;
             }
         }
         self.fitness
     }
 
-    fn mutate(&self) -> DNA<'a> {
+    pub fn mutate(&self, mutation_rate: &Bernoulli) -> DNA {
         let mut mutated = *self;
-        mutated.fitness = -1;
+        mutated.fitness = -1.;
         for i in 0..GENOME_SIZE {
-            if rand::thread_rng().gen_bool(params::get_params().mutation_rate) {
-                mutated.genome[i] = rand::random::<u8>();
+            if mutation_rate.sample(&mut thread_rng()) {
+                mutated.genome[i] = random::<u8>();
             }
         }
         mutated
     }
 
-    fn crossover(&self, other: &Self) -> Self {
+    pub fn crossover(&self, other: &Self) -> Self {
         let mut child = *self;
-        child.fitness = -1;
-        let crossover_point = rand::random::<usize>() % GENOME_SIZE;
+        child.fitness = -1.;
+        let crossover_point = random::<usize>() % GENOME_SIZE;
         for i in crossover_point..GENOME_SIZE {
             child.genome[i] = other.genome[i];
         }
@@ -182,14 +216,14 @@ impl<'a> Phenotype<i32> for DNA<'a> {
     }
 }
 
-pub fn population_to_svg(population: &[DNA]) -> String {
+pub fn population_to_svg(population: &[DNA], game: &Game) -> String {
     let mut svg = String::new();
     svg.push_str(r#"<svg xmlns="http://www.w3.org/2000/svg" width="7000" height="3000" viewBox="0 0 7000 3000">"#);
     svg.push_str(r#"<rect width="100%" height="100%" fill="black" />"#);
-    svg.push_str(&population[0].get_game().to_svg());
+    svg.push_str(&game.to_svg());
     svg.push_str("<g>\n");
     for dna in population {
-        svg.push_str(&dna.to_svg());
+        svg.push_str(&dna.to_svg(game));
     }
     svg.push_str("</g>\n");
     svg.push_str("</svg>");

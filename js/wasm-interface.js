@@ -7,55 +7,81 @@ let wasmLoadPromise = null;
 
 // Predefined map configurations - stored as arrays for faster processing
 const predefinedMaps = {
-  default: [
-    [0, 100],
-    [1000, 500],
-    [1500, 1500],
-    [3000, 1000],
-    [4000, 150],
-    [5500, 150],
-    [6999, 800]
-  ],
-  canyon: [
-    [0, 1000],
-    [1000, 2000],
-    [2000, 200],
-    [3000, 200],
-    [4000, 2000],
-    [5000, 1500],
-    [6999, 1000]
-  ],
-  mountain: [
-    [0, 500],
-    [1000, 800],
-    [2000, 1800],
-    [3000, 2500],
-    [4000, 1800],
-    [5000, 800],
-    [6999, 600]
-  ],
-  plateau: [
-    [0, 1500],
-    [1500, 1500],
-    [2000, 2200],
-    [4500, 2200],
-    [5000, 1500],
-    [6999, 1000]
-  ],
-  valley: [
-    [0, 2000],
-    [1000, 2000],
-    [2000, 500],
-    [3500, 500],
-    [5000, 2000],
-    [6999, 2000]
-  ]
+  default: `7
+0 100
+1000 500
+1500 1500
+3000 1000
+4000 150
+5500 150
+6999 800
+2500 2700 0 0 550 0 0`,
+  canyon: `10
+0 100
+1000 500
+1500 100
+3000 100
+3500 500
+3700 200
+5000 1500
+5800 300
+6000 1000
+6999 2000
+6500 2800 -100 0 600 90 0`,
+  mountain: `7
+0 100
+1000 500
+1500 1500
+3000 1000
+4000 150
+5500 150
+6999 800
+6500 2800 -90 0 750 90 0`,
+  plateau: `20
+0 1000
+300 1500
+350 1400
+500 2000
+800 1800
+1000 2500
+1200 2100
+1500 2400
+2000 1000
+2200 500
+2500 100
+2900 800
+3000 500
+3200 1000
+3500 2000
+3800 800
+4000 200
+5000 200
+5500 1500
+6999 2800
+500 2700 100 0 800 -90 0`,
+  valley: `20
+0 1000
+300 1500
+350 1400
+500 2100
+1500 2100
+2000 200
+2500 500
+2900 300
+3000 200
+3200 1000
+3500 500
+3800 800
+4000 200
+4200 800
+4800 600
+5000 1200
+5500 900
+6000 500
+6500 300
+6999 500
+6500 2700 -50 0 1000 90 0`
 };
-
-// Convert array format to the string format expected by WASM
-function formatMapForSimulation(mapArray) {
-  return mapArray.map(point => `(${point[0]}, ${point[1]})`).join('\n');
-}
 
 // Initialize WebAssembly module lazily
 async function loadWasm() {
@@ -149,8 +175,7 @@ async function runMarsLanderSimulation(params) {
     let eliteRate = params.eliteRate / 100.;
 
     // Get the selected map from predefined maps
-    let mapArray = predefinedMaps[params.mapSelection] || predefinedMaps.default;
-    let map = formatMapForSimulation(mapArray);
+    let map = predefinedMaps[params.mapSelection] || predefinedMaps.default;
 
     console.log(`Calling WASM function 'run_simulation' with ${populationSize} population size, ${nbGenerations} generations, ${crossoverRate} crossover rate, ${mutationRate} mutation rate, ${eliteRate} elite rate, using map: ${params.mapSelection}`);
 

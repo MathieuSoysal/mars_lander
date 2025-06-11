@@ -1,28 +1,32 @@
-use crate::genetics::pheno::Phenotype;
+use crate::entities::{game::Game, genome::DNA};
 use itertools::Itertools;
-use rand::prelude::*;
+use rand::{distributions::Bernoulli, prelude::*};
 
-const WINNING_FITNESS: i32 = 7000 * 500 + 90 * 500 + 90 * 500 + 90 * 500;
+const TOUR_SIZE: usize = 5;
 
 // Returns true if any individual solved the problem
-pub fn elitiste_new_population<T>(
-    population: &mut [T],
-    new_population: &mut [T],
+pub fn elitiste_new_population(
+    population: &mut [DNA],
+    new_population: &mut [DNA],
     elite_count: usize,
-    crossover_rate: f64,
-) -> bool
-where
-    T: Phenotype<i32> + Clone,
-{
+    crossover_rate: &Bernoulli,
+    mutation_rate: &Bernoulli,
+    game: &Game,
+) -> DNA {
     let mut rng = thread_rng();
 
     let n = population.len();
     // Need to sort using mutable references
     let indices: Vec<usize> = (0..n)
-        .sorted_by_key(|&i| -population[i].fitness())
+        .sorted_by(|&i, &j| {
+            population[j]
+                .fitness(game)
+                .partial_cmp(&population[i].fitness(game))
+                .unwrap_or(std::cmp::Ordering::Equal)
+        })
         .collect();
 
-    let solved = population[indices[0]].fitness() >= WINNING_FITNESS;
+    let solved = population[indices[0]];
 
     // 1) copy elites deterministically
     for i in 0..elite_count {
@@ -33,7 +37,6 @@ where
 
     // helper: tournament select one parent
     let tournament = |rng: &mut ThreadRng| -> usize {
-        const TOUR_SIZE: usize = 5;
         indices[(0..TOUR_SIZE)
             .map(|_| rng.gen_range(0..upper_bound))
             .min()
@@ -44,13 +47,14 @@ where
     for i in elite_count..n {
         let p1_idx = tournament(&mut rng);
         let p1 = &population[p1_idx];
-        if rng.gen_bool(crossover_rate) {
+        if crossover_rate.sample(&mut rng) {
             let p2_idx = tournament(&mut rng);
             let p2 = &population[p2_idx];
-            new_population[i] = p1.crossover(p2).mutate();
+            new_population[i] = p1.crossover(p2);
         } else {
-            new_population[i] = p1.mutate();
+            new_population[i] = *p1;
         }
+        new_population[i] = new_population[i].mutate(mutation_rate)
     }
     solved
 }

@@ -326,45 +326,51 @@ import { predefinedMaps } from './wasm-interface.js';
 
     // Function to update the terrain visualization based on the selected map
     function updateTerrainVisualization(mapSelection) {
-        const map = predefinedMaps[mapSelection] || predefinedMaps.default;
-        // Check if map exists and is an array
+        // Clear the progress bar completely
+        stopAutoScroll();
+        show(0);
+
+        let smap = predefinedMaps[mapSelection] || predefinedMaps.default;
+        smap = smap.split("\n");
+        let len = parseInt(smap[0]);
+        let map = [];
+        for (let i = 1; i <= len; i++) {
+            map.push(smap[i].split(" ").map(Number));
+        }
+
         if (!map || !Array.isArray(map) || map.length < 2) {
             console.error('Invalid map structure. Expected array of coordinate pairs.');
             return;
         }
-        // Create SVG elements for the terrain
-        let terrainSVG = '';
-        let landingZoneFound = false;
-        // Create lines between consecutive points
-        for (let i = 0; i < map.length - 1; i++) {
-            // Get current and next point coordinates
+
+        // Build SVG lines for the terrain
+        let terrainLines = '<svg xmlns="http://www.w3.org/2000/svg" width="7000" height="3000" viewBox="0 0 7000 3000">';
+        for (let i = 0; i < len - 1; i++) {
             const [x1, y1] = map[i];
             const [x2, y2] = map[i + 1];
-
-            // Check if this segment is a flat one (potential landing zone)
             const isLandingZone = y1 === y2;
-
-            if (isLandingZone && !landingZoneFound) {
-                // This is likely the landing zone (flat segment)
-                terrainSVG += `<line x1="${x1}" y1="${3000 - y1}" x2="${x2}" y2="${3000 - y2}" 
-                       stroke="#00ff9d" stroke-width="8" filter="url(#glow)">
-                       <title>Landing Zone</title>
-                       <animate attributeName="stroke-opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" />
-                       </line>`;
-                landingZoneFound = true;
+            if (isLandingZone) {
+                terrainLines += `<line x1="${x1}" y1="${3000 - y1}" x2="${x2}" y2="${3000 - y2}" 
+                    stroke="green" stroke-width="8"">
+                    <title>Landing Zone</title>
+                    </line>`;
             } else {
-                // Regular terrain segment
-                terrainSVG += `<line x1="${x1}" y1="${3000 - y1}" x2="${x2}" y2="${3000 - y2}" 
-                       stroke="#ff3300" stroke-width="7" filter="url(#glow)"></line>`;
+                terrainLines += `<line x1="${x1}" y1="${3000 - y1}" x2="${x2}" y2="${3000 - y2}" 
+                    stroke="red" stroke-width="7""></line>`;
             }
         }
+        terrainLines += '</svg>';
 
-        // Update the SVG container with new terrain
-        const svg = document.querySelector('#svg-container svg');
+        // Update the SVG container with new terrain lines only (no duplicate <svg>)
+        const svg = document.querySelector('#svg-container');
         if (svg) {
-            // Clear existing terrain lines but keep the defs and background elements
-            const existingElements = svg.innerHTML.split('<g>')[0];
-            svg.innerHTML = existingElements + '<g>' + terrainSVG + '</g>';
+            // If svg-container has no SVG child, append; else, replace the first SVG child
+            const existingSvg = svg.querySelector('svg');
+            if (existingSvg) {
+                existingSvg.outerHTML = terrainLines;
+            } else {
+                svg.insertAdjacentHTML('beforeend', terrainLines);
+            }
         }
     }
 

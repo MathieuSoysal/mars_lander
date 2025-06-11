@@ -115,12 +115,12 @@ impl Game {
         let mut svg = String::new();
         for segment in &self.segments {
             svg.push_str(&format!(
-                "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"red\"  stroke-width=\"7\" />\n",
+                "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"red\" stroke-width=\"7\" />\n",
                 segment.start.x, HEIGHT - segment.start.y, segment.end.x, HEIGHT - segment.end.y
             ));
         }
         svg.push_str(&format!(
-            "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"green\"  stroke-width=\"8\">\n",
+            "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"green\" stroke-width=\"8\">\n",
             self.landing.start.x,
             HEIGHT - self.landing.start.y,
             self.landing.end.x,
