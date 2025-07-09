@@ -180,6 +180,42 @@ header::after {
   font-weight: 500;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(0, 246, 255, 0.1);
+  border: 1px solid rgba(0, 246, 255, 0.3);
+  border-radius: 4px;
+  color: var(--text-bright);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.header-button:hover {
+  background: rgba(0, 246, 255, 0.2);
+  box-shadow: 0 0 10px rgba(0, 246, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.tutorial-icon {
+  font-size: 16px;
+}
+
+.tutorial-text {
+  font-weight: 500;
+}
+
 h1 {
   font-size: 26px;
   font-weight: 700;
