@@ -1186,7 +1186,7 @@ h2 {
   height: 100%;
   background: rgba(0, 8, 36, 0.95);
   backdrop-filter: blur(10px);
-  z-index: 2000;
+  z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;

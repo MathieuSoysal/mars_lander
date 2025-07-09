@@ -510,6 +510,8 @@ import { predefinedMaps } from './wasm-interface.js';
 
     // Tutorial functionality
     function initializeTutorial() {
+        console.log('Initializing tutorial...');
+        
         const tutorialButton = document.getElementById('tutorial-button');
         const tutorialModal = document.getElementById('tutorial-modal');
         const closeTutorial = document.getElementById('close-tutorial');
@@ -517,21 +519,32 @@ import { predefinedMaps } from './wasm-interface.js';
         const tutorialNavBtns = document.querySelectorAll('.tutorial-nav-btn');
         const tutorialSections = document.querySelectorAll('.tutorial-section');
 
-        if (!tutorialButton || !tutorialModal) return;
+        console.log('Tutorial button:', tutorialButton);
+        console.log('Tutorial modal:', tutorialModal);
+
+        if (!tutorialButton || !tutorialModal) {
+            console.error('Tutorial elements not found');
+            return;
+        }
 
         // Open tutorial
-        tutorialButton.addEventListener('click', () => {
+        tutorialButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Tutorial button clicked');
             tutorialModal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         });
 
         // Close tutorial
         function closeTutorialModal() {
+            console.log('Closing tutorial modal');
             tutorialModal.classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
 
-        closeTutorial.addEventListener('click', closeTutorialModal);
+        if (closeTutorial) {
+            closeTutorial.addEventListener('click', closeTutorialModal);
+        }
 
         // Close on background click
         tutorialModal.addEventListener('click', (e) => {
@@ -551,6 +564,7 @@ import { predefinedMaps } from './wasm-interface.js';
         tutorialNavBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const targetSection = btn.dataset.section;
+                console.log('Switching to section:', targetSection);
                 
                 // Update nav buttons
                 tutorialNavBtns.forEach(b => b.classList.remove('active'));
@@ -564,6 +578,8 @@ import { predefinedMaps } from './wasm-interface.js';
                 const targetSectionElement = document.getElementById(`tutorial-${targetSection}`);
                 if (targetSectionElement) {
                     targetSectionElement.classList.add('active');
+                } else {
+                    console.error('Target section not found:', `tutorial-${targetSection}`);
                 }
             });
         });
@@ -584,6 +600,8 @@ import { predefinedMaps } from './wasm-interface.js';
                 }
             });
         }
+
+        console.log('Tutorial initialization complete');
     }
 
     // Enhanced SVG container explanation
