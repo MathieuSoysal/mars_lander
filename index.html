@@ -209,6 +209,12 @@
 <body>
   <header>
     <h1>Mars Lander Viewer</h1>
+    <div class="header-controls">
+      <button id="tutorial-button" class="header-button" title="Learn about Genetic Algorithms">
+        <span class="tutorial-icon">📚</span>
+        <span class="tutorial-text">Tutorial</span>
+      </button>
+    </div>
   </header>
 
   <div class="main-container">
@@ -259,7 +265,7 @@
         <h3>Simulation Environment</h3>
         <div class="param-group">
           <label for="map-selection">Map Selection: <button type="button" class="info-button"
-              data-info="Choose from different terrain configurations for the simulation">i</button></label>
+              data-info="Choose from different Martian terrain configurations. Each map presents unique challenges: Default (balanced), Canyon (narrow passage), Mountain (high terrain), Plateau (elevated landing), Valley (confined space). Different terrains test the genetic algorithm's adaptability.">i</button></label>
           <select id="map-selection">
             <option value="default">Default Map</option>
             <option value="canyon">Deep Canyon</option>
@@ -274,17 +280,20 @@
         <h3>Genetic Algorithm Configuration</h3>
         <form id="ga-params">
           <div class="param-group">
-            <label for="population-size">Population Size:</label>
+            <label for="population-size">Population Size: <button type="button" class="info-button"
+                data-info="Population Size (100 recommended): The number of potential solutions (landing strategies) in each generation. Larger populations explore more possibilities but require more computation. Smaller populations evolve faster but may miss optimal solutions. Balance between exploration and computational efficiency.">i</button></label>
             <input type="number" id="population-size" min="10" max="1000" value="100">
           </div>
 
           <div class="param-group">
-            <label for="generation-count">Number of Generations:</label>
+            <label for="generation-count">Number of Generations: <button type="button" class="info-button"
+                data-info="Number of Generations (200 recommended): How many evolution cycles to run. Each generation tests all solutions, selects the best, and creates the next generation. More generations usually find better solutions but take longer. Watch for convergence - when solutions stop improving significantly.">i</button></label>
             <input type="number" id="generation-count" min="1" max="1000" value="200">
           </div>
 
           <div class="param-group">
-            <label for="selection-mode">Selection Mode:</label>
+            <label for="selection-mode">Selection Mode: <button type="button" class="info-button"
+                data-info="Selection Strategy: How to choose parents for the next generation. Tournament: Randomly select groups and pick the best from each (balanced). Roulette Wheel: Probability proportional to fitness (favors good solutions). Rank-based: Selection based on ranking rather than raw fitness (reduces selection pressure).">i</button></label>
             <select id="selection-mode">
               <option value="tournament">Tournament</option>
               <option value="roulette">Roulette Wheel</option>
@@ -294,21 +303,21 @@
 
           <div class="param-group">
             <label for="elite-rate">Elite rate: <button type="button" class="info-button"
-                data-info="Percentage of best individuals that automatically survive to next generation unchanged">i</button></label>
+                data-info="Elite Rate (20% recommended): The percentage of the best-performing individuals that automatically survive to the next generation without any changes. This ensures that good solutions aren't lost. Higher values preserve good genes but reduce diversity. Lower values increase exploration but risk losing good solutions.">i</button></label>
             <input type="range" id="elite-rate" min="0" value="20" max="100">
             <span id="elite-rate-value">20%</span>
           </div>
 
           <div class="param-group">
             <label for="crossover-rate">Crossover Rate: <button type="button" class="info-button"
-                data-info="Probability of genetic crossover between parents - controls how much genetic material is exchanged">i</button></label>
+                data-info="Crossover Rate (90% recommended): The probability that two parent solutions will exchange genetic material (command sequences) to create offspring. High rates (80-95%) promote exploitation of good solutions by combining their best parts. Lower rates reduce genetic mixing but maintain more diversity.">i</button></label>
             <input type="range" id="crossover-rate" min="0" max="100" value="90">
             <span id="crossover-rate-value">90%</span>
           </div>
 
           <div class="param-group">
             <label for="mutation-rate">Mutation Rate: <button type="button" class="info-button"
-                data-info="Probability of random mutations - higher values increase diversity but may disrupt good solutions">i</button></label>
+                data-info="Mutation Rate (10% recommended): The probability of random changes to landing commands. Essential for genetic diversity and exploring new solutions. Too high (>20%) disrupts good solutions with excessive randomness. Too low (<5%) may cause premature convergence to suboptimal solutions. Mutation prevents the algorithm from getting stuck in local optima.">i</button></label>
             <input type="range" id="mutation-rate" min="0" max="100" value="10">
             <span id="mutation-rate-value">10%</span>
           </div>
@@ -321,6 +330,213 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tutorial Modal -->
+  <div id="tutorial-modal" class="tutorial-modal hidden">
+    <div class="tutorial-content">
+      <div class="tutorial-header">
+        <h2>🧬 Genetic Algorithms & Mars Lander</h2>
+        <button id="close-tutorial" class="close-button" title="Close Tutorial">✕</button>
+      </div>
+      
+      <div class="tutorial-body">
+        <div class="tutorial-nav">
+          <button class="tutorial-nav-btn active" data-section="overview">Overview</button>
+          <button class="tutorial-nav-btn" data-section="genetic-algorithm">Genetic Algorithm</button>
+          <button class="tutorial-nav-btn" data-section="mars-lander">Mars Lander</button>
+          <button class="tutorial-nav-btn" data-section="visualization">Visualization</button>
+        </div>
+        
+        <div class="tutorial-sections">
+          <!-- Overview Section -->
+          <div class="tutorial-section active" id="tutorial-overview">
+            <h3>🚀 Welcome to Mars Lander Genetic Algorithm Simulator</h3>
+            <p>This simulator demonstrates how <strong>genetic algorithms</strong> can solve complex optimization problems like landing a spacecraft on Mars. Watch as artificial evolution finds the optimal landing strategy!</p>
+            
+            <div class="feature-grid">
+              <div class="feature-card">
+                <div class="feature-icon">🧬</div>
+                <h4>Genetic Evolution</h4>
+                <p>Algorithms inspired by natural selection evolve better solutions over time</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h4>Precision Landing</h4>
+                <p>Navigate complex terrain to achieve safe spacecraft landings</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h4>Real-time Visualization</h4>
+                <p>See evolution in action with live trajectory simulations</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Genetic Algorithm Section -->
+          <div class="tutorial-section" id="tutorial-genetic-algorithm">
+            <h3>🧬 Understanding Genetic Algorithms</h3>
+            <p>Genetic algorithms are powerful optimization techniques inspired by the process of natural selection. Here's how they work:</p>
+            
+            <div class="algorithm-steps">
+              <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                  <h4>Initial Population</h4>
+                  <p>Create a diverse set of random solutions (landing command sequences). Each solution represents a potential strategy for landing the Mars rover.</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                  <h4>Fitness Evaluation</h4>
+                  <p>Test each solution by simulating the landing. Fitness is measured by factors like:</p>
+                  <ul>
+                    <li>Distance to the landing zone</li>
+                    <li>Landing speed (must be gentle)</li>
+                    <li>Lander orientation (must be upright)</li>
+                    <li>Fuel efficiency</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                  <h4>Selection</h4>
+                  <p>Choose the best-performing solutions as "parents" for the next generation. Better solutions have higher chances of being selected.</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                  <h4>Crossover</h4>
+                  <p>Combine parts of successful solutions to create "offspring" that inherit good traits from both parents.</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                  <h4>Mutation</h4>
+                  <p>Introduce small random changes to maintain diversity and explore new possibilities.</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                  <h4>Evolution</h4>
+                  <p>Repeat this process for many generations. Each generation should perform better than the last, eventually finding optimal landing strategies.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Mars Lander Section -->
+          <div class="tutorial-section" id="tutorial-mars-lander">
+            <h3>🔴 The Mars Lander Challenge</h3>
+            <p>Landing on Mars is incredibly challenging. The lander must navigate complex terrain while managing limited fuel and precise physics.</p>
+            
+            <div class="challenge-details">
+              <div class="challenge-item">
+                <h4>🎯 Mission Objectives</h4>
+                <ul>
+                  <li><strong>Find the landing zone:</strong> Locate the flat area safe for landing</li>
+                  <li><strong>Control descent:</strong> Manage thrust and rotation every second</li>
+                  <li><strong>Safe landing criteria:</strong>
+                    <ul>
+                      <li>Vertical speed ≤ 40 m/s</li>
+                      <li>Horizontal speed ≤ 20 m/s</li>
+                      <li>Lander must be upright (0° angle)</li>
+                      <li>Land on flat ground</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              
+              <div class="challenge-item">
+                <h4>⚙️ Physics Simulation</h4>
+                <ul>
+                  <li><strong>Mars gravity:</strong> 3.711 m/s² (weaker than Earth)</li>
+                  <li><strong>No atmosphere:</strong> No air resistance to slow descent</li>
+                  <li><strong>Fuel management:</strong> Limited fuel, thrust consumes fuel</li>
+                  <li><strong>Real-time control:</strong> Decisions made every second of flight</li>
+                </ul>
+              </div>
+              
+              <div class="challenge-item">
+                <h4>🎮 Control Parameters</h4>
+                <ul>
+                  <li><strong>Rotation:</strong> -90° to +90° (lander orientation)</li>
+                  <li><strong>Thrust:</strong> 0 to 4 (4 needed to counteract gravity)</li>
+                  <li><strong>Strategy:</strong> Balance fuel consumption vs. control precision</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Visualization Section -->
+          <div class="tutorial-section" id="tutorial-visualization">
+            <h3>📊 Understanding the Visualization</h3>
+            <p>The simulation shows the evolution process in real-time. Here's what you're seeing:</p>
+            
+            <div class="visualization-guide">
+              <div class="guide-item">
+                <h4>🗺️ Terrain Display</h4>
+                <p>The background shows the Martian surface with:</p>
+                <ul>
+                  <li><strong>Rocky terrain:</strong> Dangerous areas where landing would fail</li>
+                  <li><strong>Flat landing zone:</strong> The safe area for successful landing</li>
+                  <li><strong>Scale:</strong> 7000m wide × 3000m high simulation area</li>
+                </ul>
+              </div>
+              
+              <div class="guide-item">
+                <h4>🚀 Lander Trajectories</h4>
+                <p>Watch the evolution of landing strategies:</p>
+                <ul>
+                  <li><strong>Current generation:</strong> All population members attempting to land</li>
+                  <li><strong>Path traces:</strong> Shows the flight path of each lander</li>
+                  <li><strong>Success/failure:</strong> Different visual indicators for outcomes</li>
+                  <li><strong>Best performer:</strong> Highlighted trajectory of the fittest individual</li>
+                </ul>
+              </div>
+              
+              <div class="guide-item">
+                <h4>📈 Evolution Progress</h4>
+                <p>Track the algorithm's improvement:</p>
+                <ul>
+                  <li><strong>Generation counter:</strong> Shows current generation number</li>
+                  <li><strong>Progress bar:</strong> Indicates how many generations completed</li>
+                  <li><strong>Frame navigation:</strong> Step through generations to see improvement</li>
+                  <li><strong>Speed control:</strong> Adjust playback speed for analysis</li>
+                </ul>
+              </div>
+              
+              <div class="guide-item">
+                <h4>🎛️ Interactive Controls</h4>
+                <p>Experiment with different settings:</p>
+                <ul>
+                  <li><strong>Population size:</strong> More individuals = better exploration</li>
+                  <li><strong>Mutation rate:</strong> Higher = more randomness</li>
+                  <li><strong>Crossover rate:</strong> How often parents combine traits</li>
+                  <li><strong>Elite rate:</strong> Percentage of best solutions preserved</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tutorial-footer">
+          <button id="start-simulation" class="primary-button">
+            <span class="button-text">Start Your First Simulation</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

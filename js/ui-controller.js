@@ -398,6 +398,11 @@ import { predefinedMaps } from './wasm-interface.js';
             const eliteRate = parseInt(eliteRateInput.value);
             const mapSelection = document.getElementById('map-selection').value;
 
+            // Hide SVG explanation overlay when simulation starts
+            if (window.hideSVGExplanation) {
+                window.hideSVGExplanation();
+            }
+
             // Hide dashboard if screen is small
             if (window.innerWidth <= 1300 && dashboardElement && dashboardToggle) {
                 dashboardElement.classList.remove('active');
@@ -503,6 +508,138 @@ import { predefinedMaps } from './wasm-interface.js';
         });
     }
 
+    // Tutorial functionality
+    function initializeTutorial() {
+        const tutorialButton = document.getElementById('tutorial-button');
+        const tutorialModal = document.getElementById('tutorial-modal');
+        const closeTutorial = document.getElementById('close-tutorial');
+        const startSimulation = document.getElementById('start-simulation');
+        const tutorialNavBtns = document.querySelectorAll('.tutorial-nav-btn');
+        const tutorialSections = document.querySelectorAll('.tutorial-section');
+
+        if (!tutorialButton || !tutorialModal) return;
+
+        // Open tutorial
+        tutorialButton.addEventListener('click', () => {
+            tutorialModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+
+        // Close tutorial
+        function closeTutorialModal() {
+            tutorialModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        closeTutorial.addEventListener('click', closeTutorialModal);
+
+        // Close on background click
+        tutorialModal.addEventListener('click', (e) => {
+            if (e.target === tutorialModal) {
+                closeTutorialModal();
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !tutorialModal.classList.contains('hidden')) {
+                closeTutorialModal();
+            }
+        });
+
+        // Navigation between tutorial sections
+        tutorialNavBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetSection = btn.dataset.section;
+                
+                // Update nav buttons
+                tutorialNavBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update sections
+                tutorialSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                const targetSectionElement = document.getElementById(`tutorial-${targetSection}`);
+                if (targetSectionElement) {
+                    targetSectionElement.classList.add('active');
+                }
+            });
+        });
+
+        // Start simulation button
+        if (startSimulation) {
+            startSimulation.addEventListener('click', () => {
+                closeTutorialModal();
+                // Trigger the run button if it exists
+                const runButton = document.getElementById('run-ga');
+                if (runButton) {
+                    runButton.scrollIntoView({ behavior: 'smooth' });
+                    // Add a highlight effect
+                    runButton.style.boxShadow = '0 0 30px rgba(0, 246, 255, 0.8)';
+                    setTimeout(() => {
+                        runButton.style.boxShadow = '';
+                    }, 3000);
+                }
+            });
+        }
+    }
+
+    // Enhanced SVG container explanation
+    function addSVGExplanation() {
+        const svgContainer = document.getElementById('svg-container');
+        if (!svgContainer) return;
+
+        // Add explanation overlay that shows when no simulation is running
+        const explanationOverlay = document.createElement('div');
+        explanationOverlay.className = 'svg-explanation-overlay';
+        explanationOverlay.innerHTML = `
+            <div class="explanation-content">
+                <h3>🚀 Mars Lander Visualization</h3>
+                <p>This area will show the genetic algorithm evolution in real-time:</p>
+                <div class="explanation-features">
+                    <div class="explanation-item">
+                        <span class="explanation-icon">🗺️</span>
+                        <div>
+                            <strong>Martian Terrain</strong>
+                            <small>Rocky surface with safe landing zones</small>
+                        </div>
+                    </div>
+                    <div class="explanation-item">
+                        <span class="explanation-icon">🚀</span>
+                        <div>
+                            <strong>Lander Trajectories</strong>
+                            <small>Flight paths of each generation's attempts</small>
+                        </div>
+                    </div>
+                    <div class="explanation-item">
+                        <span class="explanation-icon">📈</span>
+                        <div>
+                            <strong>Evolution Progress</strong>
+                            <small>Watch solutions improve over generations</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="start-prompt">
+                    <p>Configure the genetic algorithm parameters and click <strong>"Run Algorithm"</strong> to begin!</p>
+                </div>
+            </div>
+        `;
+        
+        svgContainer.appendChild(explanationOverlay);
+        
+        // Hide explanation when simulation starts
+        window.hideSVGExplanation = function() {
+            explanationOverlay.style.display = 'none';
+        };
+        
+        // Show explanation when needed
+        window.showSVGExplanation = function() {
+            explanationOverlay.style.display = 'flex';
+        };
+    }
+
     // Initialize all UI components
     window.addEventListener('load', function () {
         // Initialize UI elements first
@@ -513,6 +650,12 @@ import { predefinedMaps } from './wasm-interface.js';
         setupDashboardListeners();
         setupRunButton();
         setupMapSelectionHandler();
+        
+        // Initialize tutorial system
+        initializeTutorial();
+        
+        // Add SVG explanation
+        addSVGExplanation();
         
         // Then preload images
         preloadImages();
