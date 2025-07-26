@@ -4,7 +4,7 @@ use rand::{distributions::Bernoulli, prelude::*};
 
 const TOUR_SIZE: usize = 5;
 
-// Returns true if any individual solved the problem
+// Returns the best individual
 pub fn elitiste_new_population(
     population: &mut [DNA],
     new_population: &mut [DNA],
@@ -26,7 +26,7 @@ pub fn elitiste_new_population(
         })
         .collect();
 
-    let solved = population[indices[0]];
+    let best = population[indices[0]];
 
     // 1) copy elites deterministically
     for i in 0..elite_count {
@@ -56,5 +56,5 @@ pub fn elitiste_new_population(
         }
         new_population[i] = new_population[i].mutate(mutation_rate)
     }
-    solved
+    best
 }
