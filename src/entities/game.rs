@@ -50,14 +50,26 @@ impl Game {
     }
 
     // TODO Maybe also use y position
-    pub fn get_distance_to_landing(&self, starship: &Starship) -> i32 {
+    pub fn get_distance_to_landing(&self, starship: &Starship) -> (i32, i32) {
         let x = starship.get_x();
-        if x >= self.landing.start.x as i32 && x <= self.landing.end.x as i32 {
-            return 0;
-        }
-        let d_start_x = (self.landing.start.x as i32 - x).abs();
-        let d_end_x = (self.landing.end.x as i32 - x).abs();
-        d_end_x.min(d_start_x) as i32
+        let y = starship.get_y();
+
+        let dist_x = if x >= self.landing.start.x as i32 && x <= self.landing.end.x as i32 {
+            0
+        } else {
+            let d_start_x = (self.landing.start.x as i32 - x).abs();
+            let d_end_x = (self.landing.end.x as i32 - x).abs();
+            d_end_x.min(d_start_x) as i32
+        };
+
+        let dist_y = if y >= self.landing.start.y as i32 && y <= self.landing.end.y as i32 {
+            0
+        } else {
+            let d_start_y = (self.landing.start.y as i32 - y).abs();
+            let d_end_y = (self.landing.end.y as i32 - y).abs();
+            d_end_y.min(d_start_y) as i32
+        };
+        (dist_x, dist_y)
     }
 
     pub fn starship_is_crash(&self, starship: &Starship) -> bool {
