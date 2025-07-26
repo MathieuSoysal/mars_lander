@@ -149,17 +149,19 @@ Order of importance:
     range: [0, 2000]
     nval: 2001 (2**11)
 */
-const LAND_DISTANCE_WEIGHT: f64 = 20.0;
+const LAND_DISTANCE_X_WEIGHT: f64 = 20.0;
+const LAND_DISTANCE_Y_WEIGHT: f64 = 1.0;
 const ROTATION_WEIGHT: f64 = 0.0;
 const X_SPEED_WEIGHT: f64 = 4.0;
-const Y_SPEED_WEIGHT: f64 = 7.0;
+const Y_SPEED_WEIGHT: f64 = 15.0;
 const FUEL_WEIGHT: f64 = 100.0;
 
-pub const WINNING_FITNESS: f64 = LAND_DISTANCE_WEIGHT + ROTATION_WEIGHT + X_SPEED_WEIGHT + Y_SPEED_WEIGHT;
+pub const WINNING_FITNESS: f64 = LAND_DISTANCE_X_WEIGHT + ROTATION_WEIGHT + X_SPEED_WEIGHT + Y_SPEED_WEIGHT;
 
 #[inline(always)]
-fn calc_fit(land_dist: i32, rot: i8, x_speed: f32, y_speed: f32, fuel: u16) -> f64 {
-    (7000.0 - land_dist as f64).div(7000.) * LAND_DISTANCE_WEIGHT + 
+fn calc_fit(land_dist_x: i32, land_dist_y: i32, rot: i8, x_speed: f32, y_speed: f32, fuel: u16) -> f64 {
+    (7000.0 - land_dist_x as f64).div(7000.) * LAND_DISTANCE_X_WEIGHT + 
+    (3000.0 - land_dist_y as f64).div(3000.) * LAND_DISTANCE_Y_WEIGHT + 
     (90.0 - rot.abs() as f64).div(90.) * ROTATION_WEIGHT +
     (500.0 - x_speed.abs() as f64).div(500.) * X_SPEED_WEIGHT +
     (500.0 - y_speed.abs() as f64).div(500.) * Y_SPEED_WEIGHT +
@@ -181,13 +183,13 @@ impl DNA {
             s.apply_movement();
 
             if game.starship_is_landing(&s) {
-                self.fitness = calc_fit(0, 0, 0., 0., s.get_fuel());
+                self.fitness = calc_fit(0, 0, 0, 0., 0., s.get_fuel());
                 break;
             }
 
             if game.starship_is_crash(&s) {
-                let land_distance = game.get_distance_to_landing(&s);
-                self.fitness = calc_fit(land_distance, s.get_rotation(), s.get_x_speed(), s.get_y_speed(), 0);
+                let (land_dist_x, land_dist_y) = game.get_distance_to_landing(&s);
+                self.fitness = calc_fit(land_dist_x, land_dist_y, s.get_rotation(), s.get_x_speed(), s.get_y_speed(), 0);
                 break;
             }
         }
