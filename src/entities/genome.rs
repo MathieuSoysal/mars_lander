@@ -149,10 +149,10 @@ Order of importance:
     range: [0, 2000]
     nval: 2001 (2**11)
 */
-const LAND_DISTANCE_WEIGHT: f64 = 10.0;
+const LAND_DISTANCE_WEIGHT: f64 = 20.0;
 const ROTATION_WEIGHT: f64 = 0.0;
-const X_SPEED_WEIGHT: f64 = 2.0;
-const Y_SPEED_WEIGHT: f64 = 10.0;
+const X_SPEED_WEIGHT: f64 = 4.0;
+const Y_SPEED_WEIGHT: f64 = 7.0;
 const FUEL_WEIGHT: f64 = 100.0;
 
 pub const WINNING_FITNESS: f64 = LAND_DISTANCE_WEIGHT + ROTATION_WEIGHT + X_SPEED_WEIGHT + Y_SPEED_WEIGHT;

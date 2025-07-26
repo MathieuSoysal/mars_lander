@@ -4,15 +4,13 @@ pub mod params;
 use algorithms::elitiste::elitiste_new_population;
 use entities::{
     game::Game,
-    genome::{DNA, gen_init_rand, population_to_svg},
+    genome::{DNA, WINNING_FITNESS, gen_init_rand, population_to_svg},
     starship::Starship,
 };
 use itertools::Itertools;
 use params::SimulationParams;
 use rand::distributions::Bernoulli;
 use wasm_bindgen::prelude::*;
-
-use crate::entities::genome::WINNING_FITNESS;
 
 pub mod entities;
 
@@ -48,7 +46,7 @@ pub fn run_simulation(
     log(&format!("Running simulation with {:?}", params));
 
     let mut returned: Vec<String> = Vec::new();
-    let input = map.split("\n").collect_vec();
+    let input = map.split('\n').collect_vec();
     let n_points = parse_input!(input[0], usize);
     let points = (1..=n_points)
         .flat_map(|line| {
@@ -77,7 +75,6 @@ pub fn run_simulation(
 
     for i in (0..points.len()).step_by(2) {
         game.add_point(points[i], points[i + 1]);
-        // log(&format!("Point({}, {})", points[i], points[i + 1]));
     }
 
     let mut population = (0..params.pop_size)
@@ -106,13 +103,16 @@ pub fn run_simulation(
             &game,
         );
 
-        if best_individual.fitness(&game) >= WINNING_FITNESS {
+        let best_fitness = best_individual.fitness(&game);
+        if best_fitness >= WINNING_FITNESS {
             if first_ok == -1 {
                 first_ok = generation + 1;
             }
-            if overall_best
-                .is_none_or(|mut best| best.fitness(&game) < best_individual.fitness(&game))
-            {
+            let should_replace = match overall_best.as_mut() {
+                None => true,
+                Some(best) => best_fitness > best.fitness(&game),
+            };
+            if should_replace {
                 overall_best = Some(best_individual);
             }
         }
@@ -128,12 +128,108 @@ pub fn run_simulation(
 
 #[cfg(test)]
 mod tests {
-    use crate::entities::genome::WINNING_FITNESS;
-
     use super::*;
+    use crate::entities::genome::WINNING_FITNESS;
     use colored::*;
     use rand::distributions::Bernoulli;
     use rayon::prelude::*;
+    use std::env;
+
+    const MINIMAL_STATS: bool = false;
+    const N_TESTS_MAP: usize = 6000;
+    const N_TESTS_ALL: usize = 6000;
+    const PARAMS: SimulationParams = SimulationParams {
+        pop_size: 100,
+        nb_generations: 50,
+        crossover_rate: 0.96,
+        mutation_rate: 0.055,
+        elite_rate: 0.06,
+    };
+
+    const DEFAULT_MAP: &str = "7
+    0 100
+    1000 500
+    1500 1500
+    3000 1000
+    4000 150
+    5500 150
+    6999 800
+    2500 2700 0 0 550 0 0";
+    const CANYON_MAP: &str = "10
+    0 100
+    1000 500
+    1500 100
+    3000 100
+    3500 500
+    3700 200
+    5000 1500
+    5800 300
+    6000 1000
+    6999 2000
+    6500 2800 -100 0 600 90 0";
+    const MOUNTAIN_MAP: &str = "7
+    0 100
+    1000 500
+    1500 1500
+    3000 1000
+    4000 150
+    5500 150
+    6999 800
+    6500 2800 -90 0 750 90 0";
+    const PLATEAU_MAP: &str = "20
+    0 1000
+    300 1500
+    350 1400
+    500 2000
+    800 1800
+    1000 2500
+    1200 2100
+    1500 2400
+    2000 1000
+    2200 500
+    2500 100
+    2900 800
+    3000 500
+    3200 1000
+    3500 2000
+    3800 800
+    4000 200
+    5000 200
+    5500 1500
+    6999 2800
+    500 2700 100 0 800 -90 0";
+    const VALLEY_MAP: &str = "20
+    0 1000
+    300 1500
+    350 1400
+    500 2100
+    1500 2100
+    2000 200
+    2500 500
+    2900 300
+    3000 200
+    3200 1000
+    3500 500
+    3800 800
+    4000 200
+    4200 800
+    4800 600
+    5000 1200
+    5500 900
+    6000 500
+    6500 300
+    6999 500
+    6500 2700 -50 0 1000 90 0";
+
+    fn get_maps() -> Vec<(&'static str, &'static str)> {
+        vec![
+            ("default", DEFAULT_MAP),
+            ("canyon", CANYON_MAP),
+            ("mountain", MOUNTAIN_MAP),
+            ("plateau", PLATEAU_MAP),
+            ("valley", VALLEY_MAP),
+        ]
+    }
 
     fn test_one(params: &SimulationParams, game: &Game, starship: &Starship) -> (i32, Option<DNA>) {
         let mut population = (0..params.pop_size)
@@ -161,13 +257,16 @@ mod tests {
                 game,
             );
 
-            if best_individual.fitness(game) >= WINNING_FITNESS {
+            let best_fitness = best_individual.fitness(game);
+            if best_fitness >= WINNING_FITNESS {
                 if first_ok == -1 {
                     first_ok = generation + 1;
                 }
-                if overall_best
-                    .is_none_or(|mut best| best.fitness(game) < best_individual.fitness(game))
-                {
+                let should_replace = match overall_best.as_mut() {
+                    None => true,
+                    Some(best) => best_fitness > best.fitness(game),
+                };
+                if should_replace {
                     overall_best = Some(best_individual);
                 }
             }
@@ -176,34 +275,24 @@ mod tests {
         (first_ok, overall_best)
     }
 
-    #[test]
-    fn test_perfs() {
-        rayon::ThreadPoolBuilder::new()
-            .num_threads(16)
-            .build_global()
-            .unwrap();
+    fn run_perf_test_for_map(
+        map_name: &str,
+        map_data: &str,
+        params: &SimulationParams,
+        n_tests: usize,
+        minimal_stats: bool,
+    ) {
+        if !minimal_stats {
+            println!(
+                "\n\n{}",
+                format!("===== Running tests for map: {} =====", map_name)
+                    .to_uppercase()
+                    .bold()
+                    .yellow()
+            );
+        }
 
-        const N_TESTS: usize = 10000;
-
-        let params = SimulationParams {
-            pop_size: 100,
-            nb_generations: 50,
-            crossover_rate: 0.96,
-            mutation_rate: 0.055,
-            elite_rate: 0.06,
-        };
-
-        let input = "7
-0 100
-1000 500
-1500 1500
-3000 1000
-4000 150
-5500 150
-6999 800
-2500 2700 0 0 550 0 0"
-            .split("\n")
-            .collect_vec();
+        let input = map_data.split('\n').collect_vec();
         let n_points = parse_input!(input[0], usize);
         let points = (1..=n_points)
             .flat_map(|line| {
@@ -234,14 +323,14 @@ mod tests {
             game.add_point(points[i], points[i + 1]);
         }
 
-        let res: Vec<(i32, Option<DNA>)> = (0..N_TESTS)
+        let res: Vec<(i32, Option<DNA>)> = (0..n_tests)
             .into_par_iter()
-            .map(|_| test_one(&params, &game, &starship))
+            .map(|_| test_one(params, &game, &starship))
             .collect();
 
         // Calculate statistics
         let failed = res.iter().filter(|&&(x, _)| x == -1).count();
-        let successfull_bests: Vec<(i32, DNA)> = res
+        let mut successfull_bests: Vec<(i32, DNA)> = res
             .into_iter()
             .filter_map(|(x, dna)| {
                 if x != -1 {
@@ -253,10 +342,25 @@ mod tests {
             .collect();
         let successful: Vec<i32> = successfull_bests.iter().map(|&(x, _)| x).collect();
         let successful_fuel: Vec<u16> = successfull_bests
-            .iter()
+            .iter_mut()
             .map(|(_, dna)| fuel as u16 - dna.fuel_left(&game))
             .collect();
-        let success_rate = (N_TESTS - failed) as f64 * 100.0 / N_TESTS as f64;
+        let success_rate = (n_tests - failed) as f64 * 100.0 / n_tests as f64;
+
+        if minimal_stats {
+            let avg_gen = if successful.is_empty() {
+                -1.0
+            } else {
+                successful.iter().map(|&x| x as f64).sum::<f64>() / successful.len() as f64
+            };
+            println!(
+                "  {:<10} | Success rate: {:>6.2}% | Avg generations: {:>5.2}",
+                map_name.bold(),
+                success_rate,
+                avg_gen
+            );
+            return;
+        }
 
         println!("{}", "=".repeat(60).bright_cyan());
 
@@ -264,118 +368,134 @@ mod tests {
         println!("{}", "📊 OVERALL RESULTS:".bright_green().bold());
         println!(
             "  Total runs: {}",
-            N_TESTS.to_string().bright_white().bold()
+            n_tests.to_string().bright_white().bold()
         );
         println!(
             "  Successful: {}",
-            (N_TESTS - failed).to_string().bright_green().bold()
+            (n_tests - failed).to_string().bright_green().bold()
         );
         println!("  Failed: {}", failed.to_string().bright_red().bold());
         println!(
             "  Success rate: {}%",
             format!("{:.2}", success_rate).bright_cyan().bold()
         );
+        // Helper function for statistics
+        fn print_statistics<T, F>(
+            data: &[T],
+            label: &str,
+            unit: &str,
+            color: colored::Color,
+            value_fn: F,
+        ) where
+            T: Copy + Ord + std::fmt::Display + Into<f64>,
+            F: Fn(&T) -> f64,
+        {
+            if data.is_empty() {
+                return;
+            }
+            let min = *data.iter().min().unwrap();
+            let max = *data.iter().max().unwrap();
+            let avg = data.iter().map(|&x| value_fn(&x)).sum::<f64>() / data.len() as f64;
 
-        if !successful.is_empty() {
-            // Success statistics
-            let min_gen = *successful.iter().min().unwrap();
-            let max_gen = *successful.iter().max().unwrap();
-            let avg_gen = successful.iter().sum::<i32>() as f64 / successful.len() as f64;
-
-            // Calculate median
-            let mut sorted_successful = successful.clone();
-            sorted_successful.sort();
-            let median_gen = if sorted_successful.len() % 2 == 0 {
-                (sorted_successful[sorted_successful.len() / 2 - 1]
-                    + sorted_successful[sorted_successful.len() / 2]) as f64
+            // Median
+            let mut sorted = data.to_vec();
+            sorted.sort();
+            let median = if sorted.len() % 2 == 0 {
+                (value_fn(&sorted[sorted.len() / 2 - 1]) + value_fn(&sorted[sorted.len() / 2]))
                     / 2.0
             } else {
-                sorted_successful[sorted_successful.len() / 2] as f64
+                value_fn(&sorted[sorted.len() / 2])
             };
 
-            // Calculate standard deviation
-            let variance = successful
+            // Std dev
+            let variance = data
                 .iter()
-                .map(|&x| (x as f64 - avg_gen).powi(2))
+                .map(|&x| {
+                    let diff = value_fn(&x) - avg;
+                    diff * diff
+                })
                 .sum::<f64>()
-                / successful.len() as f64;
+                / data.len() as f64;
             let std_dev = variance.sqrt();
 
+            println!("\n{}", label.bright_green().bold());
+            println!("  Min: {} {}", min.to_string().color(color).bold(), unit);
+            println!("  Max: {} {}", max.to_string().bright_yellow(), unit);
             println!(
-                "\n{}",
-                "📈 SUCCESS STATISTICS (generations to solution):"
-                    .bright_green()
-                    .bold()
+                "  Average: {} {}",
+                format!("{:.2}", avg).bright_blue().bold(),
+                unit
             );
             println!(
-                "  Fastest: {} generations",
-                min_gen.to_string().bright_green().bold()
-            );
-            println!(
-                "  Slowest: {} generations",
-                max_gen.to_string().bright_yellow()
-            );
-            println!(
-                "  Average: {} generations",
-                format!("{:.2}", avg_gen).bright_blue().bold()
-            );
-            println!(
-                "  Median: {} generations",
-                format!("{:.2}", median_gen).bright_purple().bold()
+                "  Median: {} {}",
+                format!("{:.2}", median).bright_purple().bold(),
+                unit
             );
             println!("  Std Dev: {}", format!("{:.2}", std_dev).bright_white());
         }
 
-        if !successful_fuel.is_empty() {
-            // Fuel statistics
-            let min_fuel = *successful_fuel.iter().min().unwrap();
-            let max_fuel = *successful_fuel.iter().max().unwrap();
-            let avg_fuel = successful_fuel.iter().map(|&x| x as u32).sum::<u32>() as f64
-                / successful_fuel.len() as f64;
+        print_statistics(
+            &successful,
+            "📈 SUCCESS STATISTICS (generations to solution):",
+            "generations",
+            colored::Color::Green,
+            |&x| x as f64,
+        );
 
-            // Calculate median for fuel
-            let mut sorted_successful_fuel = successful_fuel.clone();
-            sorted_successful_fuel.sort();
-            let median_fuel = if sorted_successful_fuel.len() % 2 == 0 {
-                (sorted_successful_fuel[sorted_successful_fuel.len() / 2 - 1] as u32
-                    + sorted_successful_fuel[sorted_successful_fuel.len() / 2] as u32)
-                    as f64
-                    / 2.0
-            } else {
-                sorted_successful_fuel[sorted_successful_fuel.len() / 2] as f64
-            };
+        print_statistics(
+            &successful_fuel,
+            "⛽ FUEL STATISTICS (fuel used):",
+            "units",
+            colored::Color::Green,
+            |&x| x as f64,
+        );
 
-            // Calculate standard deviation for fuel
-            let fuel_variance = successful_fuel
-                .iter()
-                .map(|&x| (x as f64 - avg_fuel).powi(2))
-                .sum::<f64>()
-                / successful_fuel.len() as f64;
-            let fuel_std_dev = fuel_variance.sqrt();
+        println!("{}", "=".repeat(60).bright_cyan());
+    }
 
+    #[test]
+    fn test_perfs_all() {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(16)
+            .build_global()
+            .unwrap();
+
+        let maps = get_maps();
+
+        if MINIMAL_STATS {
             println!(
-                "\n{}",
-                "⛽ FUEL STATISTICS (fuel used):".bright_green().bold()
-            );
-            println!(
-                "  Min Fuel: {} units",
-                min_fuel.to_string().bright_green().bold()
-            );
-            println!("  Max Fuel: {} units", max_fuel.to_string().bright_yellow());
-            println!(
-                "  Average Fuel: {} units",
-                format!("{:.2}", avg_fuel).bright_blue().bold()
-            );
-            println!(
-                "  Median Fuel: {} units",
-                format!("{:.2}", median_fuel).bright_purple().bold()
-            );
-            println!(
-                "  Std Dev Fuel: {}",
-                format!("{:.2}", fuel_std_dev).bright_white()
+                "{}",
+                "===== Minimalist Performance Stats ====="
+                    .to_uppercase()
+                    .bold()
+                    .green()
             );
         }
 
-        println!("{}", "=".repeat(60).bright_cyan());
+        for (map_name, map_data) in maps {
+            run_perf_test_for_map(map_name, map_data, &PARAMS, N_TESTS_ALL, MINIMAL_STATS);
+        }
+    }
+
+    #[test]
+    fn test_perfs_map() {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(16)
+            .build_global()
+            .unwrap();
+
+        let maps = get_maps();
+
+        let args: Vec<String> = env::args().collect();
+        let map_to_run = args.get(3).map(|s| s.to_lowercase());
+
+        let map_to_run = map_to_run.as_deref().unwrap_or("default");
+
+        if let Some((map_name, map_data)) = maps.iter().find(|(name, _)| *name == map_to_run) {
+            run_perf_test_for_map(map_name, map_data, &PARAMS, N_TESTS_MAP, MINIMAL_STATS);
+        } else {
+            println!("Map '{}' not found. Running default map.", map_to_run);
+            run_perf_test_for_map(maps[0].0, maps[0].1, &PARAMS, N_TESTS_MAP, MINIMAL_STATS);
+        }
     }
 }
