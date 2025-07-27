@@ -76,13 +76,15 @@ impl DNA {
     pub fn fuel_left(&self, game: &Game) -> u16 {
         let mut s = self.starship.copy();
         for i in 0..GENOME_SIZE {
+            let px = s.get_x();
+            let py = s.get_y();
             let rotate = get_rotate_on_turn(&self.genome, i);
             let power = get_power_on_turn(&self.genome, i);
             s.add_power(power as i16);
             s.add_rotation(rotate);
             s.apply_movement();
 
-            if game.starship_is_landing(&s) || game.starship_is_crash(&s) {
+            if game.starship_is_landing(&s) || game.starship_is_crash(&s, px, py) {
                 break;
             }
         }
@@ -98,6 +100,8 @@ impl DNA {
         ));
         let mut s = self.starship.copy();
         for i in 0..GENOME_SIZE {
+            let px = s.get_x();
+            let py = s.get_y();
             let rotate = get_rotate_on_turn(&self.genome, i);
             let power = get_power_on_turn(&self.genome, i);
             s.add_power(power as i16);
@@ -112,7 +116,7 @@ impl DNA {
                 ));
                 return str;
             }
-            if game.starship_is_crash(&s) {
+            if game.starship_is_crash(&s, px, py) {
                 str.push_str(r#"" fill="none" stroke="white" />"#);
                 str.push_str(&format!(
                     r#"<circle cx="{}" cy="{}" r="{}" fill="none" stroke="white" stroke-width="1" />"#,
@@ -156,7 +160,7 @@ const X_SPEED_WEIGHT: f64 = 4.0;
 const Y_SPEED_WEIGHT: f64 = 5.0;
 const FUEL_WEIGHT: f64 = 100.0;
 
-pub const WINNING_FITNESS: f64 = LAND_DISTANCE_X_WEIGHT + ROTATION_WEIGHT + X_SPEED_WEIGHT + Y_SPEED_WEIGHT;
+pub const WINNING_FITNESS: f64 = LAND_DISTANCE_X_WEIGHT + LAND_DISTANCE_Y_WEIGHT + ROTATION_WEIGHT + X_SPEED_WEIGHT + Y_SPEED_WEIGHT;
 
 #[inline(always)]
 fn calc_fit(land_dist_x: i32, land_dist_y: i32, rot: i8, x_speed: f32, y_speed: f32, fuel: u16) -> f64 {
@@ -176,6 +180,8 @@ impl DNA {
         self.fitness = 0.0;
         let mut s = self.starship.copy();
         for i in 0..GENOME_SIZE {
+            let px = s.get_x();
+            let py = s.get_y();
             let rotate = get_rotate_on_turn(&self.genome, i);
             let power = get_power_on_turn(&self.genome, i);
             s.add_power(power as i16);
@@ -187,7 +193,7 @@ impl DNA {
                 break;
             }
 
-            if game.starship_is_crash(&s) {
+            if game.starship_is_crash(&s, px, py) {
                 let (land_dist_x, land_dist_y) = game.get_distance_to_landing(&s);
                 self.fitness = calc_fit(land_dist_x, land_dist_y, s.get_rotation(), s.get_x_speed(), s.get_y_speed(), 0);
                 break;
@@ -217,10 +223,8 @@ impl DNA {
         child
     }
 
-    pub fn next_move(&self) -> (i8, i8) {
-        let rotate = get_rotate_on_turn(&self.genome, 0);
-        let power = get_power_on_turn(&self.genome, 0);
-        (rotate, power)
+    pub fn get_genome(&self) -> Genome {
+        self.genome
     }
 }
 
