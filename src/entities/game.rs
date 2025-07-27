@@ -30,8 +30,56 @@ impl Segment {
 pub struct Game {
     points: Vec<Point>,
     segments: Vec<Segment>,
-    crash_points: [u32; WIDTH], // Dans le puzzle lv 3 cela ne marchera plus
     landing: Segment,
+}
+
+fn orientation(p: &Point, q: &Point, r: &Point) -> i32 {
+    let val = (q.y as i32 - p.y as i32) * (r.x as i32 - q.x as i32)
+        - (q.x as i32 - p.x as i32) * (r.y as i32 - q.y as i32);
+    if val == 0 {
+        0 // colinear
+    } else if val > 0 {
+        1 // clockwise
+    } else {
+        2 // counter-clockwise
+    }
+}
+
+fn on_segment(p: &Point, q: &Point, r: &Point) -> bool {
+    q.x >= p.x.min(r.x) && q.x <= p.x.max(r.x) && q.y >= p.y.min(r.y) && q.y <= p.y.max(r.y)
+}
+
+fn collide(seg1: &Segment, seg2: &Segment) -> bool {
+    let p1 = &seg1.start;
+    let q1 = &seg1.end;
+    let p2 = &seg2.start;
+    let q2 = &seg2.end;
+
+    let o1 = orientation(p1, q1, p2);
+    let o2 = orientation(p1, q1, q2);
+    let o3 = orientation(p2, q2, p1);
+    let o4 = orientation(p2, q2, q1);
+
+    // General case
+    if o1 != o2 && o3 != o4 {
+        return true;
+    }
+
+    // Special cases
+    if o1 == 0 && on_segment(p1, p2, q1) {
+        return true;
+    }
+    if o2 == 0 && on_segment(p1, q2, q1) {
+        return true;
+    }
+    if o3 == 0 && on_segment(p2, p1, q2) {
+        return true;
+    }
+    if o4 == 0 && on_segment(p2, q1, q2) {
+        return true;
+    }
+
+    false
 }
 
 impl Game {
@@ -41,7 +89,6 @@ impl Game {
         Game {
             points,
             segments,
-            crash_points: [0; WIDTH],
             landing: Segment {
                 start: Point { x: 0, y: 0 },
                 end: Point { x: 0, y: 0 },
@@ -71,7 +118,25 @@ impl Game {
         (dist_x, dist_y)
     }
 
-    pub fn starship_is_crash(&self, starship: &Starship) -> bool {
+    fn collide_seg(&self, starship: &Starship, px: i32, py: i32) -> bool {
+        let cx = starship.get_x();
+        let cy = starship.get_y();
+
+        let segment = Segment {
+            start: Point {
+                x: px as usize,
+                y: py as usize,
+            },
+            end: Point {
+                x: cx as usize,
+                y: cy as usize,
+            },
+        };
+
+        self.segments.iter().any(|seg| collide(seg, &segment))
+    }
+
+    pub fn starship_is_crash(&self, starship: &Starship, px: i32, py: i32) -> bool {
         let x = starship.get_x();
         let y = starship.get_y();
         let is_on_landing = x as usize >= self.landing.start.x
@@ -81,7 +146,7 @@ impl Game {
             || x > MAX_X
             || y > MAX_Y
             || y < 0
-            || self.crash_points[x as usize] >= y as u32
+            || self.collide_seg(starship, px, py)
             || is_on_landing
     }
 
@@ -109,16 +174,7 @@ impl Game {
         if seg.is_landing() {
             self.landing = seg.clone();
         } else {
-            let start_x = seg.start.x as i32;
-            let start_y = seg.start.y as i32;
-            let end_y = seg.end.y as i32;
-            let end_x = seg.end.x as i32;
             self.segments.push(seg);
-            for x in start_x..=end_x {
-                self.crash_points[x as usize] = ((((end_y - start_y) * x) / (end_x - start_x))
-                    + (start_y + -1 * ((start_x * (end_y - start_y)) / (end_x - start_x))))
-                    as u32;
-            }
         }
     }
 
@@ -171,15 +227,15 @@ mod tests {
         game.add_point(6999, 1000);
 
         let starship = Starship::new(1000, 2000, 0, 0, 0, 0., 0.);
-        assert!(game.starship_is_crash(&starship));
+        assert!(game.starship_is_crash(&starship, 0, 0));
         let starship = Starship::new(1000, 1500, 0, 0, 0, 0., 0.);
-        assert!(game.starship_is_crash(&starship));
+        assert!(game.starship_is_crash(&starship, 0, 0));
         let starship = Starship::new(5000, 1500, 0, 0, 0, 0., 0.);
-        assert!(game.starship_is_crash(&starship));
+        assert!(game.starship_is_crash(&starship, 0, 0));
         let starship = Starship::new(9999, 1000, 0, 0, 0, 0., 0.);
-        assert!(game.starship_is_crash(&starship));
+        assert!(game.starship_is_crash(&starship, 0, 0));
         let starship = Starship::new(5, 9999, 0, 0, 0, 0., 0.);
-        assert!(game.starship_is_crash(&starship));
+        assert!(game.starship_is_crash(&starship, 0, 0));
     }
 
     #[test]
@@ -193,17 +249,17 @@ mod tests {
         game.add_point(6999, 1000);
 
         let starship = Starship::new(500, 2500, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship));
+        assert!(!game.starship_is_crash(&starship, 0, 0));
         let starship = Starship::new(600, 1850, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship));
+        assert!(!game.starship_is_crash(&starship, 0, 0));
         let starship = Starship::new(1600, 1200, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship));
+        assert!(!game.starship_is_crash(&starship, 0, 0));
         let starship = Starship::new(6000, 1500, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship));
+        assert!(!game.starship_is_crash(&starship, 0, 0));
         let starship = Starship::new(1500, 1500, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship));
+        assert!(!game.starship_is_crash(&starship, 0, 0));
         let starship = Starship::new(500, 2000, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship));
+        assert!(!game.starship_is_crash(&starship, 0, 0));
     }
 
     #[test]
