@@ -216,6 +216,12 @@ impl DNA {
         }
         child
     }
+
+    pub fn next_move(&self) -> (i8, i8) {
+        let rotate = get_rotate_on_turn(&self.genome, 0);
+        let power = get_power_on_turn(&self.genome, 0);
+        (rotate, power)
+    }
 }
 
 pub fn population_to_svg(population: &[DNA], game: &Game) -> String {
