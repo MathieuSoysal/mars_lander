@@ -19,7 +19,7 @@ impl Starship {
         let v0_y = self.y_speed;
 
         let v1_x = -rad.sin() * thrust;
-        let v1_y =  rad.cos() * thrust - MARS_GRAVITY;
+        let v1_y = rad.cos() * thrust - MARS_GRAVITY;
 
         self.add_x_speed(v1_x);
         self.add_y_speed(v1_y);
