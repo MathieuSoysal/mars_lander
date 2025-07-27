@@ -49,7 +49,6 @@ impl Game {
         }
     }
 
-    // TODO Maybe also use y position
     pub fn get_distance_to_landing(&self, starship: &Starship) -> (i32, i32) {
         let x = starship.get_x();
         let y = starship.get_y();
