@@ -1,4 +1,4 @@
-import init, { run_simulation } from "../pkg/my_lib.js?v=1.0.0";
+import init, { run_from_web } from "../pkg/my_lib.js?v=1.0.0";
 
 // Global reference to store SVG data
 let svgData = [];
@@ -177,11 +177,11 @@ async function runMarsLanderSimulation(params) {
     // Get the selected map from predefined maps
     let map = predefinedMaps[params.mapSelection] || predefinedMaps.default;
 
-    console.log(`Calling WASM function 'run_simulation' with ${populationSize} population size, ${nbGenerations} generations, ${crossoverRate} crossover rate, ${mutationRate} mutation rate, ${eliteRate} elite rate, using map: ${params.mapSelection}`);
+    console.log(`Calling WASM function 'run_from_web' with ${populationSize} population size, ${nbGenerations} generations, ${crossoverRate} crossover rate, ${mutationRate} mutation rate, ${eliteRate} elite rate, using map: ${params.mapSelection}`);
 
-    // Call the run_simulation function which returns array of SVG strings
-    // Pass both required parameters to the run_simulation function
-    svgData = run_simulation(map, populationSize, nbGenerations, crossoverRate, mutationRate, eliteRate);
+    // Call the run_from_web function which returns array of SVG strings
+    // Pass both required parameters to the run_from_web function
+    svgData = run_from_web(map, populationSize, nbGenerations, crossoverRate, mutationRate, eliteRate);
 
     // Update the viewer with the new SVG data
     if (Array.isArray(svgData) && svgData.length > 0) {
