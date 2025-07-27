@@ -106,7 +106,7 @@ jobs:
               else
                 # Create a minimal JavaScript file if original doesn't exist
                 echo "Creating minimal my_lib.js file..."
-                echo "export function run_simulation() { console.error('WASM binding not properly loaded'); return []; }" > dist/pkg/my_lib.js
+                echo "export function run_from_web() { console.error('WASM binding not properly loaded'); return []; }" > dist/pkg/my_lib.js
               fi
             else
               echo "No WASM files found in target directory either!"

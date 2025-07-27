@@ -14,11 +14,9 @@ pub struct Starship {
 
 const MIN_ROTATE: i8 = -90;
 const MAX_ROTATE: i8 = 90;
-
 const MAX_POWER: u8 = 4;
 
 impl Starship {
-
     pub fn copy(&self) -> Self {
         Starship {
             x: self.x,
@@ -31,10 +29,18 @@ impl Starship {
         }
     }
 
-    pub fn new(x: i32, y: i32, fuel: u16, rotation: i8, power: u8, x_speed: f32, y_speed: f32) -> Self {
+    pub fn new(
+        x: i32,
+        y: i32,
+        fuel: u16,
+        rotation: i8,
+        power: u8,
+        x_speed: f32,
+        y_speed: f32,
+    ) -> Self {
         Starship {
-            x : (x * 100),
-            y : (y * 100),
+            x: (x * 100),
+            y: (y * 100),
             fuel,
             rotation,
             power,
@@ -45,7 +51,7 @@ impl Starship {
 
     #[inline(always)]
     pub fn get_x(&self) -> i32 {
-        (self.x + 50) / 100 
+        (self.x + 50) / 100
     }
 
     #[inline(always)]
@@ -78,6 +84,3 @@ impl Starship {
         self.y_speed
     }
 }
-
-
-

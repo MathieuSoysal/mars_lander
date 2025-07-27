@@ -27,7 +27,7 @@ extern "C" {
 }
 
 #[wasm_bindgen]
-pub fn run_simulation(
+pub fn run_from_web(
     map: &str,
     pop_size: usize,
     nb_generations: i32,
@@ -43,9 +43,6 @@ pub fn run_simulation(
         elite_rate,
     };
 
-    log(&format!("Running simulation with {:?}", params));
-
-    let mut returned: Vec<String> = Vec::new();
     let input = map.split('\n').collect_vec();
     let n_points = parse_input!(input[0], usize);
     let points = (1..=n_points)
@@ -76,6 +73,14 @@ pub fn run_simulation(
     for i in (0..points.len()).step_by(2) {
         game.add_point(points[i], points[i + 1]);
     }
+
+    log(&format!("Running simulation with {:?}", params));
+
+    run_simulation(&game, &starship, &params)
+}
+
+pub fn run_simulation(game: &Game, starship: &Starship, params: &SimulationParams) -> Vec<String> {
+    let mut returned: Vec<String> = Vec::new();
 
     let mut population = (0..params.pop_size)
         .map(|_| {
@@ -135,7 +140,7 @@ mod tests {
     use rayon::prelude::*;
     use std::env;
 
-    const MINIMAL_STATS: bool = false;
+    const MINIMAL_STATS: bool = true;
     const N_TESTS_MAP: usize = 6000;
     const N_TESTS_ALL: usize = 6000;
     const PARAMS: SimulationParams = SimulationParams {
