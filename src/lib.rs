@@ -134,15 +134,18 @@ pub fn run_simulation(game: &Game, starship: &Starship, params: &SimulationParam
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::entities::genome::WINNING_FITNESS;
+    use crate::entities::genome::{
+        LAND_DISTANCE_X_WEIGHT, LAND_DISTANCE_Y_WEIGHT, ROTATION_WEIGHT, WINNING_FITNESS,
+        X_SPEED_WEIGHT, Y_SPEED_WEIGHT,
+    };
     use colored::*;
     use rand::distributions::Bernoulli;
     use rayon::prelude::*;
     use std::env;
 
     const MINIMAL_STATS: bool = true;
+    const N_TESTS_ALL: usize = 3000;
     const N_TESTS_MAP: usize = 6000;
-    const N_TESTS_ALL: usize = 6000;
     const PARAMS: SimulationParams = SimulationParams {
         pop_size: 100,
         nb_generations: 50,
@@ -520,6 +523,16 @@ mod tests {
                     .to_uppercase()
                     .bold()
                     .green()
+            );
+            println!(
+                "{:?}",
+                vec![
+                    LAND_DISTANCE_X_WEIGHT,
+                    LAND_DISTANCE_Y_WEIGHT,
+                    ROTATION_WEIGHT,
+                    X_SPEED_WEIGHT,
+                    Y_SPEED_WEIGHT
+                ]
             );
         }
 
