@@ -249,17 +249,17 @@ mod tests {
         game.add_point(6999, 1000);
 
         let starship = Starship::new(500, 2500, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship, 0, 0));
+        assert!(!game.starship_is_crash(&starship, starship.get_x(), starship.get_y()));
         let starship = Starship::new(600, 1850, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship, 0, 0));
+        assert!(!game.starship_is_crash(&starship, starship.get_x(), starship.get_y()));
         let starship = Starship::new(1600, 1200, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship, 0, 0));
+        assert!(!game.starship_is_crash(&starship, starship.get_x(), starship.get_y()));
         let starship = Starship::new(6000, 1500, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship, 0, 0));
+        assert!(!game.starship_is_crash(&starship, starship.get_x(), starship.get_y()));
         let starship = Starship::new(1500, 1500, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship, 0, 0));
+        assert!(!game.starship_is_crash(&starship, starship.get_x(), starship.get_y()));
         let starship = Starship::new(500, 2000, 0, 0, 0, 0., 0.);
-        assert!(!game.starship_is_crash(&starship, 0, 0));
+        assert!(!game.starship_is_crash(&starship, starship.get_x(), starship.get_y()));
     }
 
     #[test]
