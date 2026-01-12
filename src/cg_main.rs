@@ -590,6 +590,7 @@ macro_rules! parse_input {
     };
 }
 
+#[allow(dead_code)]
 fn main() {
     let mut input_line = String::new();
     io::stdin().read_line(&mut input_line).unwrap();

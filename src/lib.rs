@@ -1,4 +1,5 @@
 pub mod algorithms;
+mod cg_main; // So that rust-analyzer keep analyzing
 pub mod params;
 
 use algorithms::elitiste::elitiste_new_population;
