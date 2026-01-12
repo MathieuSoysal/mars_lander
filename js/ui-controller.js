@@ -198,9 +198,11 @@ import { predefinedMaps } from './wasm-interface.js';
         isAutoScrolling = false;
 
         // Update the player controls
-        playPauseBtn.querySelector('.play-icon').classList.remove('hidden');
-        playPauseBtn.querySelector('.pause-icon').classList.add('hidden');
-        playPauseBtn.classList.remove('active');
+        if (playPauseBtn) {
+            playPauseBtn.querySelector('.play-icon').classList.remove('hidden');
+            playPauseBtn.querySelector('.pause-icon').classList.add('hidden');
+            playPauseBtn.classList.remove('active');
+        }
     }
 
     // Function to set up event listeners
