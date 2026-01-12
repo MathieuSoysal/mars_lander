@@ -603,6 +603,10 @@ import { predefinedMaps } from './wasm-interface.js';
             });
         }
 
+        // Show tutorial by default on initial load
+        tutorialModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
         console.log('Tutorial initialization complete');
     }
 
