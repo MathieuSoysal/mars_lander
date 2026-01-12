@@ -444,6 +444,40 @@
             <div class="algorithm-steps">
               <div class="step">
                 <div class="step-number">1</div>
+                <div class="step-illustration">
+                  <svg width="300" height="140" viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background -->
+                    <rect width="300" height="140" fill="none"/>
+                    <!-- Rocket 1 -->
+                    <g transform="translate(30, 60)">
+                      <circle cx="0" cy="0" r="8" fill="#00f6ff" opacity="0.7"/>
+                      <polygon points="0,-8 -6,6 6,6" fill="#a855f7" stroke="#00f6ff" stroke-width="1"/>
+                      <rect x="-4" y="6" width="8" height="20" fill="#ff6b00" opacity="0.6"/>
+                      <text x="0" y="35" text-anchor="middle" fill="#00f6ff" font-size="11" font-weight="bold">A</text>
+                    </g>
+                    <!-- Rocket 2 -->
+                    <g transform="translate(100, 40)">
+                      <circle cx="0" cy="0" r="8" fill="#00f6ff" opacity="0.7"/>
+                      <polygon points="0,-8 -6,6 6,6" fill="#a855f7" stroke="#00f6ff" stroke-width="1"/>
+                      <rect x="-4" y="6" width="8" height="20" fill="#ff6b00" opacity="0.6"/>
+                      <text x="0" y="35" text-anchor="middle" fill="#00f6ff" font-size="11" font-weight="bold">B</text>
+                    </g>
+                    <!-- Rocket 3 -->
+                    <g transform="translate(170, 70)">
+                      <circle cx="0" cy="0" r="8" fill="#00f6ff" opacity="0.7"/>
+                      <polygon points="0,-8 -6,6 6,6" fill="#a855f7" stroke="#00f6ff" stroke-width="1"/>
+                      <rect x="-4" y="6" width="8" height="20" fill="#ff6b00" opacity="0.6"/>
+                      <text x="0" y="35" text-anchor="middle" fill="#00f6ff" font-size="11" font-weight="bold">C</text>
+                    </g>
+                    <!-- Rocket 4 -->
+                    <g transform="translate(240, 50)">
+                      <circle cx="0" cy="0" r="8" fill="#00f6ff" opacity="0.7"/>
+                      <polygon points="0,-8 -6,6 6,6" fill="#a855f7" stroke="#00f6ff" stroke-width="1"/>
+                      <rect x="-4" y="6" width="8" height="20" fill="#ff6b00" opacity="0.6"/>
+                      <text x="0" y="35" text-anchor="middle" fill="#00f6ff" font-size="11" font-weight="bold">D</text>
+                    </g>
+                  </svg>
+                </div>
                 <div class="step-content">
                   <h4>Initial Population</h4>
                   <p>Create a diverse set of random solutions (landing command sequences). Each solution represents a potential strategy for landing the Mars rover.</p>
@@ -452,47 +486,248 @@
               
               <div class="step">
                 <div class="step-number">2</div>
+                <div class="step-illustration">
+                  <svg width="300" height="150" viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Bar 1: 85% -->
+                    <g transform="translate(20, 15)">
+                      <text x="0" y="0" fill="#00ff88" font-size="12" font-weight="bold">A: 85%</text>
+                      <rect x="0" y="8" width="70" height="20" fill="rgba(0,246,255,0.1)" stroke="#00f6ff" stroke-width="1" rx="3"/>
+                      <rect x="0" y="8" width="60" height="20" fill="url(#grad1)" rx="3"/>
+                    </g>
+                    <!-- Bar 2: 60% -->
+                    <g transform="translate(20, 50)">
+                      <text x="0" y="0" fill="#ffaa00" font-size="12" font-weight="bold">B: 60%</text>
+                      <rect x="0" y="8" width="70" height="20" fill="rgba(0,246,255,0.1)" stroke="#00f6ff" stroke-width="1" rx="3"/>
+                      <rect x="0" y="8" width="43" height="20" fill="url(#grad2)" rx="3"/>
+                    </g>
+                    <!-- Bar 3: 35% -->
+                    <g transform="translate(20, 85)">
+                      <text x="0" y="0" fill="#ff3366" font-size="12" font-weight="bold">C: 35%</text>
+                      <rect x="0" y="8" width="70" height="20" fill="rgba(0,246,255,0.1)" stroke="#00f6ff" stroke-width="1" rx="3"/>
+                      <rect x="0" y="8" width="25" height="20" fill="url(#grad3)" rx="3"/>
+                    </g>
+                    <!-- Bar 4: 90% -->
+                    <g transform="translate(20, 120)">
+                      <text x="0" y="0" fill="#00ff88" font-size="12" font-weight="bold">D: 90%</text>
+                      <rect x="0" y="8" width="70" height="20" fill="rgba(0,246,255,0.1)" stroke="#00f6ff" stroke-width="1" rx="3"/>
+                      <rect x="0" y="8" width="64" height="20" fill="url(#grad1)" rx="3"/>
+                    </g>
+                    <!-- Gradients -->
+                    <defs>
+                      <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#00f6ff;stop-opacity:0.8" />
+                        <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0.8" />
+                      </linearGradient>
+                      <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#00f6ff;stop-opacity:0.8" />
+                        <stop offset="100%" style="stop-color:#ffaa00;stop-opacity:0.8" />
+                      </linearGradient>
+                      <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#ff3366;stop-opacity:0.6" />
+                        <stop offset="100%" style="stop-color:#ff6b00;stop-opacity:0.6" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
                 <div class="step-content">
                   <h4>Fitness Evaluation</h4>
                   <p>Test each solution by simulating the landing. Fitness is measured by factors like:</p>
                   <ul>
-                    <li>Distance to the landing zone</li>
-                    <li>Landing speed (must be gentle)</li>
-                    <li>Lander orientation (must be upright)</li>
-                    <li>Fuel efficiency</li>
+                    <li><strong>Distance to landing zone</strong> - How close to target</li>
+                    <li><strong>Landing speed</strong> - Must be gentle (≤40 m/s)</li>
+                    <li><strong>Lander orientation</strong> - Must be upright</li>
+                    <li><strong>Fuel efficiency</strong> - Minimize fuel usage</li>
                   </ul>
                 </div>
               </div>
               
               <div class="step">
                 <div class="step-number">3</div>
+                <div class="step-illustration">
+                  <svg width="300" height="140" viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Winner A -->
+                    <g transform="translate(30, 50)">
+                      <rect x="-20" y="-25" width="40" height="50" rx="5" fill="rgba(0,255,136,0.15)" stroke="#00ff88" stroke-width="2"/>
+                      <text x="0" y="-10" text-anchor="middle" fill="#00ff88" font-size="18" font-weight="bold">⭐</text>
+                      <text x="0" y="15" text-anchor="middle" fill="#00ff88" font-size="12" font-weight="bold">A</text>
+                      <text x="0" y="28" text-anchor="middle" fill="#00ff88" font-size="10">Winner</text>
+                    </g>
+                    <!-- Winner B -->
+                    <g transform="translate(100, 50)">
+                      <rect x="-20" y="-25" width="40" height="50" rx="5" fill="rgba(0,255,136,0.15)" stroke="#00ff88" stroke-width="2"/>
+                      <text x="0" y="-10" text-anchor="middle" fill="#00ff88" font-size="18" font-weight="bold">⭐</text>
+                      <text x="0" y="15" text-anchor="middle" fill="#00ff88" font-size="12" font-weight="bold">B</text>
+                      <text x="0" y="28" text-anchor="middle" fill="#00ff88" font-size="10">Winner</text>
+                    </g>
+                    <!-- Loser C -->
+                    <g transform="translate(170, 50)" opacity="0.5">
+                      <rect x="-20" y="-25" width="40" height="50" rx="5" fill="rgba(255,51,102,0.1)" stroke="#ff3366" stroke-width="2" stroke-dasharray="5,3"/>
+                      <text x="0" y="-10" text-anchor="middle" fill="#ff3366" font-size="18" font-weight="bold">✗</text>
+                      <text x="0" y="15" text-anchor="middle" fill="#ff3366" font-size="12" font-weight="bold">C</text>
+                      <text x="0" y="28" text-anchor="middle" fill="#ff3366" font-size="10">Removed</text>
+                    </g>
+                    <!-- Winner D -->
+                    <g transform="translate(240, 50)">
+                      <rect x="-20" y="-25" width="40" height="50" rx="5" fill="rgba(0,255,136,0.15)" stroke="#00ff88" stroke-width="2"/>
+                      <text x="0" y="-10" text-anchor="middle" fill="#00ff88" font-size="18" font-weight="bold">⭐</text>
+                      <text x="0" y="15" text-anchor="middle" fill="#00ff88" font-size="12" font-weight="bold">D</text>
+                      <text x="0" y="28" text-anchor="middle" fill="#00ff88" font-size="10">Winner</text>
+                    </g>
+                  </svg>
+                </div>
                 <div class="step-content">
                   <h4>Selection</h4>
-                  <p>Choose the best-performing solutions as "parents" for the next generation. Better solutions have higher chances of being selected.</p>
+                  <p>Choose the best-performing solutions as "parents" for the next generation. Better solutions have <strong>higher chances of being selected</strong> for breeding.</p>
                 </div>
               </div>
               
               <div class="step">
                 <div class="step-number">4</div>
+                <div class="step-illustration">
+                  <svg width="300" height="160" viewBox="0 0 300 160" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Parent 1 DNA -->
+                    <g transform="translate(15, 15)">
+                      <text x="0" y="0" fill="#00f6ff" font-size="11" font-weight="bold">Parent 1</text>
+                      <g transform="translate(0, 8)">
+                        <rect x="0" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="14" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="28" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="42" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="56" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="70" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="84" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="98" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="112" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="126" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                      </g>
+                    </g>
+                    <!-- Parent 2 DNA -->
+                    <g transform="translate(15, 50)">
+                      <text x="0" y="0" fill="#00f6ff" font-size="11" font-weight="bold">Parent 2</text>
+                      <g transform="translate(0, 8)">
+                        <rect x="0" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="14" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="28" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="42" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="56" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="70" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="84" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="98" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="112" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="126" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                      </g>
+                    </g>
+                    <!-- Arrow down -->
+                    <path d="M 80 90 L 80 110 M 75 105 L 80 110 L 85 105" stroke="#00ff88" stroke-width="2" fill="none"/>
+                    <!-- Child DNA -->
+                    <g transform="translate(15, 120)">
+                      <text x="0" y="0" fill="#00ff88" font-size="11" font-weight="bold">Child</text>
+                      <g transform="translate(0, 8)">
+                        <rect x="0" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="14" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="28" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="42" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="56" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="70" y="0" width="12" height="15" rx="2" fill="#00ff88" opacity="0.7" stroke="#00ff88" stroke-width="2"/>
+                        <rect x="84" y="0" width="12" height="15" rx="2" fill="#00ff88" opacity="0.7" stroke="#00ff88" stroke-width="2"/>
+                        <rect x="98" y="0" width="12" height="15" rx="2" fill="#00ff88" opacity="0.7" stroke="#00ff88" stroke-width="2"/>
+                        <rect x="112" y="0" width="12" height="15" rx="2" fill="#00ff88" opacity="0.7" stroke="#00ff88" stroke-width="2"/>
+                        <rect x="126" y="0" width="12" height="15" rx="2" fill="#00ff88" opacity="0.7" stroke="#00ff88" stroke-width="2"/>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
                 <div class="step-content">
                   <h4>Crossover</h4>
-                  <p>Combine parts of successful solutions to create "offspring" that inherit good traits from both parents.</p>
+                  <p>Combine parts of successful solutions to create "offspring" that <strong>inherit good traits from both parents</strong>. This creates new solutions that build on proven strategies.</p>
                 </div>
               </div>
               
               <div class="step">
                 <div class="step-number">5</div>
+                <div class="step-illustration">
+                  <svg width="300" height="100" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Original DNA -->
+                    <g transform="translate(15, 20)">
+                      <text x="35" y="-8" fill="#00f6ff" font-size="11" font-weight="bold">Original</text>
+                      <g transform="translate(0, 0)">
+                        <rect x="0" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="7" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">A</text>
+                        <rect x="16" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="23" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">B</text>
+                        <rect x="32" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="39" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">C</text>
+                        <rect x="48" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="55" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">D</text>
+                      </g>
+                    </g>
+                    <!-- Arrow right -->
+                    <path d="M 120 35 L 140 35 M 135 30 L 140 35 L 135 40" stroke="#a855f7" stroke-width="2" fill="none"/>
+                    <!-- Mutated DNA -->
+                    <g transform="translate(155, 20)">
+                      <text x="35" y="-8" fill="#ff3366" font-size="11" font-weight="bold">Mutated</text>
+                      <g transform="translate(0, 0)">
+                        <rect x="0" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="7" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">A</text>
+                        <rect x="16" y="0" width="14" height="20" rx="2" fill="#ff3366" opacity="0.8" stroke="#ff3366" stroke-width="2"/>
+                        <text x="23" y="15" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">X</text>
+                        <circle cx="23" cy="10" r="17" fill="none" stroke="#ff3366" stroke-width="1" opacity="0.5" stroke-dasharray="3,2"/>
+                        <rect x="32" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="39" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">C</text>
+                        <rect x="48" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="55" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">D</text>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
                 <div class="step-content">
                   <h4>Mutation</h4>
-                  <p>Introduce small random changes to maintain diversity and explore new possibilities.</p>
+                  <p>Introduce <strong>small random changes</strong> to maintain diversity and explore new possibilities. This prevents the algorithm from getting stuck in local optima.</p>
                 </div>
               </div>
               
               <div class="step">
                 <div class="step-number">6</div>
+                <div class="step-illustration">
+                  <svg width="300" height="160" viewBox="0 0 300 160" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="evolveGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" style="stop-color:#a855f7;stop-opacity:0.8" />
+                        <stop offset="100%" style="stop-color:#00f6ff;stop-opacity:1" />
+                      </linearGradient>
+                    </defs>
+                    <!-- Generation 1: 30% -->
+                    <g transform="translate(25, 120)">
+                      <rect x="-12" y="-30" width="24" height="30" rx="2" fill="url(#evolveGrad)" opacity="0.5"/>
+                      <rect x="-12" y="-30" width="24" height="1" rx="2" fill="#00f6ff" opacity="0.8"/>
+                      <text x="0" y="15" text-anchor="middle" fill="#00f6ff" font-size="10" font-weight="bold">Gen 1</text>
+                    </g>
+                    <!-- Generation 5: 50% -->
+                    <g transform="translate(100, 100)">
+                      <rect x="-12" y="-50" width="24" height="50" rx="2" fill="url(#evolveGrad)" opacity="0.7"/>
+                      <rect x="-12" y="-50" width="24" height="2" rx="2" fill="#00f6ff" opacity="0.8"/>
+                      <text x="0" y="15" text-anchor="middle" fill="#00f6ff" font-size="10" font-weight="bold">Gen 5</text>
+                    </g>
+                    <!-- Generation 10: 75% -->
+                    <g transform="translate(175, 65)">
+                      <rect x="-12" y="-75" width="24" height="75" rx="2" fill="url(#evolveGrad)" opacity="0.8"/>
+                      <rect x="-12" y="-75" width="24" height="2" rx="2" fill="#00f6ff" opacity="0.8"/>
+                      <text x="0" y="15" text-anchor="middle" fill="#00f6ff" font-size="10" font-weight="bold">Gen 10</text>
+                    </g>
+                    <!-- Generation 50: 95% -->
+                    <g transform="translate(250, 20)">
+                      <rect x="-12" y="-95" width="24" height="95" rx="2" fill="url(#evolveGrad)" opacity="1"/>
+                      <rect x="-12" y="-95" width="24" height="2" rx="2" fill="#00f6ff" opacity="1"/>
+                      <circle cx="0" cy="-100" r="3" fill="#00ff88"/>
+                      <text x="0" y="15" text-anchor="middle" fill="#00ff88" font-size="10" font-weight="bold">Gen 50</text>
+                    </g>
+                    <!-- Base line -->
+                    <line x1="10" y1="120" x2="270" y2="120" stroke="#00f6ff" stroke-width="1" opacity="0.3"/>
+                  </svg>
+                </div>
                 <div class="step-content">
-                  <h4>Evolution</h4>
-                  <p>Repeat this process for many generations. Each generation should perform better than the last, eventually finding optimal landing strategies.</p>
+                  <h4>Evolution Over Time</h4>
+                  <p>Repeat this process for many generations. <strong>Each generation should perform better than the last</strong>, eventually finding optimal landing strategies. The population "evolves" toward the best solution.</p>
                 </div>
               </div>
             </div>
