@@ -225,18 +225,38 @@ import { predefinedMaps } from './wasm-interface.js';
             playPauseBtn.addEventListener('click', toggleAutoScroll);
         }
 
+        // Debounced keyboard navigation for better INP performance
+        let lastKeyTime = 0;
+        const KEY_DEBOUNCE_MS = 100;
+
         document.addEventListener('keydown', e => {
+            const now = Date.now();
+            // Debounce arrow keys to prevent rapid firing
+            if (['ArrowLeft', 'ArrowRight'].includes(e.key) && now - lastKeyTime < KEY_DEBOUNCE_MS) {
+                return;
+            }
+
             if (e.key === 'ArrowLeft') {
+                lastKeyTime = now;
                 stopAutoScroll();
                 show(current - 1);
             }
             if (e.key === 'ArrowRight') {
+                lastKeyTime = now;
                 stopAutoScroll();
                 show(current + 1);
             }
             if (e.key === ' ') {
-                toggleAutoScroll();
-                e.preventDefault();
+                // Don't toggle on space in input elements
+                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+                    toggleAutoScroll();
+                    e.preventDefault();
+                }
+            }
+            // Keyboard shortcuts for accessibility
+            if (e.key === 't' || e.key === 'T') {
+                const tutorialBtn = document.getElementById('tutorial-button');
+                if (tutorialBtn) tutorialBtn.click();
             }
         });
 
@@ -287,10 +307,13 @@ import { predefinedMaps } from './wasm-interface.js';
             !mutationRateInput || !mutationRateValue || 
             !eliteRateInput) return;
 
-        // Toggle dashboard visibility
+        // Toggle dashboard visibility with accessibility support
         dashboardToggle.addEventListener('click', () => {
             dashboardElement.classList.toggle('active');
             const isActive = dashboardElement.classList.contains('active');
+            
+            // Update ARIA attributes for accessibility
+            dashboardToggle.setAttribute('aria-expanded', isActive);
             
             // Get icon elements safely
             const openIcon = dashboardToggle.querySelector('.open-icon');
@@ -305,6 +328,14 @@ import { predefinedMaps } from './wasm-interface.js';
                 if (!isActive) {
                     openIcon.style.display = 'inline-block';
                 }
+            }
+        });
+
+        // Keyboard shortcut for dashboard toggle (Alt+M for Mission Control)
+        document.addEventListener('keydown', (e) => {
+            if ((e.altKey || e.ctrlKey) && (e.key === 'm' || e.key === 'M')) {
+                dashboardToggle.click();
+                e.preventDefault();
             }
         });
 

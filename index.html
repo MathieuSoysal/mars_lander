@@ -142,12 +142,30 @@
   <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png?v=1.0.0">
   <link rel="manifest" href="site.webmanifest?v=1.0.0">
 
-  <meta name="theme-color" content="#000824">
+  <!-- SEO and Meta Tags -->
+  <meta name="theme-color" content="#000512">
+  <meta name="color-scheme" content="dark light">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description"
-    content="Mars Lander Viewer - A futuristic simulation environment for Mars landing missions.">
-  <meta name="keywords" content="Mars, Lander, Simulation, Genetic Algorithm, Space, Mission Control">
+  <meta name="apple-mobile-web-app-title" content="Mars Lander">
+  <meta name="description" content="Mars Lander Viewer - Experience a futuristic genetic algorithm simulation for Mars landing missions. Watch AI-powered spacecraft optimize their descent strategies.">
+  <meta name="keywords" content="Mars, Lander, Genetic Algorithm, Simulation, Space, AI, Machine Learning">
+  
+  <!-- Open Graph Tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Mars Lander Viewer - AI Simulation">
+  <meta property="og:description" content="Explore genetic algorithm optimization for Mars landing missions">
+  <meta property="og:site_name" content="Mars Lander Viewer">
+  
+  <!-- Twitter Card Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mars Lander Viewer">
+  <meta name="twitter:description" content="Watch AI optimize Mars landing strategies">
+  
+  <!-- Web Standards -->
+  <meta name="format-detection" content="telephone=no">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="canonical" href="https://example.com">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM4D7H1L8J"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -204,14 +222,55 @@
       setTimeout(markFontsAsLoaded, 100);
     });
   </script>
+
+  <!-- Web Vitals Monitoring (Core Web Vitals) -->
+  <script async src="https://unpkg.com/web-vitals@3.5.2/dist/web-vitals.iife.js"></script>
+  <script>
+    // Monitor Core Web Vitals per web.dev best practices
+    if (window.webVitals) {
+      function sendToAnalytics(metric) {
+        // Send to analytics service (Google Analytics, custom endpoint, etc)
+        if (navigator.sendBeacon) {
+          const body = JSON.stringify(metric);
+          navigator.sendBeacon('/analytics', body);
+        }
+        // Console log for debugging
+        console.log(`[WebVitals] ${metric.name}: ${metric.value.toFixed(2)}ms`);
+      }
+
+      webVitals.onCLS(sendToAnalytics);
+      webVitals.onINP(sendToAnalytics);
+      webVitals.onLCP(sendToAnalytics);
+      webVitals.onFCP(sendToAnalytics);
+      webVitals.onTTFB(sendToAnalytics);
+    }
+  </script>
+
+  <!-- Accessibility & Performance Hints -->
+  <script>
+    // Detect if user prefers reduced motion (for better INP scores)
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.style.setProperty('--animation-duration', '0.01ms');
+      document.documentElement.classList.add('reduce-motion');
+    }
+
+    // Service Worker Registration for offline capability and caching
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js', { scope: '/' })
+          .then(reg => console.log('[ServiceWorker] Registered successfully'))
+          .catch(err => console.log('[ServiceWorker] Registration failed:', err));
+      });
+    }
+  </script>
 </head>
 
 <body>
   <header>
     <h1>Mars Lander Viewer</h1>
     <div class="header-controls">
-      <button id="tutorial-button" class="header-button" title="Learn about Genetic Algorithms">
-        <span class="tutorial-icon">📚</span>
+      <button id="tutorial-button" class="header-button" title="Learn about Genetic Algorithms" aria-label="Open Tutorial - Learn about Genetic Algorithms and Mars Lander Simulation">
+        <span class="tutorial-icon" aria-hidden="true">📚</span>
         <span class="tutorial-text">Tutorial</span>
       </button>
     </div>
@@ -225,24 +284,24 @@
       </div>
 
       <div class="player-controls">
-        <button id="prev" class="player-button"><span>⏮</span></button>
-        <button id="play-pause" class="player-button">
-          <span class="play-icon">▶</span>
-          <span class="pause-icon hidden">⏸</span>
+        <button id="prev" class="player-button" aria-label="Previous frame"><span aria-hidden="true">⏮</span></button>
+        <button id="play-pause" class="player-button" aria-label="Play/Pause simulation">
+          <span class="play-icon" aria-hidden="true">▶</span>
+          <span class="pause-icon hidden" aria-hidden="true">⏸</span>
         </button>
-        <button id="next" class="player-button"><span>⏭</span></button>
+        <button id="next" class="player-button" aria-label="Next frame"><span aria-hidden="true">⏭</span></button>
 
-        <div class="speed-control-compact">
+        <div class="speed-control-compact" role="group" aria-label="Speed control">
           <span class="speed-label">Speed</span>
-          <input type="range" id="speed-compact" min="1" max="10" value="10" class="speed-slider">
-          <span id="speed-value">10x</span>
+          <input type="range" id="speed-compact" min="1" max="10" value="10" class="speed-slider" aria-label="Simulation speed multiplier">
+          <span id="speed-value" aria-live="polite">10x</span>
         </div>
 
-        <div class="mini-progress-container">
-          <div class="mini-progress-bar">
+        <div class="mini-progress-container" role="group" aria-label="Progress indicator">
+          <div class="mini-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Simulation progress">
             <div id="mini-progress" class="mini-progress-fill"></div>
           </div>
-          <span id="progress-text">0%</span>
+          <span id="progress-text" aria-live="polite">0%</span>
         </div>
       </div>
 
@@ -250,9 +309,9 @@
       <div id="loader" class="loader hidden"></div>
     </div>
 
-    <button id="dashboard-toggle" class="dashboard-toggle hidden">
-      <span class="open-icon">⚙️</span>
-      <span class="close-icon hidden">✕</span>
+    <button id="dashboard-toggle" class="dashboard-toggle hidden" aria-label="Toggle Mission Control Panel" aria-expanded="false">
+      <span class="open-icon" aria-hidden="true">⚙️</span>
+      <span class="close-icon hidden" aria-hidden="true">✕</span>
     </button>
 
     <div class="dashboard futuristic">

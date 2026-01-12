@@ -28,6 +28,34 @@
   padding: 0;
 }
 
+/* Focus indicators for accessibility */
+*:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+  box-shadow: 0 0 10px var(--primary-color);
+}
+
+/* Reduce motion for users with vestibular disorders */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background-color: var(--background-dark);
@@ -132,6 +160,16 @@ header::after {
     inset 0 0 10px rgba(0, 246, 255, 0.1);
   transform: translateY(-2px);
   border-color: rgba(0, 246, 255, 0.5);
+}
+
+/* Reduce INP impact - use will-change sparingly and only on :hover */
+.header-button:active {
+  will-change: transform;
+  transform: translateY(0);
+}
+
+.header-button:active:after {
+  will-change: auto;
 }
 
 .tutorial-icon {
