@@ -105,7 +105,7 @@ impl Game {
         } else {
             let d_start_x = (self.landing.start.x as i32 - x).abs();
             let d_end_x = (self.landing.end.x as i32 - x).abs();
-            d_end_x.min(d_start_x) as i32
+            d_end_x.min(d_start_x)
         };
 
         let dist_y = if y >= self.landing.start.y as i32 && y <= self.landing.end.y as i32 {
@@ -113,7 +113,7 @@ impl Game {
         } else {
             let d_start_y = (self.landing.start.y as i32 - y).abs();
             let d_end_y = (self.landing.end.y as i32 - y).abs();
-            d_end_y.min(d_start_y) as i32
+            d_end_y.min(d_start_y)
         };
         (dist_x, dist_y)
     }
@@ -142,10 +142,8 @@ impl Game {
         let is_on_landing = x as usize >= self.landing.start.x
             && x as usize <= self.landing.end.x
             && y as usize <= self.landing.start.y;
-        x < 0
-            || x > MAX_X
-            || y > MAX_Y
-            || y < 0
+        !(0..=MAX_X).contains(&x)
+            || !(0..=MAX_Y).contains(&y)
             || self.collide_seg(starship, px, py)
             || is_on_landing
     }

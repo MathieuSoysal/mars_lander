@@ -109,7 +109,7 @@ mod tests {
         starship.add_power(MAX_POWER as i16 + 1);
         assert_eq!(starship.get_power(), 1);
 
-        starship.add_power(0 as i16 - 1);
+        starship.add_power(-1);
         assert_eq!(starship.get_power(), 0);
     }
 }

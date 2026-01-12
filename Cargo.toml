@@ -19,6 +19,7 @@ getrandom = { version = "0.2", features = ["js"] }
 once_cell = "1.18.0"
 rayon = "1.10.0"
 colored = "3.0.0"
+clippy = "0.0.302"
 
 [dev-dependencies]
 criterion = "0.4"

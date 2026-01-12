@@ -236,7 +236,7 @@ impl Game {
         } else {
             let d_start_x = (self.landing.start.x as i32 - x).abs();
             let d_end_x = (self.landing.end.x as i32 - x).abs();
-            d_end_x.min(d_start_x) as i32
+            d_end_x.min(d_start_x)
         };
 
         let dist_y = if y >= self.landing.start.y as i32 && y <= self.landing.end.y as i32 {
@@ -244,7 +244,7 @@ impl Game {
         } else {
             let d_start_y = (self.landing.start.y as i32 - y).abs();
             let d_end_y = (self.landing.end.y as i32 - y).abs();
-            d_end_y.min(d_start_y) as i32
+            d_end_y.min(d_start_y)
         };
         (dist_x, dist_y)
     }
@@ -273,10 +273,8 @@ impl Game {
         let is_on_landing = x as usize >= self.landing.start.x
             && x as usize <= self.landing.end.x
             && y as usize <= self.landing.start.y;
-        x < 0
-            || x > MAX_X
-            || y > MAX_Y
-            || y < 0
+        !(0..=MAX_X).contains(&x)
+            || !(0..=MAX_Y).contains(&y)
             || is_on_landing
             || self.collide_seg(starship, px, py)
     }
@@ -350,15 +348,15 @@ type Genome = [Nucleotide; GENOME_SIZE];
 
 fn gen_init_rand() -> Genome {
     let mut genome = [0; GENOME_SIZE];
-    for i in 0..GENOME_SIZE {
-        genome[i] = ((random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS) | (random::<u8>() % 3);
-    }
+    genome.iter_mut().take(GENOME_SIZE).for_each(|genome| {
+        *genome = ((random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS) | (random::<u8>() % 3);
+    });
     genome
 }
 
 fn get_rotate_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     let turn = genome[nb_turn];
-    let rotate = turn & GEN_MASK_ROTATE as u8;
+    let rotate = turn & GEN_MASK_ROTATE;
     match rotate {
         0 => 0,
         1 => -15,
@@ -369,7 +367,7 @@ fn get_rotate_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
 
 fn get_power_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     let turn = genome[nb_turn];
-    let power = (turn >> GEN_ROTATE_SIZE_BITS) & GEN_MASK_POWER as u8;
+    let power = (turn >> GEN_ROTATE_SIZE_BITS) & GEN_MASK_POWER;
     match power {
         0 => 0,
         1 => -1,
@@ -378,6 +376,7 @@ fn get_power_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     }
 }
 
+#[expect(clippy::upper_case_acronyms)]
 #[derive(Clone, Copy)]
 struct DNA {
     genome: Genome,
@@ -514,7 +513,7 @@ fn elitiste_new_population(
 
     // 1) copy elites deterministically
     for i in 0..elite_count {
-        new_population[i] = population[indices[i]].clone();
+        new_population[i] = population[indices[i]];
     }
 
     let upper_bound = if elite_count == 0 { n } else { elite_count };
@@ -528,18 +527,22 @@ fn elitiste_new_population(
     };
 
     // 2) fill out the rest
-    for i in elite_count..n {
-        let p1_idx = tournament(&mut rng);
-        let p1 = &population[p1_idx];
-        if crossover_rate.sample(&mut rng) {
-            let p2_idx = tournament(&mut rng);
-            let p2 = &population[p2_idx];
-            new_population[i] = p1.crossover(p2);
-        } else {
-            new_population[i] = *p1;
-        }
-        new_population[i] = new_population[i].mutate(mutation_rate)
-    }
+    new_population
+        .iter_mut()
+        .take(n)
+        .skip(elite_count)
+        .for_each(|new| {
+            let p1_idx = tournament(&mut rng);
+            let p1 = &population[p1_idx];
+            if crossover_rate.sample(&mut rng) {
+                let p2_idx = tournament(&mut rng);
+                let p2 = &population[p2_idx];
+                *new = p1.crossover(p2);
+            } else {
+                *new = *p1;
+            }
+            *new = new.mutate(mutation_rate)
+        });
     best
 }
 
@@ -566,14 +569,14 @@ fn run_simulation(game: &Game, starship: &Starship, params: &SimulationParams) -
             elite_count,
             &crossover_rate,
             &mutation_rate,
-            &game,
+            game,
         );
 
-        let best_fitness = best_individual.fitness(&game);
+        let best_fitness = best_individual.fitness(game);
         if best_fitness >= WINNING_FITNESS {
             let should_replace = match overall_best.as_mut() {
                 None => true,
-                Some(best) => best_fitness > best.fitness(&game),
+                Some(best) => best_fitness > best.fitness(game),
             };
             if should_replace {
                 overall_best = Some(best_individual);

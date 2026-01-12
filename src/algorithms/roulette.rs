@@ -25,7 +25,7 @@ pub fn roulette_new_population(
         for (ind, &fit) in population.iter().zip(fitnesses.iter()) {
             pick -= fit;
             if pick <= 0.0 {
-                *slot = ind.clone();
+                *slot = *ind;
                 break;
             }
         }
@@ -34,8 +34,8 @@ pub fn roulette_new_population(
     // 3) Crossover and mutation
     for i in (0..new_population.len()).step_by(2) {
         if rng.gen_bool(crossover_rate) {
-            let p1 = new_population[i].clone();
-            let p2 = new_population[i + 1].clone();
+            let p1 = new_population[i];
+            let p2 = new_population[i + 1];
             new_population[i] = p1.crossover(&p2).mutate(&Bernoulli::new(0.0).unwrap());
             new_population[i + 1] = p2.crossover(&p1);
         }

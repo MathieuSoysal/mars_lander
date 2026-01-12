@@ -18,26 +18,23 @@ pub type Genome = [Nucleotide; GENOME_SIZE];
 
 pub fn gen_init_rand() -> Genome {
     let mut genome = [0; GENOME_SIZE];
-    for i in 0..GENOME_SIZE {
-        genome[i] =
-            ((random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS) | (random::<u8>() % 3);
-    }
+    genome.iter_mut().take(GENOME_SIZE).for_each(|genome| {
+        *genome = ((random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS) | (random::<u8>() % 3);
+    });
     genome
 }
 
 pub fn gen_init_full() -> Genome {
-    let genome = [2 << 2 | 2; GENOME_SIZE];
-    genome
+    [2 << 2 | 2; GENOME_SIZE]
 }
 
 pub fn gen_init_semi_full() -> Genome {
-    let genome = [2 << 2 | 1; GENOME_SIZE];
-    genome
+    [2 << 2 | 1; GENOME_SIZE]
 }
 
 pub fn get_rotate_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     let turn = genome[nb_turn];
-    let rotate = turn & GEN_MASK_ROTATE as u8;
+    let rotate = turn & GEN_MASK_ROTATE;
     match rotate {
         0 => 0,
         1 => -15,
@@ -48,7 +45,7 @@ pub fn get_rotate_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
 
 pub fn get_power_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     let turn = genome[nb_turn];
-    let power = (turn >> GEN_ROTATE_SIZE_BITS) & GEN_MASK_POWER as u8;
+    let power = (turn >> GEN_ROTATE_SIZE_BITS) & GEN_MASK_POWER;
     match power {
         0 => 0,
         1 => -1,
