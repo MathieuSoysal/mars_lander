@@ -1,0 +1,15 @@
+{
+  "name": "mars_lander",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "my_lib_bg.wasm",
+    "my_lib.js",
+    "my_lib.d.ts"
+  ],
+  "main": "my_lib.js",
+  "types": "my_lib.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
