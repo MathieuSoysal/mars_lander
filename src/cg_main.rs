@@ -3,7 +3,7 @@ use std::{io, ops::Div};
 use itertools::Itertools;
 
 #[derive(Debug, Clone, Copy)]
-struct SimulationParams {
+pub struct SimulationParams {
     pub pop_size: usize,
     pub nb_generations: i32,
     pub crossover_rate: f64,
@@ -68,6 +68,31 @@ impl Starship {
     pub fn get_y(&self) -> i32 {
         (self.y + 50) / 100
     }
+
+    #[inline(always)]
+    pub fn get_fuel(&self) -> u16 {
+        self.fuel
+    }
+
+    #[inline(always)]
+    pub fn get_rotation(&self) -> i8 {
+        self.rotation
+    }
+
+    #[inline(always)]
+    pub fn get_power(&self) -> u8 {
+        self.power
+    }
+
+    #[inline(always)]
+    pub fn get_x_speed(&self) -> f32 {
+        self.x_speed
+    }
+
+    #[inline(always)]
+    pub fn get_y_speed(&self) -> f32 {
+        self.y_speed
+    }
 }
 
 const MIN_SPEED: f32 = -500.;
@@ -130,7 +155,7 @@ impl Starship {
     }
 }
 
-const MARS_GRAVITY: f32 = 3.711;
+pub const MARS_GRAVITY: f32 = 3.711;
 const MAX_H_SPEED_ON_LAND: f32 = 20.;
 const MAX_V_SPEED_ON_LAND: f32 = 40.;
 const ANGLE_TO_LAND: i32 = 0;
@@ -138,13 +163,13 @@ const MAX_X: i32 = 6999;
 const MAX_Y: i32 = 2999;
 
 #[derive(Clone)]
-struct Point {
+pub struct Point {
     pub x: usize,
     pub y: usize,
 }
 
 #[derive(Clone)]
-struct Segment {
+pub struct Segment {
     pub start: Point,
     pub end: Point,
 }
@@ -155,7 +180,7 @@ impl Segment {
     }
 }
 
-struct Game {
+pub struct Game {
     points: Vec<Point>,
     segments: Vec<Segment>,
     landing: Segment,
@@ -275,19 +300,19 @@ impl Game {
             && y as usize <= self.landing.start.y;
         !(0..=MAX_X).contains(&x)
             || !(0..=MAX_Y).contains(&y)
-            || is_on_landing
             || self.collide_seg(starship, px, py)
+            || is_on_landing
     }
 
     pub fn starship_is_landing(&self, starship: &Starship) -> bool {
         let x = starship.get_x() as usize;
         let y = starship.get_y() as usize;
-        x >= self.landing.start.x + 50
-            && x <= self.landing.end.x - 50
+        x >= self.landing.start.x + 100
+            && x <= self.landing.end.x - 100
             && y <= self.landing.start.y
-            && starship.x_speed.abs() <= MAX_H_SPEED_ON_LAND
-            && starship.y_speed.abs() <= MAX_V_SPEED_ON_LAND
-            && starship.rotation == ANGLE_TO_LAND as i8
+            && starship.get_x_speed().abs() <= MAX_H_SPEED_ON_LAND
+            && starship.get_y_speed().abs() <= MAX_V_SPEED_ON_LAND
+            && starship.get_rotation() == ANGLE_TO_LAND as i8
     }
 
     pub fn add_point(&mut self, x: usize, y: usize) {
@@ -341,12 +366,12 @@ const GEN_ROTATE_SIZE_BITS: usize = 2;
 const GEN_MASK_POWER: u8 = (1 << GEN_POWER_SIZE_BITS) - 1;
 const GEN_MASK_ROTATE: u8 = (1 << GEN_ROTATE_SIZE_BITS) - 1;
 
-const GENOME_SIZE: usize = 100;
+pub const GENOME_SIZE: usize = 100;
 
 type Nucleotide = u8;
-type Genome = [Nucleotide; GENOME_SIZE];
+pub type Genome = [Nucleotide; GENOME_SIZE];
 
-fn gen_init_rand() -> Genome {
+pub fn gen_init_rand() -> Genome {
     let mut genome = [0; GENOME_SIZE];
     genome.iter_mut().take(GENOME_SIZE).for_each(|genome| {
         *genome = ((random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS) | (random::<u8>() % 3);
@@ -354,7 +379,7 @@ fn gen_init_rand() -> Genome {
     genome
 }
 
-fn get_rotate_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
+pub fn get_rotate_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     let turn = genome[nb_turn];
     let rotate = turn & GEN_MASK_ROTATE;
     match rotate {
@@ -365,7 +390,7 @@ fn get_rotate_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     }
 }
 
-fn get_power_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
+pub fn get_power_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     let turn = genome[nb_turn];
     let power = (turn >> GEN_ROTATE_SIZE_BITS) & GEN_MASK_POWER;
     match power {
@@ -376,14 +401,47 @@ fn get_power_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     }
 }
 
-#[expect(clippy::upper_case_acronyms)]
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Clone, Copy)]
-struct DNA {
+pub struct DNA {
     genome: Genome,
     starship: Starship,
     fitness: f64,
 }
 
+impl DNA {
+    pub fn new(genome: Genome, starship: Starship) -> Self {
+        DNA {
+            genome,
+            starship,
+            fitness: -1.,
+        }
+    }
+}
+
+/*
+TODO Adjust weights
+Order of importance:
+ - land_distance (if we take account of y, put 8000 instead of 7000)
+    goal: 0
+    range: [0, 7000]
+    nval: 7001 (2**13)
+ - rotation
+    goal: 0
+    range: [0, 90]
+    nval: 91 (2**7)
+- x speed
+    goal: abs <= 20
+    mx_val: [0, 4 * GENOME_SIZE]
+    nval: 4 * GENOME_SIZE + 1 (2**9)
+ - y speed
+    goal: abs <= 40
+    mx_val: [0, 4 * GENOME_SIZE]
+    nval: 4 * GENOME_SIZE + 1 (2**9)
+ - fuel (take account of it only for thoose who succeed)
+    range: [0, 2000]
+    nval: 2001 (2**11)
+*/
 const LAND_DISTANCE_X_WEIGHT: f64 = 20.0;
 const LAND_DISTANCE_Y_WEIGHT: f64 = 1.0;
 const ROTATION_WEIGHT: f64 = 0.0;
@@ -391,11 +449,8 @@ const X_SPEED_WEIGHT: f64 = 4.0;
 const Y_SPEED_WEIGHT: f64 = 5.0;
 const FUEL_WEIGHT: f64 = 100.0;
 
-pub const WINNING_FITNESS: f64 = LAND_DISTANCE_X_WEIGHT
-    + LAND_DISTANCE_Y_WEIGHT
-    + ROTATION_WEIGHT
-    + X_SPEED_WEIGHT
-    + Y_SPEED_WEIGHT;
+pub const WINNING_FITNESS: f64 =
+    LAND_DISTANCE_X_WEIGHT + ROTATION_WEIGHT + X_SPEED_WEIGHT + Y_SPEED_WEIGHT;
 
 #[inline(always)]
 fn calc_fit(
@@ -415,14 +470,6 @@ fn calc_fit(
 }
 
 impl DNA {
-    pub fn new(genome: Genome, starship: Starship) -> Self {
-        DNA {
-            genome,
-            starship,
-            fitness: -1.,
-        }
-    }
-
     pub fn fitness(&mut self, game: &Game) -> f64 {
         if self.fitness != -1.0 {
             return self.fitness;
@@ -439,7 +486,7 @@ impl DNA {
             s.apply_movement();
 
             if game.starship_is_landing(&s) {
-                self.fitness = calc_fit(0, 0, 0, 0., 0., s.fuel);
+                self.fitness = calc_fit(0, 0, 0, 0., 0., s.get_fuel());
                 break;
             }
 
@@ -448,9 +495,9 @@ impl DNA {
                 self.fitness = calc_fit(
                     land_dist_x,
                     land_dist_y,
-                    s.rotation,
-                    s.x_speed,
-                    s.y_speed,
+                    s.get_rotation(),
+                    s.get_x_speed(),
+                    s.get_y_speed(),
                     0,
                 );
                 break;
@@ -488,7 +535,7 @@ impl DNA {
 const TOUR_SIZE: usize = 5;
 
 // Returns the best individual
-fn elitiste_new_population(
+pub fn elitiste_new_population(
     population: &mut [DNA],
     new_population: &mut [DNA],
     elite_count: usize,
@@ -546,7 +593,7 @@ fn elitiste_new_population(
     best
 }
 
-fn run_simulation(game: &Game, starship: &Starship, params: &SimulationParams) -> Option<DNA> {
+pub fn run_simulation(game: &Game, starship: &Starship, params: &SimulationParams) -> Option<DNA> {
     let mut population = (0..params.pop_size)
         .map(|_| {
             let genome = gen_init_rand();
@@ -556,13 +603,14 @@ fn run_simulation(game: &Game, starship: &Starship, params: &SimulationParams) -
 
     let mut new_population = population.clone();
 
+    let mut first_ok = -1;
     let mut overall_best = Option::<DNA>::None;
 
     let elite_count = (params.elite_rate * params.pop_size as f64).floor() as usize;
     let crossover_rate = Bernoulli::new(params.crossover_rate).unwrap();
     let mutation_rate = Bernoulli::new(params.mutation_rate).unwrap();
 
-    for _ in 0..params.nb_generations {
+    for generation in 0..params.nb_generations {
         let mut best_individual = elitiste_new_population(
             &mut population,
             &mut new_population,
@@ -574,6 +622,9 @@ fn run_simulation(game: &Game, starship: &Starship, params: &SimulationParams) -
 
         let best_fitness = best_individual.fitness(game);
         if best_fitness >= WINNING_FITNESS {
+            if first_ok == -1 {
+                first_ok = generation + 1;
+            }
             let should_replace = match overall_best.as_mut() {
                 None => true,
                 Some(best) => best_fitness > best.fitness(game),
@@ -648,7 +699,8 @@ fn main() {
         starship.add_rotation(rotate);
         starship.apply_movement();
 
-        println!("{} {}", starship.rotation, starship.power);
+        // R P. R is the desired rotation angle. P is the desired thrust power.
+        println!("{} {}", starship.get_rotation(), starship.get_power());
         i += 1;
     }
 }
