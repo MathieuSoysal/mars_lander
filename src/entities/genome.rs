@@ -1,5 +1,5 @@
 use std::ops::Div as _;
-use rand::{distributions::Bernoulli, prelude::*};
+use rand::{distr::Bernoulli, prelude::*, random, rng};
 
 use super::{
     game::{Game, HEIGHT},
@@ -203,7 +203,7 @@ impl DNA {
         let mut mutated = *self;
         mutated.fitness = -1.;
         for i in 0..GENOME_SIZE {
-            if mutation_rate.sample(&mut thread_rng()) {
+            if mutation_rate.sample(&mut rng()) {
                 mutated.genome[i] = random::<u8>();
             }
         }
@@ -213,7 +213,7 @@ impl DNA {
     pub fn crossover(&self, other: &Self) -> Self {
         let mut child = *self;
         child.fitness = -1.;
-        let crossover_point = random::<usize>() % GENOME_SIZE;
+        let crossover_point = random::<u32>() as usize % GENOME_SIZE;
         for i in crossover_point..GENOME_SIZE {
             child.genome[i] = other.genome[i];
         }

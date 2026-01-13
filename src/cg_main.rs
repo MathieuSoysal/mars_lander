@@ -334,7 +334,7 @@ impl Starship {
     }
 }
 
-use rand::{distributions::Bernoulli, prelude::*};
+use rand::{distr::Bernoulli, prelude::*, random, rng};
 
 const GEN_POWER_SIZE_BITS: usize = 2;
 const GEN_ROTATE_SIZE_BITS: usize = 2;
@@ -463,7 +463,7 @@ impl DNA {
         let mut mutated = *self;
         mutated.fitness = -1.;
         for i in 0..GENOME_SIZE {
-            if mutation_rate.sample(&mut thread_rng()) {
+            if mutation_rate.sample(&mut rng()) {
                 mutated.genome[i] = random::<u8>();
             }
         }
@@ -473,7 +473,7 @@ impl DNA {
     pub fn crossover(&self, other: &Self) -> Self {
         let mut child = *self;
         child.fitness = -1.;
-        let crossover_point = random::<usize>() % GENOME_SIZE;
+        let crossover_point = random::<u32>() as usize % GENOME_SIZE;
         for i in crossover_point..GENOME_SIZE {
             child.genome[i] = other.genome[i];
         }
@@ -496,7 +496,7 @@ fn elitiste_new_population(
     mutation_rate: &Bernoulli,
     game: &Game,
 ) -> DNA {
-    let mut rng = thread_rng();
+    let mut rng = rng();
 
     let n = population.len();
     // Need to sort using mutable references
@@ -521,7 +521,7 @@ fn elitiste_new_population(
     // helper: tournament select one parent
     let tournament = |rng: &mut ThreadRng| -> usize {
         indices[(0..TOUR_SIZE)
-            .map(|_| rng.gen_range(0..upper_bound))
+            .map(|_| rng.random_range(0..upper_bound))
             .min()
             .unwrap()]
     };

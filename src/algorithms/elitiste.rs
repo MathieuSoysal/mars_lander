@@ -1,6 +1,6 @@
 use crate::entities::{game::Game, genome::DNA};
 use itertools::Itertools;
-use rand::{distributions::Bernoulli, prelude::*};
+use rand::{distr::Bernoulli, prelude::*, rng};
 
 const TOUR_SIZE: usize = 5;
 
@@ -13,7 +13,7 @@ pub fn elitiste_new_population(
     mutation_rate: &Bernoulli,
     game: &Game,
 ) -> DNA {
-    let mut rng = thread_rng();
+    let mut rng = rng();
 
     let n = population.len();
     // Need to sort using mutable references
@@ -38,7 +38,7 @@ pub fn elitiste_new_population(
     // helper: tournament select one parent
     let tournament = |rng: &mut ThreadRng| -> usize {
         indices[(0..TOUR_SIZE)
-            .map(|_| rng.gen_range(0..upper_bound))
+            .map(|_| rng.random_range(0..upper_bound))
             .min()
             .unwrap()]
     };

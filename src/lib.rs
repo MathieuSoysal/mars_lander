@@ -10,7 +10,7 @@ use entities::{
 };
 use itertools::Itertools;
 use params::SimulationParams;
-use rand::distributions::Bernoulli;
+use rand::distr::Bernoulli;
 use wasm_bindgen::prelude::*;
 
 pub mod entities;
@@ -140,7 +140,7 @@ mod tests {
         X_SPEED_WEIGHT, Y_SPEED_WEIGHT,
     };
     use colored::*;
-    use rand::distributions::Bernoulli;
+    use rand::distr::Bernoulli;
     use rayon::prelude::*;
     use std::env;
 
