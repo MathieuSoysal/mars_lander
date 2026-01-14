@@ -1,138 +1,49 @@
-name: Deploy
+name: Build and Deploy
 
-on:
+on: 
   push:
-    branches:
-      - master
-      - main
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
 
-# Add explicit permissions for the GITHUB_TOKEN
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
+  pull-requests: write
+  deployments: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
         with:
-          fetch-depth: 0 
-          submodules: recursive  
+          targets: wasm32-unknown-unknown
 
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
 
-      - name: Install wasm-pack
-        run: |
-          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-      - name: Build WASM
-        run: wasm-pack build --target web --release
-
-      - name: Check WASM output
-        run: |
-          echo "Contents of pkg directory:"
-          ls -la pkg/
-          echo "WASM modules:"
-          find pkg -name "*.wasm"
-
-      - name: Set up Node.js
+      - name:  Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install terser html-minifier postcss postcss-cli cssnano-cli
-
-      - name: Minify JavaScript
         run: |
-          for file in js/*.js; do
-            npx terser "$file" -o "$file.min.js" && mv "$file.min.js" "$file"
-          done
+          cargo install wasm-pack
+          npm ci
 
-      - name: Minify HTML
-        run: npx html-minifier --collapse-whitespace --remove-comments --minify-css true --minify-js true -o index.min.html index.html && mv index.min.html index.html
+      - name: Build
+        run: npm run build
 
-      - name: Minify CSS
-        run: npx cssnano-cli styles.css styles.min.css && mv styles.min.css styles.css
-
-      - name: Prepare deployment directory
-        run: |
-          mkdir -p dist
-          cp index.html styles.css site.webmanifest .htaccess dist/ || true
-          echo "Files copied to dist:"
-          ls -la dist/
-          
-          # Copy directories only if they exist
-          echo "Copying JS files..."
-          [ -d "js" ] && cp -r js/ dist/ || echo "js directory not found, skipping"
-          
-          # Ensure pkg directory gets copied to dist - this is critical
-          if [ -d "pkg" ]; then
-            echo "Copying pkg directory from current workspace..."
-            mkdir -p dist/pkg
-            cp -r pkg/* dist/pkg/
-            
-            echo "Verifying pkg contents in dist directory..."
-            ls -la dist/pkg/
-            
-            # Make sure the WASM files are correctly copied
-            if [ -f "dist/pkg/my_lib_bg.wasm" ]; then
-              echo "✅ WASM file exists in dist/pkg and is correctly copied"
-            else
-              echo "⚠️ Warning: my_lib_bg.wasm not found in dist/pkg directory"
-            fi
-          else
-            echo "No pkg directory found in workspace!"
-            # Create pkg directory and copy necessary files from target
-            mkdir -p dist/pkg
-            
-            # Copy the WASM file from the target directory
-            if [ -d "target/wasm32-unknown-unknown/release" ]; then
-              echo "Copying WASM files from target directory..."
-              find target/wasm32-unknown-unknown/release -name "*.wasm" -exec cp {} dist/pkg/ \;
-              
-              # Create JavaScript bindings from wasm-pack output
-              if [ -d "target/wasm32-unknown-unknown/release/build" ]; then
-                echo "Copying JS binding files from build directory..."
-                find target/wasm32-unknown-unknown/release/build -name "*.js" -exec cp {} dist/pkg/ \;
-              else
-                # Create a minimal JavaScript file if original doesn't exist
-                echo "Creating minimal my_lib.js file..."
-                echo "export function run_from_web() { console.error('WASM binding not properly loaded'); return []; }" > dist/pkg/my_lib.js
-              fi
-            else
-              echo "No WASM files found in target directory either!"
-            fi
-          fi
-          
-          echo "Copying favicon directory..."
-          [ -d "favicon" ] && cp -r favicon/ dist/ || echo "favicon directory not found, skipping"
-          
-          # Create a simple marker file to ensure the WASM is properly processed
-          echo "Creating .nojekyll file to prevent Jekyll processing..."
-          touch dist/.nojekyll
-          
-          # List what we have in the dist directory
-          echo "Contents of dist directory (files):"
-          find dist -type f | sort
-          
-          echo "Contents of dist directory (structure):"
-          find dist -type d | sort
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Deploy to Cloudflare Pages
+        uses:  cloudflare/pages-action@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: gh-pages
-          force_orphan: true
-          # Keep files option helps ensure all necessary files are included
-          keep_files: false
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName:  mars-lander
+          directory:  dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
