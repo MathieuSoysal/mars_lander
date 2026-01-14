@@ -1,0 +1,14 @@
+{
+    "name": "mars-lander",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "build: wasm": "wasm-pack build --target web --out-dir ./web/pkg",
+        "build": "npm run build:wasm && vite build",
+        "dev": "npm run build:wasm && vite",
+        "preview": "vite preview"
+    },
+    "devDependencies": {
+        "vite": "^7.3.1"
+    }
+}
