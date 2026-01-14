@@ -3,3 +3,4 @@ Cargo.lock
 /all_svg
 output.rs
 pkg
+/node_modules
