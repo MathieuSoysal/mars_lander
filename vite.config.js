@@ -26,9 +26,12 @@ export default defineConfig({
     css: {
         transformer: 'lightningcss',
         lightningcss: {
-            drafts: {
-                customMedia: true,
+            targets: {
+                chrome: 95,
+                firefox: 95,
+                safari: 14,
             },
+            minify: true,
         },
     },
 });

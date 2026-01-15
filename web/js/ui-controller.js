@@ -1,5 +1,7 @@
 // Import predefined maps from wasm-interface.js
 import { predefinedMaps } from './wasm-interface.js';
+// Import CSS for Vite processing (minification)
+import '../styles.css';
 
 (function () {
     // Variable declarations for UI elements
@@ -353,9 +355,15 @@ import { predefinedMaps } from './wasm-interface.js';
         });
     }
 
-    // Check screen size on load and resize
-    window.addEventListener('load', checkScreenSize);
-    window.addEventListener('resize', checkScreenSize);
+    // Debounced resize handler to avoid layout thrashing
+    let resizeTimeout = null;
+    function debouncedCheckScreenSize() {
+        if (resizeTimeout) cancelAnimationFrame(resizeTimeout);
+        resizeTimeout = requestAnimationFrame(checkScreenSize);
+    }
+    
+    // Only use resize listener - load is handled in main init
+    window.addEventListener('resize', debouncedCheckScreenSize, { passive: true });
 
     // Function to update the terrain visualization based on the selected map
     function updateTerrainVisualization(mapSelection) {
@@ -417,10 +425,7 @@ import { predefinedMaps } from './wasm-interface.js';
         }
     }
 
-    // Initialize terrain visualization with default map
-    window.addEventListener('load', function () {
-        updateTerrainVisualization('default');
-    });
+    // Terrain visualization is initialized in the main load handler below
     
     // Function to setup the Run button event handler
     function setupRunButton() {
@@ -506,17 +511,29 @@ import { predefinedMaps } from './wasm-interface.js';
                 const tooltip = document.createElement('div');
                 tooltip.className = 'info-tooltip';
                 tooltip.textContent = this.getAttribute('data-info');
+                
+                // Read button rect before appending (avoids forced reflow)
+                const buttonRect = this.getBoundingClientRect();
+                
+                // Position tooltip off-screen initially to measure without reflow
+                tooltip.style.cssText = 'position:fixed;visibility:hidden;left:-9999px;top:-9999px;';
                 document.body.appendChild(tooltip);
 
-                // Position tooltip near the button
-                const buttonRect = this.getBoundingClientRect();
-                tooltip.style.left = `${buttonRect.left - (tooltip.offsetWidth / 2) + (buttonRect.width / 2)}px`;
-                tooltip.style.top = `${buttonRect.top - tooltip.offsetHeight - 10}px`;
-
-                // Make tooltip visible
-                setTimeout(() => {
-                    tooltip.classList.add('visible');
-                }, 10);
+                // Use requestAnimationFrame to batch reads and writes
+                requestAnimationFrame(() => {
+                    const tooltipWidth = tooltip.offsetWidth;
+                    const tooltipHeight = tooltip.offsetHeight;
+                    
+                    // Now write all styles at once
+                    tooltip.style.cssText = '';
+                    tooltip.style.left = `${buttonRect.left - (tooltipWidth / 2) + (buttonRect.width / 2)}px`;
+                    tooltip.style.top = `${buttonRect.top - tooltipHeight - 10}px`;
+                    
+                    // Make tooltip visible
+                    requestAnimationFrame(() => {
+                        tooltip.classList.add('visible');
+                    });
+                });
 
                 activeTooltip = tooltip;
 
