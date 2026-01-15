@@ -278,25 +278,21 @@ import '../styles.css';
         }
     }
 
-    // Function to check screen size and show/hide toggle button
+    // Function to check screen size and show/hide toggle button using matchMedia to avoid layout reads
+    const smallScreenQuery = window.matchMedia('(max-width: 1300px)');
     function checkScreenSize() {
         if (!dashboardToggle || !dashboardElement) return;
         
-        if (window.innerWidth <= 1300) {
+        if (smallScreenQuery.matches) {
             dashboardToggle.classList.remove('hidden');
-            // Make dashboard expanded by default on small screens
             dashboardElement.classList.add('active');
             
-            // Check if icon elements exist before manipulating them
             const openIcon = dashboardToggle.querySelector('.open-icon');
             const closeIcon = dashboardToggle.querySelector('.close-icon');
-            
-            // Update toggle button icons to show close icon by default
             if (openIcon) openIcon.classList.add('hidden');
             if (closeIcon) closeIcon.classList.remove('hidden');
         } else {
             dashboardToggle.classList.add('hidden');
-            // Make sure dashboard is visible when screen is large
             dashboardElement.classList.remove('active');
         }
     }
@@ -355,15 +351,8 @@ import '../styles.css';
         });
     }
 
-    // Debounced resize handler to avoid layout thrashing
-    let resizeTimeout = null;
-    function debouncedCheckScreenSize() {
-        if (resizeTimeout) cancelAnimationFrame(resizeTimeout);
-        resizeTimeout = requestAnimationFrame(checkScreenSize);
-    }
-    
-    // Only use resize listener - load is handled in main init
-    window.addEventListener('resize', debouncedCheckScreenSize, { passive: true });
+    // React to media query changes instead of window resize (avoids layout reads)
+    smallScreenQuery.addEventListener('change', checkScreenSize, { passive: true });
 
     // Function to update the terrain visualization based on the selected map
     function updateTerrainVisualization(mapSelection) {
@@ -735,11 +724,17 @@ import '../styles.css';
         // Initialize tooltips for info buttons
         initializeInfoButtons();
         
-        // Initialize terrain visualization
-        updateTerrainVisualization('default');
+        // Initialize terrain visualization off the critical path
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => updateTerrainVisualization('default'), { timeout: 1000 });
+        } else {
+            setTimeout(() => updateTerrainVisualization('default'), 150);
+        }
         
-        // Set up other UI components
-        checkScreenSize();
+        // Defer screen size check to the next frame to avoid synchronous reflow
+        requestAnimationFrame(() => {
+            checkScreenSize();
+        });
         
         console.log("UI initialization complete");
     });
