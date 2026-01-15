@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-  <link rel="stylesheet" href="styles.css">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, viewport-fit=cover">
   <title>Mars Lander Viewer</title>
@@ -10,10 +9,8 @@
   <!-- Resource hints for faster loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="//fonts.googleapis.com">
-  <link rel="dns-prefetch" href="//fonts.gstatic.com">
-
-  <!-- Preload critical assets -->
+  
+  <!-- Modulepreload for main JS to reduce chain latency -->
   <style>
     /* Critical CSS for above-the-fold content */
     :root {
@@ -166,15 +163,31 @@
   <meta name="format-detection" content="telephone=no">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="canonical" href="https://mars-lander.pages.dev/">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM4D7H1L8J"></script>
+  <!-- Google Analytics - Deferred to avoid blocking LCP/FCP -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-SM4D7H1L8J', {
-      'storage': 'none'
-    });
+    // Defer analytics to improve Core Web Vitals
+    function loadGtag() {
+      if (window.gtagLoaded) return;
+      window.gtagLoaded = true;
+      
+      const script = document.createElement('script');
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-SM4D7H1L8J';
+      script.async = true;
+      document.head.appendChild(script);
+      
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      window.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', 'G-SM4D7H1L8J', { 'storage': 'none' });
+    }
+    
+    // Load after page is interactive
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadGtag, { timeout: 4000 });
+    } else {
+      setTimeout(loadGtag, 2000);
+    }
   </script>
   <meta name="author" content="Mathieu Soysal">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -223,27 +236,35 @@
     });
   </script>
 
-  <!-- Web Vitals Monitoring (Core Web Vitals) - Loaded with low priority -->
-  <script defer fetchpriority="low" src="https://unpkg.com/web-vitals@3.5.2/dist/web-vitals.iife.js"></script>
+  <!-- Web Vitals Monitoring - Loaded after user interaction to not impact Core Web Vitals -->
   <script>
-    // Monitor Core Web Vitals per web.dev best practices
-    if (window.webVitals) {
-      function sendToAnalytics(metric) {
-        // Send to analytics service (Google Analytics, custom endpoint, etc)
-        if (navigator.sendBeacon) {
-          const body = JSON.stringify(metric);
-          navigator.sendBeacon('/analytics', body);
-        }
-        // Console log for debugging
-        console.log(`[WebVitals] ${metric.name}: ${metric.value.toFixed(2)}ms`);
-      }
-
-      webVitals.onCLS(sendToAnalytics);
-      webVitals.onINP(sendToAnalytics);
-      webVitals.onLCP(sendToAnalytics);
-      webVitals.onFCP(sendToAnalytics);
-      webVitals.onTTFB(sendToAnalytics);
+    // Defer web-vitals loading until after LCP
+    function loadWebVitals() {
+      if (window.webVitalsLoaded) return;
+      window.webVitalsLoaded = true;
+      
+      import('https://unpkg.com/web-vitals@3.5.2/dist/web-vitals.attribution.js?module')
+        .then(({ onCLS, onINP, onLCP, onFCP, onTTFB }) => {
+          function sendToAnalytics(metric) {
+            if (navigator.sendBeacon) {
+              navigator.sendBeacon('/analytics', JSON.stringify(metric));
+            }
+            console.log(`[WebVitals] ${metric.name}: ${metric.value.toFixed(2)}ms`);
+          }
+          onCLS(sendToAnalytics);
+          onINP(sendToAnalytics);
+          onLCP(sendToAnalytics);
+          onFCP(sendToAnalytics);
+          onTTFB(sendToAnalytics);
+        })
+        .catch(() => {});
     }
+    
+    // Load after first interaction or after 5 seconds
+    ['click', 'keydown', 'scroll'].forEach(event => {
+      window.addEventListener(event, loadWebVitals, { once: true, passive: true });
+    });
+    setTimeout(loadWebVitals, 5000);
   </script>
 
   <!-- Accessibility & Performance Hints -->
