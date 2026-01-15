@@ -165,7 +165,7 @@
   <!-- Web Standards -->
   <meta name="format-detection" content="telephone=no">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <link rel="canonical" href="https://example.com">
+  <link rel="canonical" href="https://mars-lander.pages.dev/">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM4D7H1L8J"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -177,8 +177,8 @@
     });
   </script>
   <meta name="author" content="Mathieu Soysal">
-  <meta name="robots" content="index, follow">
-  <meta name="revisit-after" content="1 days">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="revisit-after" content="7 days">
 
   <!-- Cache control - Note: Should be implemented server-side as well -->
   <meta http-equiv="Cache-Control" content="public, max-age=31536000, must-revalidate">
@@ -223,8 +223,8 @@
     });
   </script>
 
-  <!-- Web Vitals Monitoring (Core Web Vitals) -->
-  <script async src="https://unpkg.com/web-vitals@3.5.2/dist/web-vitals.iife.js"></script>
+  <!-- Web Vitals Monitoring (Core Web Vitals) - Loaded with low priority -->
+  <script defer fetchpriority="low" src="https://unpkg.com/web-vitals@3.5.2/dist/web-vitals.iife.js"></script>
   <script>
     // Monitor Core Web Vitals per web.dev best practices
     if (window.webVitals) {
@@ -838,10 +838,10 @@
   </div>
 
   <div class="seek-container">
-    <input type="range" id="seek" min="1" max="300" value="1" />
+    <input type="range" id="seek" min="1" max="300" value="1" aria-label="Seek through simulation frames" />
   </div>
 
-  <script type="module" src="js/ui-controller.js" fetchpriority="low"></script>
+  <script type="module" src="js/ui-controller.js" fetchpriority="low" defer></script>
 </body>
 
 </html>

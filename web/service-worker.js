@@ -3,7 +3,7 @@
  * Implements offline capability and performance caching per web.dev best practices
  */
 
-const CACHE_NAME = 'mars-lander-v1.0.0';
+const CACHE_NAME = 'mars-lander-v1.0.1';
 const RUNTIME_CACHE = 'mars-lander-runtime-v1';
 const ASSETS_TO_CACHE = [
   '/',
@@ -12,7 +12,9 @@ const ASSETS_TO_CACHE = [
   '/js/ui-controller.js',
   '/js/wasm-interface.js',
   '/css/critical.css',
-  '/site.webmanifest'
+  '/site.webmanifest',
+  '/robots.txt',
+  '/sitemap.xml'
 ];
 
 /**

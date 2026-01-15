@@ -140,16 +140,18 @@ header::after {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(0, 246, 255, 0.3), transparent);
-  transition: left 0.5s ease;
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
   z-index: 1;
+  will-change: transform;
 }
 
 .header-button:hover::before {
-  left: 100%;
+  transform: translateX(100%);
 }
 
 .header-button:hover {
@@ -209,16 +211,18 @@ header::after {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(0, 246, 255, 0.3), transparent);
-  transition: left 0.5s ease;
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
   z-index: 1;
+  will-change: transform;
 }
 
 .header-button:hover::before {
-  left: 100%;
+  transform: translateX(100%);
 }
 
 .header-button:hover {
@@ -628,7 +632,7 @@ h2 {
 .primary-button .holographic-scan {
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 50%;
   height: 100%;
   background: linear-gradient(
@@ -639,9 +643,10 @@ h2 {
     transparent
   );
   z-index: 2;
-  transform: skewX(-25deg);
+  transform: translateX(-200%) skewX(-25deg);
   opacity: 0;
   transition: opacity 0.3s;
+  will-change: transform, opacity;
 }
 
 .primary-button:hover .holographic-scan {
@@ -651,10 +656,10 @@ h2 {
 
 @keyframes scan-effect {
   0% {
-    left: -100%;
+    transform: translateX(-200%) skewX(-25deg);
   }
   100% {
-    left: 200%;
+    transform: translateX(400%) skewX(-25deg);
   }
 }
 
@@ -719,13 +724,14 @@ h2 {
   overflow: hidden;
   color: rgba(255, 255, 255, 0.9);
   cursor: wait;
+  will-change: background-position, box-shadow;
 }
 
 .primary-button.loading::after {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
   height: 100%;
   background: linear-gradient(90deg, 
@@ -733,11 +739,12 @@ h2 {
     rgba(255, 255, 255, 0.2), 
     transparent);
   animation: scanning-light 1.5s infinite;
+  will-change: transform;
 }
 
 @keyframes scanning-light {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 .primary-button.loading .button-text::after {
@@ -1039,6 +1046,8 @@ h2 {
   pointer-events: none;
   z-index: 5;
   opacity: 0.7;
+  will-change: transform;
+  contain: strict;
 }
 
 @keyframes scanLines {
@@ -1080,6 +1089,7 @@ h2 {
   height: 40px;
   animation: spin 1s linear infinite;
   box-shadow: 0 0 15px rgba(0, 246, 255, 0.3);
+  will-change: transform;
 }
 
 @keyframes spin {
