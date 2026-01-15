@@ -1,4 +1,5 @@
 pub mod algorithms;
+mod cg_main; // So that rust-analyzer keep analyzing
 pub mod params;
 
 use algorithms::elitiste::elitiste_new_population;
@@ -9,7 +10,7 @@ use entities::{
 };
 use itertools::Itertools;
 use params::SimulationParams;
-use rand::distributions::Bernoulli;
+use rand::distr::Bernoulli;
 use wasm_bindgen::prelude::*;
 
 pub mod entities;
@@ -105,28 +106,28 @@ pub fn run_simulation(game: &Game, starship: &Starship, params: &SimulationParam
             elite_count,
             &crossover_rate,
             &mutation_rate,
-            &game,
+            game,
         );
 
-        let best_fitness = best_individual.fitness(&game);
+        let best_fitness = best_individual.fitness(game);
         if best_fitness >= WINNING_FITNESS {
             if first_ok == -1 {
                 first_ok = generation + 1;
             }
             let should_replace = match overall_best.as_mut() {
                 None => true,
-                Some(best) => best_fitness > best.fitness(&game),
+                Some(best) => best_fitness > best.fitness(game),
             };
             if should_replace {
                 overall_best = Some(best_individual);
             }
         }
-        returned.push(population_to_svg(&population, &game));
+        returned.push(population_to_svg(&population, game));
         std::mem::swap(&mut population, &mut new_population);
     }
     log(&format!("First ok: {}", first_ok));
     if let Some(best) = overall_best {
-        log(&format!("Best fuel: {}", best.fuel_left(&game)));
+        log(&format!("Best fuel: {}", best.fuel_left(game)));
     }
     returned
 }
@@ -139,7 +140,7 @@ mod tests {
         X_SPEED_WEIGHT, Y_SPEED_WEIGHT,
     };
     use colored::*;
-    use rand::distributions::Bernoulli;
+    use rand::distr::Bernoulli;
     use rayon::prelude::*;
     use std::env;
 
@@ -454,7 +455,7 @@ mod tests {
             // Median
             let mut sorted = data.to_vec();
             sorted.sort();
-            let median = if sorted.len() % 2 == 0 {
+            let median = if sorted.len().is_multiple_of(2) {
                 (value_fn(&sorted[sorted.len() / 2 - 1]) + value_fn(&sorted[sorted.len() / 2]))
                     / 2.0
             } else {
