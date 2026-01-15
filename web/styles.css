@@ -291,6 +291,9 @@ h2 {
     -10px 0 40px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
   position: relative;
+  /* Keep dashboard out of initial layout until needed to reduce reflow cost */
+  content-visibility: auto;
+  contain-intrinsic-size: 900px 1400px;
 }
 
 .dashboard::before {
@@ -1210,6 +1213,8 @@ h2 {
     z-index: 1000;
     border-left: 1px solid rgba(0, 246, 255, 0.3);
     box-shadow: -5px 0 25px rgba(0, 0, 30, 0.8);
+    content-visibility: auto;
+    contain-intrinsic-size: 900px 1400px;
   }
   
   .dashboard.active {

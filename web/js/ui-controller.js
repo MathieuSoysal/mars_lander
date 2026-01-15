@@ -1,7 +1,5 @@
 // Import predefined maps from wasm-interface.js
 import { predefinedMaps } from './wasm-interface.js';
-// Import CSS for Vite processing (minification)
-import '../styles.css';
 
 (function () {
     // Variable declarations for UI elements
