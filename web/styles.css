@@ -1173,6 +1173,7 @@ h2 {
     height: 2px;
     background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
     animation: scanLine 2s linear infinite;
+    will-change: transform;
   }
   
   header::after {
@@ -1230,6 +1231,7 @@ h2 {
       inset 0 0 8px rgba(255, 255, 255, 0.6);
     border: 1px solid rgba(0, 246, 255, 0.8);
     animation: pulse-light 3s infinite;
+    will-change: box-shadow;
   }
   
   @keyframes pulse-light {
@@ -1396,6 +1398,7 @@ h2 {
   position: relative;
   overflow: hidden;
   animation: slideUp 0.5s ease-out;
+  will-change: transform, opacity;
 }
 
 @keyframes slideUp {
@@ -1563,6 +1566,7 @@ h2 {
 .tutorial-section.active {
   display: block;
   animation: fadeIn 0.3s ease;
+  will-change: transform, opacity;
 }
 
 @keyframes fadeIn {

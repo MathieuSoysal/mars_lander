@@ -276,7 +276,7 @@
     </div>
   </header>
 
-  <div class="main-container">
+  <main class="main-container">
     <div class="viewer-container">
       <div id="svg-container">
         <div class="scanner-overlay"></div>
@@ -393,14 +393,14 @@
         </form>
       </div>
     </div>
-  </div>
+  </main>
 
   <!-- Tutorial Modal -->
-  <div id="tutorial-modal" class="tutorial-modal hidden">
+  <div id="tutorial-modal" class="tutorial-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
     <div class="tutorial-content">
       <div class="tutorial-header">
-        <h2>🧬 Genetic Algorithms & Mars Lander</h2>
-        <button id="close-tutorial" class="close-button" title="Close Tutorial">✕</button>
+        <h2 id="tutorial-title">🧬 Genetic Algorithms & Mars Lander</h2>
+        <button id="close-tutorial" class="close-button" title="Close Tutorial" aria-label="Close tutorial">✕</button>
       </div>
       
       <div class="tutorial-body">
