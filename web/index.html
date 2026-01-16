@@ -10,8 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-  
-  <!-- Modulepreload for main JS to reduce chain latency -->
+
+  <!-- Modulepreload for main JS to fetch in parallel with CSS -->
+  <link rel="modulepreload" href="js/ui-controller.js" fetchpriority="high">
+
   <style>
     /* Critical CSS for above-the-fold content */
     :root {
