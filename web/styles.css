@@ -519,11 +519,7 @@ h2 {
   transition: opacity 0.3s;
 }
 
-.primary-button:hover {
-  transform: translateY(-2px);
-}
-
-.primary-button:hover .button-glow {
+.primary-button:hover:not(:disabled):not(.loading) .button-glow {
   opacity: 1;
 }
 
