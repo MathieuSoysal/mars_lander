@@ -243,14 +243,18 @@ import { predefinedMaps } from './wasm-interface.js';
         if (seek) {
             seek.addEventListener('input', () => {
                 stopAutoScroll();
-                show(seek.value - 1);
+                const seekValue = seek.value;
+                seek.setAttribute('aria-valuenow', seekValue);
+                show(seekValue - 1);
             });
         }
 
         // Update speed display when slider changes
         if (speedControl) {
             speedControl.addEventListener('input', () => {
-                speedValue.textContent = `${speedControl.value}x`;
+                const speedVal = speedControl.value;
+                speedValue.textContent = `${speedVal}x`;
+                speedControl.setAttribute('aria-valuenow', speedVal);
                 if (isAutoScrolling) startAutoScroll();
             });
         }
@@ -292,6 +296,9 @@ import { predefinedMaps } from './wasm-interface.js';
             dashboardElement.classList.toggle('active');
             const isActive = dashboardElement.classList.contains('active');
             
+            // Update ARIA attribute
+            dashboardToggle.setAttribute('aria-expanded', isActive);
+            
             // Get icon elements safely
             const openIcon = dashboardToggle.querySelector('.open-icon');
             const closeIcon = dashboardToggle.querySelector('.close-icon');
@@ -310,15 +317,21 @@ import { predefinedMaps } from './wasm-interface.js';
 
         // Input range event listeners
         crossoverRateInput.addEventListener('input', () => {
-            crossoverRateValue.textContent = `${crossoverRateInput.value}%`;
+            const value = crossoverRateInput.value;
+            crossoverRateValue.textContent = `${value}%`;
+            crossoverRateInput.setAttribute('aria-valuenow', value);
         });
 
         mutationRateInput.addEventListener('input', () => {
-            mutationRateValue.textContent = `${mutationRateInput.value}%`;
+            const value = mutationRateInput.value;
+            mutationRateValue.textContent = `${value}%`;
+            mutationRateInput.setAttribute('aria-valuenow', value);
         });
 
         eliteRateInput.addEventListener('input', () => {
-            document.getElementById('elite-rate-value').textContent = `${eliteRateInput.value}%`;
+            const value = eliteRateInput.value;
+            document.getElementById('elite-rate-value').textContent = `${value}%`;
+            eliteRateInput.setAttribute('aria-valuenow', value);
         });
     }
 

@@ -209,6 +209,7 @@
 <body>
   <header>
     <h1>Mars Lander Viewer</h1>
+    <nav aria-label="Main navigation"></nav>
   </header>
 
   <div class="main-container">
@@ -218,47 +219,47 @@
         <div class="grid-overlay"></div>
       </div>
 
-      <div class="player-controls">
-        <button id="prev" class="player-button"><span>⏮</span></button>
-        <button id="play-pause" class="player-button">
-          <span class="play-icon">▶</span>
-          <span class="pause-icon hidden">⏸</span>
+      <div class="player-controls" role="toolbar" aria-label="Simulation playback controls">
+        <button id="prev" class="player-button" aria-label="Previous frame"><span aria-hidden="true">⏮</span></button>
+        <button id="play-pause" class="player-button" aria-label="Play or pause animation">
+          <span class="play-icon" aria-hidden="true">▶</span>
+          <span class="pause-icon hidden" aria-hidden="true">⏸</span>
         </button>
-        <button id="next" class="player-button"><span>⏭</span></button>
+        <button id="next" class="player-button" aria-label="Next frame"><span aria-hidden="true">⏭</span></button>
 
         <div class="speed-control-compact">
-          <span class="speed-label">Speed</span>
-          <input type="range" id="speed-compact" min="1" max="10" value="10" class="speed-slider">
-          <span id="speed-value">10x</span>
+          <span class="speed-label" id="speed-label">Speed</span>
+          <input type="range" id="speed-compact" min="1" max="10" value="10" class="speed-slider" aria-labelledby="speed-label" aria-valuenow="10" aria-valuemin="1" aria-valuemax="10">
+          <span id="speed-value" aria-live="polite">10x</span>
         </div>
 
-        <div class="mini-progress-container">
+        <div class="mini-progress-container" role="status" aria-label="Playback progress">
           <div class="mini-progress-bar">
             <div id="mini-progress" class="mini-progress-fill"></div>
           </div>
-          <span id="progress-text">0%</span>
+          <span id="progress-text" aria-live="polite">0%</span>
         </div>
       </div>
 
-      <div id="counter">1 / 300</div>
-      <div id="loader" class="loader hidden"></div>
+      <div id="counter" role="status" aria-live="polite" aria-label="Current frame">1 / 300</div>
+      <div id="loader" class="loader hidden" role="status" aria-live="polite" aria-label="Loading simulation"></div>
     </div>
 
-    <button id="dashboard-toggle" class="dashboard-toggle hidden">
-      <span class="open-icon">⚙️</span>
-      <span class="close-icon hidden">✕</span>
+    <button id="dashboard-toggle" class="dashboard-toggle hidden" aria-label="Toggle mission control dashboard" aria-expanded="false">
+      <span class="open-icon" aria-hidden="true">⚙️</span>
+      <span class="close-icon hidden" aria-hidden="true">✕</span>
     </button>
 
-    <div class="dashboard futuristic">
+    <div class="dashboard futuristic" role="complementary" aria-label="Mission control dashboard">
       <div class="dashboard-header">
         <h2>Mission Control</h2>
-        <div class="glow-line"></div>
+        <div class="glow-line" aria-hidden="true"></div>
       </div>
 
       <div class="dashboard-section">
         <h3>Simulation Environment</h3>
         <div class="param-group">
-          <label for="map-selection">Map Selection: <button type="button" class="info-button"
+          <label for="map-selection">Map Selection: <button type="button" class="info-button" aria-label="Information about map selection"
               data-info="Choose from different terrain configurations for the simulation">i</button></label>
           <select id="map-selection">
             <option value="default">Default Map</option>
@@ -295,24 +296,24 @@
           </div>
 
           <div class="param-group">
-            <label for="elite-rate">Elite rate: <button type="button" class="info-button"
+            <label for="elite-rate">Elite rate: <button type="button" class="info-button" aria-label="Information about elite rate"
                 data-info="Percentage of best individuals that automatically survive to next generation unchanged">i</button></label>
             <input type="range" id="elite-rate" min="0" value="20" max="100">
-            <span id="elite-rate-value">20%</span>
+            <span id="elite-rate-value" aria-live="polite">20%</span>
           </div>
 
           <div class="param-group">
-            <label for="crossover-rate">Crossover Rate: <button type="button" class="info-button"
+            <label for="crossover-rate">Crossover Rate: <button type="button" class="info-button" aria-label="Information about crossover rate"
                 data-info="Probability of genetic crossover between parents - controls how much genetic material is exchanged">i</button></label>
-            <input type="range" id="crossover-rate" min="0" max="100" value="90">
-            <span id="crossover-rate-value">90%</span>
+            <input type="range" id="crossover-rate" min="0" max="100" value="90" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90">
+            <span id="crossover-rate-value" aria-live="polite">90%</span>
           </div>
 
           <div class="param-group">
-            <label for="mutation-rate">Mutation Rate: <button type="button" class="info-button"
+            <label for="mutation-rate">Mutation Rate: <button type="button" class="info-button" aria-label="Information about mutation rate"
                 data-info="Probability of random mutations - higher values increase diversity but may disrupt good solutions">i</button></label>
-            <input type="range" id="mutation-rate" min="0" max="100" value="10">
-            <span id="mutation-rate-value">10%</span>
+            <input type="range" id="mutation-rate" min="0" max="100" value="10" aria-valuemin="0" aria-valuemax="100" aria-valuenow="10">
+            <span id="mutation-rate-value" aria-live="polite">10%</span>
           </div>
 
           <div class="button-container">
@@ -328,7 +329,8 @@
   </div>
 
   <div class="seek-container">
-    <input type="range" id="seek" min="1" max="300" value="1" />
+    <label for="seek" class="visually-hidden">Seek to frame</label>
+    <input type="range" id="seek" min="1" max="300" value="1" aria-label="Seek to specific frame" aria-valuemin="1" aria-valuemax="300" aria-valuenow="1" />
   </div>
 
   <script type="module" src="js/ui-controller.js" fetchpriority="low"></script>
