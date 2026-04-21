@@ -4,9 +4,12 @@ pub mod elitiste;
 pub mod roulette;
 
 pub fn random_new_population(population: &[DNA], new_population: &mut [DNA]) {
-    for i in 0..population.len() {
-        let parent_1 = &population[rand::random::<usize>() % population.len()];
-        let parent_2 = &population[rand::random::<usize>() % population.len()];
-        new_population[i] = parent_1.crossover(&parent_2);
-    }
+    new_population
+        .iter_mut()
+        .take(population.len())
+        .for_each(|individual| {
+            let parent_1 = &population[rand::random::<u32>() as usize % population.len()];
+            let parent_2 = &population[rand::random::<u32>() as usize % population.len()];
+            *individual = parent_1.crossover(parent_2);
+        });
 }

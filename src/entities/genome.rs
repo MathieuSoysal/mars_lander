@@ -1,5 +1,5 @@
+use rand::{distr::Bernoulli, prelude::*, random, rng};
 use std::ops::Div as _;
-use rand::{distributions::Bernoulli, prelude::*};
 
 use super::{
     game::{Game, HEIGHT},
@@ -18,26 +18,23 @@ pub type Genome = [Nucleotide; GENOME_SIZE];
 
 pub fn gen_init_rand() -> Genome {
     let mut genome = [0; GENOME_SIZE];
-    for i in 0..GENOME_SIZE {
-        genome[i] =
-            ((random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS) | (random::<u8>() % 3);
-    }
+    genome.iter_mut().take(GENOME_SIZE).for_each(|genome| {
+        *genome = ((random::<u8>() % 3) << GEN_ROTATE_SIZE_BITS) | (random::<u8>() % 3);
+    });
     genome
 }
 
 pub fn gen_init_full() -> Genome {
-    let genome = [2 << 2 | 2; GENOME_SIZE];
-    genome
+    [2 << 2 | 2; GENOME_SIZE]
 }
 
 pub fn gen_init_semi_full() -> Genome {
-    let genome = [2 << 2 | 1; GENOME_SIZE];
-    genome
+    [2 << 2 | 1; GENOME_SIZE]
 }
 
 pub fn get_rotate_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     let turn = genome[nb_turn];
-    let rotate = turn & GEN_MASK_ROTATE as u8;
+    let rotate = turn & GEN_MASK_ROTATE;
     match rotate {
         0 => 0,
         1 => -15,
@@ -48,7 +45,7 @@ pub fn get_rotate_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
 
 pub fn get_power_on_turn(genome: &Genome, nb_turn: usize) -> i8 {
     let turn = genome[nb_turn];
-    let power = (turn >> GEN_ROTATE_SIZE_BITS) & GEN_MASK_POWER as u8;
+    let power = (turn >> GEN_ROTATE_SIZE_BITS) & GEN_MASK_POWER;
     match power {
         0 => 0,
         1 => -1,
@@ -109,10 +106,13 @@ impl DNA {
             s.apply_movement();
             str.push_str(&format!("{},{} ", s.get_x(), HEIGHT as i32 - s.get_y()));
             if game.starship_is_landing(&s) {
-                str.push_str(&format!(r#"" fill="none" stroke="green" stroke-width="{}" />"#,10));
+                str.push_str(&format!(
+                    r#"" fill="none" stroke="green" stroke-width="{}" />"#,
+                    10
+                ));
                 str.push_str(&format!(
                     r#"<circle cx="{}" cy="{}" r="{}" fill="none" stroke="green" stroke-width="1" />"#,
-                    s.get_x(), HEIGHT as i32 - s.get_y(), 10 + s.get_fuel() as u32 / 200 
+                    s.get_x(), HEIGHT as i32 - s.get_y(), 10 + s.get_fuel() as u32 / 200
                 ));
                 return str;
             }
@@ -120,9 +120,9 @@ impl DNA {
                 str.push_str(r#"" fill="none" stroke="white" />"#);
                 str.push_str(&format!(
                     r#"<circle cx="{}" cy="{}" r="{}" fill="none" stroke="white" stroke-width="1" />"#,
-                    s.get_x(), HEIGHT as i32 - s.get_y(), 3 
+                    s.get_x(), HEIGHT as i32 - s.get_y(), 3
                 ));
-                return str   ;
+                return str;
             }
         }
         str.push_str(r#"" fill="none" stroke="white" />"#);
@@ -160,16 +160,27 @@ pub const X_SPEED_WEIGHT: f64 = 5.0;
 pub const Y_SPEED_WEIGHT: f64 = 15.0;
 pub const FUEL_WEIGHT: f64 = 100.0;
 
-pub const WINNING_FITNESS: f64 = LAND_DISTANCE_X_WEIGHT + LAND_DISTANCE_Y_WEIGHT + ROTATION_WEIGHT + X_SPEED_WEIGHT + Y_SPEED_WEIGHT;
+pub const WINNING_FITNESS: f64 = LAND_DISTANCE_X_WEIGHT
+    + LAND_DISTANCE_Y_WEIGHT
+    + ROTATION_WEIGHT
+    + X_SPEED_WEIGHT
+    + Y_SPEED_WEIGHT;
 
 #[inline(always)]
-fn calc_fit(land_dist_x: i32, land_dist_y: i32, rot: i8, x_speed: f32, y_speed: f32, fuel: u16) -> f64 {
-    (7000.0 - land_dist_x as f64).div(7000.) * LAND_DISTANCE_X_WEIGHT + 
-    (3000.0 - land_dist_y as f64).div(3000.) * LAND_DISTANCE_Y_WEIGHT + 
-    (90.0 - rot.abs() as f64).div(90.) * ROTATION_WEIGHT +
-    (500.0 - x_speed.abs() as f64).div(500.) * X_SPEED_WEIGHT +
-    (500.0 - y_speed.abs() as f64).div(500.) * Y_SPEED_WEIGHT +
-    (fuel as f64).div(2000.) * FUEL_WEIGHT
+fn calc_fit(
+    land_dist_x: i32,
+    land_dist_y: i32,
+    rot: i8,
+    x_speed: f32,
+    y_speed: f32,
+    fuel: u16,
+) -> f64 {
+    (7000.0 - land_dist_x as f64).div(7000.) * LAND_DISTANCE_X_WEIGHT
+        + (3000.0 - land_dist_y as f64).div(3000.) * LAND_DISTANCE_Y_WEIGHT
+        + (90.0 - rot.abs() as f64).div(90.) * ROTATION_WEIGHT
+        + (500.0 - x_speed.abs() as f64).div(500.) * X_SPEED_WEIGHT
+        + (500.0 - y_speed.abs() as f64).div(500.) * Y_SPEED_WEIGHT
+        + (fuel as f64).div(2000.) * FUEL_WEIGHT
 }
 
 impl DNA {
@@ -195,7 +206,14 @@ impl DNA {
 
             if game.starship_is_crash(&s, px, py) {
                 let (land_dist_x, land_dist_y) = game.get_distance_to_landing(&s);
-                self.fitness = calc_fit(land_dist_x, land_dist_y, s.get_rotation(), s.get_x_speed(), s.get_y_speed(), 0);
+                self.fitness = calc_fit(
+                    land_dist_x,
+                    land_dist_y,
+                    s.get_rotation(),
+                    s.get_x_speed(),
+                    s.get_y_speed(),
+                    0,
+                );
                 break;
             }
         }
@@ -206,7 +224,7 @@ impl DNA {
         let mut mutated = *self;
         mutated.fitness = -1.;
         for i in 0..GENOME_SIZE {
-            if mutation_rate.sample(&mut thread_rng()) {
+            if mutation_rate.sample(&mut rng()) {
                 mutated.genome[i] = random::<u8>();
             }
         }
@@ -216,7 +234,7 @@ impl DNA {
     pub fn crossover(&self, other: &Self) -> Self {
         let mut child = *self;
         child.fitness = -1.;
-        let crossover_point = random::<usize>() % GENOME_SIZE;
+        let crossover_point = random::<u32>() as usize % GENOME_SIZE;
         for i in crossover_point..GENOME_SIZE {
             child.genome[i] = other.genome[i];
         }
