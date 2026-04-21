@@ -4,3 +4,4 @@ Cargo.lock
 output.rs
 pkg
 /node_modules
+/dist

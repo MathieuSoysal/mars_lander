@@ -225,18 +225,38 @@ import { predefinedMaps } from './wasm-interface.js';
             playPauseBtn.addEventListener('click', toggleAutoScroll);
         }
 
+        // Debounced keyboard navigation for better INP performance
+        let lastKeyTime = 0;
+        const KEY_DEBOUNCE_MS = 100;
+
         document.addEventListener('keydown', e => {
+            const now = Date.now();
+            // Debounce arrow keys to prevent rapid firing
+            if (['ArrowLeft', 'ArrowRight'].includes(e.key) && now - lastKeyTime < KEY_DEBOUNCE_MS) {
+                return;
+            }
+
             if (e.key === 'ArrowLeft') {
+                lastKeyTime = now;
                 stopAutoScroll();
                 show(current - 1);
             }
             if (e.key === 'ArrowRight') {
+                lastKeyTime = now;
                 stopAutoScroll();
                 show(current + 1);
             }
             if (e.key === ' ') {
-                toggleAutoScroll();
-                e.preventDefault();
+                // Don't toggle on space in input elements
+                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+                    toggleAutoScroll();
+                    e.preventDefault();
+                }
+            }
+            // Keyboard shortcuts for accessibility
+            if (e.key === 't' || e.key === 'T') {
+                const tutorialBtn = document.getElementById('tutorial-button');
+                if (tutorialBtn) tutorialBtn.click();
             }
         });
 
@@ -256,25 +276,21 @@ import { predefinedMaps } from './wasm-interface.js';
         }
     }
 
-    // Function to check screen size and show/hide toggle button
+    // Function to check screen size and show/hide toggle button using matchMedia to avoid layout reads
+    const smallScreenQuery = window.matchMedia('(max-width: 1300px)');
     function checkScreenSize() {
         if (!dashboardToggle || !dashboardElement) return;
         
-        if (window.innerWidth <= 1300) {
+        if (smallScreenQuery.matches) {
             dashboardToggle.classList.remove('hidden');
-            // Make dashboard expanded by default on small screens
             dashboardElement.classList.add('active');
             
-            // Check if icon elements exist before manipulating them
             const openIcon = dashboardToggle.querySelector('.open-icon');
             const closeIcon = dashboardToggle.querySelector('.close-icon');
-            
-            // Update toggle button icons to show close icon by default
             if (openIcon) openIcon.classList.add('hidden');
             if (closeIcon) closeIcon.classList.remove('hidden');
         } else {
             dashboardToggle.classList.add('hidden');
-            // Make sure dashboard is visible when screen is large
             dashboardElement.classList.remove('active');
         }
     }
@@ -287,10 +303,13 @@ import { predefinedMaps } from './wasm-interface.js';
             !mutationRateInput || !mutationRateValue || 
             !eliteRateInput) return;
 
-        // Toggle dashboard visibility
+        // Toggle dashboard visibility with accessibility support
         dashboardToggle.addEventListener('click', () => {
             dashboardElement.classList.toggle('active');
             const isActive = dashboardElement.classList.contains('active');
+            
+            // Update ARIA attributes for accessibility
+            dashboardToggle.setAttribute('aria-expanded', isActive);
             
             // Get icon elements safely
             const openIcon = dashboardToggle.querySelector('.open-icon');
@@ -308,6 +327,14 @@ import { predefinedMaps } from './wasm-interface.js';
             }
         });
 
+        // Keyboard shortcut for dashboard toggle (Alt+M for Mission Control)
+        document.addEventListener('keydown', (e) => {
+            if ((e.altKey || e.ctrlKey) && (e.key === 'm' || e.key === 'M')) {
+                dashboardToggle.click();
+                e.preventDefault();
+            }
+        });
+
         // Input range event listeners
         crossoverRateInput.addEventListener('input', () => {
             crossoverRateValue.textContent = `${crossoverRateInput.value}%`;
@@ -322,9 +349,8 @@ import { predefinedMaps } from './wasm-interface.js';
         });
     }
 
-    // Check screen size on load and resize
-    window.addEventListener('load', checkScreenSize);
-    window.addEventListener('resize', checkScreenSize);
+    // React to media query changes instead of window resize (avoids layout reads)
+    smallScreenQuery.addEventListener('change', checkScreenSize, { passive: true });
 
     // Function to update the terrain visualization based on the selected map
     function updateTerrainVisualization(mapSelection) {
@@ -386,10 +412,7 @@ import { predefinedMaps } from './wasm-interface.js';
         }
     }
 
-    // Initialize terrain visualization with default map
-    window.addEventListener('load', function () {
-        updateTerrainVisualization('default');
-    });
+    // Terrain visualization is initialized in the main load handler below
     
     // Function to setup the Run button event handler
     function setupRunButton() {
@@ -399,6 +422,11 @@ import { predefinedMaps } from './wasm-interface.js';
             const populationSize = parseInt(populationSizeInput.value);
             const eliteRate = parseInt(eliteRateInput.value);
             const mapSelection = document.getElementById('map-selection').value;
+
+            // Hide SVG explanation overlay when simulation starts
+            if (window.hideSVGExplanation) {
+                window.hideSVGExplanation();
+            }
 
             // Hide dashboard if screen is small
             if (window.innerWidth <= 1300 && dashboardElement && dashboardToggle) {
@@ -470,17 +498,29 @@ import { predefinedMaps } from './wasm-interface.js';
                 const tooltip = document.createElement('div');
                 tooltip.className = 'info-tooltip';
                 tooltip.textContent = this.getAttribute('data-info');
+                
+                // Read button rect before appending (avoids forced reflow)
+                const buttonRect = this.getBoundingClientRect();
+                
+                // Position tooltip off-screen initially to measure without reflow
+                tooltip.style.cssText = 'position:fixed;visibility:hidden;left:-9999px;top:-9999px;';
                 document.body.appendChild(tooltip);
 
-                // Position tooltip near the button
-                const buttonRect = this.getBoundingClientRect();
-                tooltip.style.left = `${buttonRect.left - (tooltip.offsetWidth / 2) + (buttonRect.width / 2)}px`;
-                tooltip.style.top = `${buttonRect.top - tooltip.offsetHeight - 10}px`;
-
-                // Make tooltip visible
-                setTimeout(() => {
-                    tooltip.classList.add('visible');
-                }, 10);
+                // Use requestAnimationFrame to batch reads and writes
+                requestAnimationFrame(() => {
+                    const tooltipWidth = tooltip.offsetWidth;
+                    const tooltipHeight = tooltip.offsetHeight;
+                    
+                    // Now write all styles at once
+                    tooltip.style.cssText = '';
+                    tooltip.style.left = `${buttonRect.left - (tooltipWidth / 2) + (buttonRect.width / 2)}px`;
+                    tooltip.style.top = `${buttonRect.top - tooltipHeight - 10}px`;
+                    
+                    // Make tooltip visible
+                    requestAnimationFrame(() => {
+                        tooltip.classList.add('visible');
+                    });
+                });
 
                 activeTooltip = tooltip;
 
@@ -505,6 +545,160 @@ import { predefinedMaps } from './wasm-interface.js';
         });
     }
 
+    // Tutorial functionality
+    function initializeTutorial() {
+        console.log('Initializing tutorial...');
+        
+        const tutorialButton = document.getElementById('tutorial-button');
+        const tutorialModal = document.getElementById('tutorial-modal');
+        const closeTutorial = document.getElementById('close-tutorial');
+        const startSimulation = document.getElementById('start-simulation');
+        const tutorialNavBtns = document.querySelectorAll('.tutorial-nav-btn');
+        const tutorialSections = document.querySelectorAll('.tutorial-section');
+
+        console.log('Tutorial button:', tutorialButton);
+        console.log('Tutorial modal:', tutorialModal);
+
+        if (!tutorialButton || !tutorialModal) {
+            console.error('Tutorial elements not found');
+            return;
+        }
+
+        // Open tutorial
+        tutorialButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Tutorial button clicked');
+            tutorialModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+
+        // Close tutorial
+        function closeTutorialModal() {
+            console.log('Closing tutorial modal');
+            tutorialModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        if (closeTutorial) {
+            closeTutorial.addEventListener('click', closeTutorialModal);
+        }
+
+        // Close on background click
+        tutorialModal.addEventListener('click', (e) => {
+            if (e.target === tutorialModal) {
+                closeTutorialModal();
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !tutorialModal.classList.contains('hidden')) {
+                closeTutorialModal();
+            }
+        });
+
+        // Navigation between tutorial sections
+        tutorialNavBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetSection = btn.dataset.section;
+                console.log('Switching to section:', targetSection);
+                
+                // Update nav buttons
+                tutorialNavBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update sections
+                tutorialSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                const targetSectionElement = document.getElementById(`tutorial-${targetSection}`);
+                if (targetSectionElement) {
+                    targetSectionElement.classList.add('active');
+                } else {
+                    console.error('Target section not found:', `tutorial-${targetSection}`);
+                }
+            });
+        });
+
+        // Start simulation button
+        if (startSimulation) {
+            startSimulation.addEventListener('click', () => {
+                closeTutorialModal();
+                // Trigger the run button if it exists
+                const runButton = document.getElementById('run-ga');
+                if (runButton) {
+                    runButton.scrollIntoView({ behavior: 'smooth' });
+                    // Add a highlight effect
+                    runButton.style.boxShadow = '0 0 30px rgba(0, 246, 255, 0.8)';
+                    setTimeout(() => {
+                        runButton.style.boxShadow = '';
+                    }, 3000);
+                }
+            });
+        }
+
+        // Show tutorial by default on initial load
+        tutorialModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        console.log('Tutorial initialization complete');
+    }
+
+    // Enhanced SVG container explanation
+    function addSVGExplanation() {
+        const svgContainer = document.getElementById('svg-container');
+        if (!svgContainer) return;
+
+        // Add explanation overlay that shows when no simulation is running
+        const explanationOverlay = document.createElement('div');
+        explanationOverlay.className = 'svg-explanation-overlay';
+        explanationOverlay.innerHTML = `
+            <div class="explanation-content">
+                <h3>🚀 Mars Lander Visualization</h3>
+                <p>This area will show the genetic algorithm evolution in real-time:</p>
+                <div class="explanation-features">
+                    <div class="explanation-item">
+                        <span class="explanation-icon">🗺️</span>
+                        <div>
+                            <strong>Martian Terrain</strong>
+                            <small>Rocky surface with safe landing zones</small>
+                        </div>
+                    </div>
+                    <div class="explanation-item">
+                        <span class="explanation-icon">🚀</span>
+                        <div>
+                            <strong>Lander Trajectories</strong>
+                            <small>Flight paths of each generation's attempts</small>
+                        </div>
+                    </div>
+                    <div class="explanation-item">
+                        <span class="explanation-icon">📈</span>
+                        <div>
+                            <strong>Evolution Progress</strong>
+                            <small>Watch solutions improve over generations</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="start-prompt">
+                    <p>Configure the genetic algorithm parameters and click <strong>"Run Algorithm"</strong> to begin!</p>
+                </div>
+            </div>
+        `;
+        
+        svgContainer.appendChild(explanationOverlay);
+        
+        // Hide explanation when simulation starts
+        window.hideSVGExplanation = function() {
+            explanationOverlay.style.display = 'none';
+        };
+        
+        // Show explanation when needed
+        window.showSVGExplanation = function() {
+            explanationOverlay.style.display = 'flex';
+        };
+    }
+
     // Initialize all UI components
     window.addEventListener('load', function () {
         // Initialize UI elements first
@@ -516,17 +710,29 @@ import { predefinedMaps } from './wasm-interface.js';
         setupRunButton();
         setupMapSelectionHandler();
         
+        // Initialize tutorial system
+        initializeTutorial();
+        
+        // Add SVG explanation
+        addSVGExplanation();
+        
         // Then preload images
         preloadImages();
 
         // Initialize tooltips for info buttons
         initializeInfoButtons();
         
-        // Initialize terrain visualization
-        updateTerrainVisualization('default');
+        // Initialize terrain visualization off the critical path
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => updateTerrainVisualization('default'), { timeout: 1000 });
+        } else {
+            setTimeout(() => updateTerrainVisualization('default'), 150);
+        }
         
-        // Set up other UI components
-        checkScreenSize();
+        // Defer screen size check to the next frame to avoid synchronous reflow
+        requestAnimationFrame(() => {
+            checkScreenSize();
+        });
         
         console.log("UI initialization complete");
     });
