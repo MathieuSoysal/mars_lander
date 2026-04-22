@@ -1,6 +1,8 @@
 use rand::{distr::Bernoulli, prelude::*, random, rng};
 use std::ops::Div as _;
 
+use crate::entities::game::WIDTH;
+
 use super::{
     game::{Game, HEIGHT},
     starship::Starship,
@@ -167,7 +169,7 @@ pub const WINNING_FITNESS: f64 = LAND_DISTANCE_X_WEIGHT
     + Y_SPEED_WEIGHT;
 
 #[inline(always)]
-fn calc_fit(
+pub fn calc_fit(
     land_dist_x: i32,
     land_dist_y: i32,
     rot: i8,
@@ -188,7 +190,14 @@ impl DNA {
         if self.fitness != -1.0 {
             return self.fitness;
         }
-        self.fitness = 0.0;
+        self.fitness = self.fitness_no_cache(game);
+        self.fitness
+    }
+
+    pub fn fitness_no_cache(&self, game: &Game) -> f64 {
+        if self.fitness != -1.0 {
+            return self.fitness;
+        }
         let mut s = self.starship.copy();
         for i in 0..GENOME_SIZE {
             let px = s.get_x();
@@ -200,13 +209,12 @@ impl DNA {
             s.apply_movement();
 
             if game.starship_is_landing(&s) {
-                self.fitness = calc_fit(0, 0, 0, 0., 0., s.get_fuel());
-                break;
+                return calc_fit(0, 0, 0, 0., 0., s.get_fuel());
             }
 
             if game.starship_is_crash(&s, px, py) {
                 let (land_dist_x, land_dist_y) = game.get_distance_to_landing(&s);
-                self.fitness = calc_fit(
+                return calc_fit(
                     land_dist_x,
                     land_dist_y,
                     s.get_rotation(),
@@ -214,10 +222,9 @@ impl DNA {
                     s.get_y_speed(),
                     0,
                 );
-                break;
             }
         }
-        self.fitness
+        0.0
     }
 
     pub fn mutate(&self, mutation_rate: &Bernoulli) -> DNA {
@@ -256,6 +263,11 @@ pub fn population_to_svg(population: &[DNA], game: &Game) -> String {
         svg.push_str(&dna.to_svg(game));
     }
     svg.push_str("</g>\n");
+    svg.push_str(&format!(
+        r#"<text x="{}" y="250" font-size="72" fill="white">Best fitness : {:.2}</text>"#,
+        WIDTH - 500,
+        population[0].fitness
+    ));
     svg.push_str("</svg>");
     svg
 }
