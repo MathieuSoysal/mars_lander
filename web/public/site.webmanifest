@@ -1,1 +1,82 @@
-{"name":"Mars Lander Genetic","short_name":"Mars Lander","icons":[{"src":"favicon/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"favicon/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#000824","background_color":"#000824","display":"standalone"}
+{
+  "name": "Mars Lander Viewer - Genetic Algorithm Simulator",
+  "short_name": "Mars Lander",
+  "description": "Experience a futuristic genetic algorithm simulation for Mars landing missions. Watch AI-powered spacecraft optimize their descent strategies.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#000512",
+  "background_color": "#000512",
+  "categories": ["productivity", "games", "education"],
+  "icons": [
+    {
+      "src": "favicon/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "favicon/screenshot-540x720.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "favicon/screenshot-1280x720.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Simulation",
+      "short_name": "Simulate",
+      "description": "Start a new genetic algorithm simulation",
+      "url": "/?action=simulate",
+      "icons": [
+        {
+          "src": "favicon/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "View Tutorial",
+      "short_name": "Tutorial",
+      "description": "Learn about the genetic algorithm",
+      "url": "/?action=tutorial",
+      "icons": [
+        {
+          "src": "favicon/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}
+

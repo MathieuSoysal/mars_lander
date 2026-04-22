@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-  <link rel="stylesheet" href="styles.css">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, viewport-fit=cover">
   <title>Mars Lander Viewer</title>
@@ -10,10 +9,11 @@
   <!-- Resource hints for faster loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="//fonts.googleapis.com">
-  <link rel="dns-prefetch" href="//fonts.gstatic.com">
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
 
-  <!-- Preload critical assets -->
+  <!-- Modulepreload for main JS to fetch in parallel with CSS -->
+  <link rel="modulepreload" href="js/ui-controller.js" fetchpriority="high">
+
   <style>
     /* Critical CSS for above-the-fold content */
     :root {
@@ -122,11 +122,9 @@
     }
   </style>
 
-  <!-- Non-blocking CSS loading -->
-  <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
-  <noscript>
-    <link rel="stylesheet" href="styles.css">
-  </noscript>
+  <!-- Preload CSS to shorten critical path -->
+  <link rel="preload" href="styles.css" as="style" fetchpriority="high">
+  <link rel="stylesheet" href="styles.css" fetchpriority="high">
 
   <!-- Optimized font loading with display swap -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"
@@ -142,25 +140,59 @@
   <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png?v=1.0.0">
   <link rel="manifest" href="site.webmanifest?v=1.0.0">
 
-  <meta name="theme-color" content="#000824">
+  <!-- SEO and Meta Tags -->
+  <meta name="theme-color" content="#000512">
+  <meta name="color-scheme" content="dark light">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description"
-    content="Mars Lander Viewer - A futuristic simulation environment for Mars landing missions.">
-  <meta name="keywords" content="Mars, Lander, Simulation, Genetic Algorithm, Space, Mission Control">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM4D7H1L8J"></script>
+  <meta name="apple-mobile-web-app-title" content="Mars Lander">
+  <meta name="description" content="Mars Lander Viewer - Experience a futuristic genetic algorithm simulation for Mars landing missions. Watch AI-powered spacecraft optimize their descent strategies.">
+  <meta name="keywords" content="Mars, Lander, Genetic Algorithm, Simulation, Space, AI, Machine Learning">
+  
+  <!-- Open Graph Tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Mars Lander Viewer - AI Simulation">
+  <meta property="og:description" content="Explore genetic algorithm optimization for Mars landing missions">
+  <meta property="og:site_name" content="Mars Lander Viewer">
+  
+  <!-- Twitter Card Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mars Lander Viewer">
+  <meta name="twitter:description" content="Watch AI optimize Mars landing strategies">
+  
+  <!-- Web Standards -->
+  <meta name="format-detection" content="telephone=no">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="canonical" href="https://mars-lander.pages.dev/">
+  <!-- Google Analytics - Deferred to avoid blocking LCP/FCP -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-SM4D7H1L8J', {
-      'storage': 'none'
-    });
+    // Defer analytics to improve Core Web Vitals
+    function loadGtag() {
+      if (window.gtagLoaded) return;
+      window.gtagLoaded = true;
+      
+      const script = document.createElement('script');
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-SM4D7H1L8J';
+      script.async = true;
+      document.head.appendChild(script);
+      
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      window.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', 'G-SM4D7H1L8J', { 'storage': 'none' });
+    }
+    
+    // Load after page is interactive
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadGtag, { timeout: 4000 });
+    } else {
+      setTimeout(loadGtag, 2000);
+    }
   </script>
   <meta name="author" content="Mathieu Soysal">
-  <meta name="robots" content="index, follow">
-  <meta name="revisit-after" content="1 days">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="revisit-after" content="7 days">
 
   <!-- Cache control - Note: Should be implemented server-side as well -->
   <meta http-equiv="Cache-Control" content="public, max-age=31536000, must-revalidate">
@@ -204,14 +236,69 @@
       setTimeout(markFontsAsLoaded, 100);
     });
   </script>
+
+  <!-- Web Vitals Monitoring - Loaded after user interaction to not impact Core Web Vitals -->
+  <script>
+    // Defer web-vitals loading until after LCP
+    function loadWebVitals() {
+      if (window.webVitalsLoaded) return;
+      window.webVitalsLoaded = true;
+      
+      import('https://unpkg.com/web-vitals@3.5.2/dist/web-vitals.attribution.js?module')
+        .then(({ onCLS, onINP, onLCP, onFCP, onTTFB }) => {
+          function sendToAnalytics(metric) {
+            if (navigator.sendBeacon) {
+              navigator.sendBeacon('/analytics', JSON.stringify(metric));
+            }
+            console.log(`[WebVitals] ${metric.name}: ${metric.value.toFixed(2)}ms`);
+          }
+          onCLS(sendToAnalytics);
+          onINP(sendToAnalytics);
+          onLCP(sendToAnalytics);
+          onFCP(sendToAnalytics);
+          onTTFB(sendToAnalytics);
+        })
+        .catch(() => {});
+    }
+    
+    // Load after first interaction or after 5 seconds
+    ['click', 'keydown', 'scroll'].forEach(event => {
+      window.addEventListener(event, loadWebVitals, { once: true, passive: true });
+    });
+    setTimeout(loadWebVitals, 5000);
+  </script>
+
+  <!-- Accessibility & Performance Hints -->
+  <script>
+    // Detect if user prefers reduced motion (for better INP scores)
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.style.setProperty('--animation-duration', '0.01ms');
+      document.documentElement.classList.add('reduce-motion');
+    }
+
+    // Service Worker Registration for offline capability and caching
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js', { scope: '/' })
+          .then(reg => console.log('[ServiceWorker] Registered successfully'))
+          .catch(err => console.log('[ServiceWorker] Registration failed:', err));
+      });
+    }
+  </script>
 </head>
 
 <body>
   <header>
     <h1>Mars Lander Viewer</h1>
+    <div class="header-controls">
+      <button id="tutorial-button" class="header-button" title="Learn about Genetic Algorithms" aria-label="Open Tutorial - Learn about Genetic Algorithms and Mars Lander Simulation">
+        <span class="tutorial-icon" aria-hidden="true">📚</span>
+        <span class="tutorial-text">Tutorial</span>
+      </button>
+    </div>
   </header>
 
-  <div class="main-container">
+  <main class="main-container">
     <div class="viewer-container">
       <div id="svg-container">
         <div class="scanner-overlay"></div>
@@ -219,24 +306,24 @@
       </div>
 
       <div class="player-controls">
-        <button id="prev" class="player-button"><span>⏮</span></button>
-        <button id="play-pause" class="player-button">
-          <span class="play-icon">▶</span>
-          <span class="pause-icon hidden">⏸</span>
+        <button id="prev" class="player-button" aria-label="Previous frame"><span aria-hidden="true">⏮</span></button>
+        <button id="play-pause" class="player-button" aria-label="Play/Pause simulation">
+          <span class="play-icon" aria-hidden="true">▶</span>
+          <span class="pause-icon hidden" aria-hidden="true">⏸</span>
         </button>
-        <button id="next" class="player-button"><span>⏭</span></button>
+        <button id="next" class="player-button" aria-label="Next frame"><span aria-hidden="true">⏭</span></button>
 
-        <div class="speed-control-compact">
+        <div class="speed-control-compact" role="group" aria-label="Speed control">
           <span class="speed-label">Speed</span>
-          <input type="range" id="speed-compact" min="1" max="10" value="10" class="speed-slider">
-          <span id="speed-value">10x</span>
+          <input type="range" id="speed-compact" min="1" max="10" value="10" class="speed-slider" aria-label="Simulation speed multiplier">
+          <span id="speed-value" aria-live="polite">10x</span>
         </div>
 
-        <div class="mini-progress-container">
-          <div class="mini-progress-bar">
+        <div class="mini-progress-container" role="group" aria-label="Progress indicator">
+          <div class="mini-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Simulation progress">
             <div id="mini-progress" class="mini-progress-fill"></div>
           </div>
-          <span id="progress-text">0%</span>
+          <span id="progress-text" aria-live="polite">0%</span>
         </div>
       </div>
 
@@ -244,9 +331,9 @@
       <div id="loader" class="loader hidden"></div>
     </div>
 
-    <button id="dashboard-toggle" class="dashboard-toggle hidden">
-      <span class="open-icon">⚙️</span>
-      <span class="close-icon hidden">✕</span>
+    <button id="dashboard-toggle" class="dashboard-toggle hidden" aria-label="Toggle Mission Control Panel" aria-expanded="false">
+      <span class="open-icon" aria-hidden="true">⚙️</span>
+      <span class="close-icon hidden" aria-hidden="true">✕</span>
     </button>
 
     <div class="dashboard futuristic">
@@ -259,7 +346,7 @@
         <h3>Simulation Environment</h3>
         <div class="param-group">
           <label for="map-selection">Map Selection: <button type="button" class="info-button"
-              data-info="Choose from different terrain configurations for the simulation">i</button></label>
+              data-info="Choose from different Martian terrain configurations. Each map presents unique challenges: Default (balanced), Canyon (narrow passage), Mountain (high terrain), Plateau (elevated landing), Valley (confined space). Different terrains test the genetic algorithm's adaptability.">i</button></label>
           <select id="map-selection">
             <option value="default">Default Map</option>
             <option value="canyon">Deep Canyon</option>
@@ -276,17 +363,20 @@
         <h3>Genetic Algorithm Configuration</h3>
         <form id="ga-params">
           <div class="param-group">
-            <label for="population-size">Population Size:</label>
+            <label for="population-size">Population Size: <button type="button" class="info-button"
+                data-info="Population Size (100 recommended): The number of potential solutions (landing strategies) in each generation. Larger populations explore more possibilities but require more computation. Smaller populations evolve faster but may miss optimal solutions. Balance between exploration and computational efficiency.">i</button></label>
             <input type="number" id="population-size" min="10" max="1000" value="100">
           </div>
 
           <div class="param-group">
-            <label for="generation-count">Number of Generations:</label>
+            <label for="generation-count">Number of Generations: <button type="button" class="info-button"
+                data-info="Number of Generations (200 recommended): How many evolution cycles to run. Each generation tests all solutions, selects the best, and creates the next generation. More generations usually find better solutions but take longer. Watch for convergence - when solutions stop improving significantly.">i</button></label>
             <input type="number" id="generation-count" min="1" max="1000" value="200">
           </div>
 
           <div class="param-group">
-            <label for="selection-mode">Selection Mode:</label>
+            <label for="selection-mode">Selection Mode: <button type="button" class="info-button"
+                data-info="Selection Strategy: How to choose parents for the next generation. Tournament: Randomly select groups and pick the best from each (balanced). Roulette Wheel: Probability proportional to fitness (favors good solutions). Rank-based: Selection based on ranking rather than raw fitness (reduces selection pressure).">i</button></label>
             <select id="selection-mode">
               <option value="tournament">Tournament</option>
               <option value="roulette">Roulette Wheel</option>
@@ -296,21 +386,21 @@
 
           <div class="param-group">
             <label for="elite-rate">Elite rate: <button type="button" class="info-button"
-                data-info="Percentage of best individuals that automatically survive to next generation unchanged">i</button></label>
+                data-info="Elite Rate (20% recommended): The percentage of the best-performing individuals that automatically survive to the next generation without any changes. This ensures that good solutions aren't lost. Higher values preserve good genes but reduce diversity. Lower values increase exploration but risk losing good solutions.">i</button></label>
             <input type="range" id="elite-rate" min="0" value="20" max="100">
             <span id="elite-rate-value">20%</span>
           </div>
 
           <div class="param-group">
             <label for="crossover-rate">Crossover Rate: <button type="button" class="info-button"
-                data-info="Probability of genetic crossover between parents - controls how much genetic material is exchanged">i</button></label>
+                data-info="Crossover Rate (90% recommended): The probability that two parent solutions will exchange genetic material (command sequences) to create offspring. High rates (80-95%) promote exploitation of good solutions by combining their best parts. Lower rates reduce genetic mixing but maintain more diversity.">i</button></label>
             <input type="range" id="crossover-rate" min="0" max="100" value="90">
             <span id="crossover-rate-value">90%</span>
           </div>
 
           <div class="param-group">
             <label for="mutation-rate">Mutation Rate: <button type="button" class="info-button"
-                data-info="Probability of random mutations - higher values increase diversity but may disrupt good solutions">i</button></label>
+                data-info="Mutation Rate (10% recommended): The probability of random changes to landing commands. Essential for genetic diversity and exploring new solutions. Too high (>20%) disrupts good solutions with excessive randomness. Too low (<5%) may cause premature convergence to suboptimal solutions. Mutation prevents the algorithm from getting stuck in local optima.">i</button></label>
             <input type="range" id="mutation-rate" min="0" max="100" value="10">
             <span id="mutation-rate-value">10%</span>
           </div>
@@ -325,13 +415,456 @@
         </form>
       </div>
     </div>
+  </main>
+
+  <!-- Tutorial Modal -->
+  <div id="tutorial-modal" class="tutorial-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+    <div class="tutorial-content">
+      <div class="tutorial-header">
+        <h2 id="tutorial-title">🧬 Genetic Algorithms & Mars Lander</h2>
+        <button id="close-tutorial" class="close-button" title="Close Tutorial" aria-label="Close tutorial">✕</button>
+      </div>
+      
+      <div class="tutorial-body">
+        <div class="tutorial-nav">
+          <button class="tutorial-nav-btn active" data-section="overview">Overview</button>
+          <button class="tutorial-nav-btn" data-section="genetic-algorithm">Genetic Algorithm</button>
+          <button class="tutorial-nav-btn" data-section="mars-lander">Mars Lander</button>
+          <button class="tutorial-nav-btn" data-section="visualization">Visualization</button>
+        </div>
+        
+        <div class="tutorial-sections">
+          <!-- Overview Section -->
+          <div class="tutorial-section active" id="tutorial-overview">
+            <h3>🚀 Welcome to Mars Lander Genetic Algorithm Simulator</h3>
+            <p>This simulator demonstrates how <strong>genetic algorithms</strong> can solve complex optimization problems like landing a spacecraft on Mars. Watch as artificial evolution finds the optimal landing strategy!</p>
+            
+            <div class="feature-grid">
+              <div class="feature-card">
+                <div class="feature-icon">🧬</div>
+                <h4>Genetic Evolution</h4>
+                <p>Algorithms inspired by natural selection evolve better solutions over time</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h4>Precision Landing</h4>
+                <p>Navigate complex terrain to achieve safe spacecraft landings</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h4>Real-time Visualization</h4>
+                <p>See evolution in action with live trajectory simulations</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Genetic Algorithm Section -->
+          <div class="tutorial-section" id="tutorial-genetic-algorithm">
+            <h3>🧬 Understanding Genetic Algorithms</h3>
+            <p>Genetic algorithms are powerful optimization techniques inspired by the process of natural selection. Here's how they work:</p>
+            
+            <div class="algorithm-steps">
+              <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-illustration">
+                  <svg width="300" height="140" viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background -->
+                    <rect width="300" height="140" fill="none"/>
+                    <!-- Rocket 1 -->
+                    <g transform="translate(30, 60)">
+                      <circle cx="0" cy="0" r="8" fill="#00f6ff" opacity="0.7"/>
+                      <polygon points="0,-8 -6,6 6,6" fill="#a855f7" stroke="#00f6ff" stroke-width="1"/>
+                      <rect x="-4" y="6" width="8" height="20" fill="#ff6b00" opacity="0.6"/>
+                      <text x="0" y="35" text-anchor="middle" fill="#00f6ff" font-size="11" font-weight="bold">A</text>
+                    </g>
+                    <!-- Rocket 2 -->
+                    <g transform="translate(100, 40)">
+                      <circle cx="0" cy="0" r="8" fill="#00f6ff" opacity="0.7"/>
+                      <polygon points="0,-8 -6,6 6,6" fill="#a855f7" stroke="#00f6ff" stroke-width="1"/>
+                      <rect x="-4" y="6" width="8" height="20" fill="#ff6b00" opacity="0.6"/>
+                      <text x="0" y="35" text-anchor="middle" fill="#00f6ff" font-size="11" font-weight="bold">B</text>
+                    </g>
+                    <!-- Rocket 3 -->
+                    <g transform="translate(170, 70)">
+                      <circle cx="0" cy="0" r="8" fill="#00f6ff" opacity="0.7"/>
+                      <polygon points="0,-8 -6,6 6,6" fill="#a855f7" stroke="#00f6ff" stroke-width="1"/>
+                      <rect x="-4" y="6" width="8" height="20" fill="#ff6b00" opacity="0.6"/>
+                      <text x="0" y="35" text-anchor="middle" fill="#00f6ff" font-size="11" font-weight="bold">C</text>
+                    </g>
+                    <!-- Rocket 4 -->
+                    <g transform="translate(240, 50)">
+                      <circle cx="0" cy="0" r="8" fill="#00f6ff" opacity="0.7"/>
+                      <polygon points="0,-8 -6,6 6,6" fill="#a855f7" stroke="#00f6ff" stroke-width="1"/>
+                      <rect x="-4" y="6" width="8" height="20" fill="#ff6b00" opacity="0.6"/>
+                      <text x="0" y="35" text-anchor="middle" fill="#00f6ff" font-size="11" font-weight="bold">D</text>
+                    </g>
+                  </svg>
+                </div>
+                <div class="step-content">
+                  <h4>Initial Population</h4>
+                  <p>Create a diverse set of random solutions (landing command sequences). Each solution represents a potential strategy for landing the Mars rover.</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-illustration">
+                  <svg width="300" height="150" viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Bar 1: 85% -->
+                    <g transform="translate(20, 15)">
+                      <text x="0" y="0" fill="#00ff88" font-size="12" font-weight="bold">A: 85%</text>
+                      <rect x="0" y="8" width="70" height="20" fill="rgba(0,246,255,0.1)" stroke="#00f6ff" stroke-width="1" rx="3"/>
+                      <rect x="0" y="8" width="60" height="20" fill="url(#grad1)" rx="3"/>
+                    </g>
+                    <!-- Bar 2: 60% -->
+                    <g transform="translate(20, 50)">
+                      <text x="0" y="0" fill="#ffaa00" font-size="12" font-weight="bold">B: 60%</text>
+                      <rect x="0" y="8" width="70" height="20" fill="rgba(0,246,255,0.1)" stroke="#00f6ff" stroke-width="1" rx="3"/>
+                      <rect x="0" y="8" width="43" height="20" fill="url(#grad2)" rx="3"/>
+                    </g>
+                    <!-- Bar 3: 35% -->
+                    <g transform="translate(20, 85)">
+                      <text x="0" y="0" fill="#ff3366" font-size="12" font-weight="bold">C: 35%</text>
+                      <rect x="0" y="8" width="70" height="20" fill="rgba(0,246,255,0.1)" stroke="#00f6ff" stroke-width="1" rx="3"/>
+                      <rect x="0" y="8" width="25" height="20" fill="url(#grad3)" rx="3"/>
+                    </g>
+                    <!-- Bar 4: 90% -->
+                    <g transform="translate(20, 120)">
+                      <text x="0" y="0" fill="#00ff88" font-size="12" font-weight="bold">D: 90%</text>
+                      <rect x="0" y="8" width="70" height="20" fill="rgba(0,246,255,0.1)" stroke="#00f6ff" stroke-width="1" rx="3"/>
+                      <rect x="0" y="8" width="64" height="20" fill="url(#grad1)" rx="3"/>
+                    </g>
+                    <!-- Gradients -->
+                    <defs>
+                      <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#00f6ff;stop-opacity:0.8" />
+                        <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0.8" />
+                      </linearGradient>
+                      <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#00f6ff;stop-opacity:0.8" />
+                        <stop offset="100%" style="stop-color:#ffaa00;stop-opacity:0.8" />
+                      </linearGradient>
+                      <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#ff3366;stop-opacity:0.6" />
+                        <stop offset="100%" style="stop-color:#ff6b00;stop-opacity:0.6" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <div class="step-content">
+                  <h4>Fitness Evaluation</h4>
+                  <p>Test each solution by simulating the landing. Fitness is measured by factors like:</p>
+                  <ul>
+                    <li><strong>Distance to landing zone</strong> - How close to target</li>
+                    <li><strong>Landing speed</strong> - Must be gentle (≤40 m/s)</li>
+                    <li><strong>Lander orientation</strong> - Must be upright</li>
+                    <li><strong>Fuel efficiency</strong> - Minimize fuel usage</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-illustration">
+                  <svg width="300" height="140" viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Winner A -->
+                    <g transform="translate(30, 50)">
+                      <rect x="-20" y="-25" width="40" height="50" rx="5" fill="rgba(0,255,136,0.15)" stroke="#00ff88" stroke-width="2"/>
+                      <text x="0" y="-10" text-anchor="middle" fill="#00ff88" font-size="18" font-weight="bold">⭐</text>
+                      <text x="0" y="15" text-anchor="middle" fill="#00ff88" font-size="12" font-weight="bold">A</text>
+                      <text x="0" y="28" text-anchor="middle" fill="#00ff88" font-size="10">Winner</text>
+                    </g>
+                    <!-- Winner B -->
+                    <g transform="translate(100, 50)">
+                      <rect x="-20" y="-25" width="40" height="50" rx="5" fill="rgba(0,255,136,0.15)" stroke="#00ff88" stroke-width="2"/>
+                      <text x="0" y="-10" text-anchor="middle" fill="#00ff88" font-size="18" font-weight="bold">⭐</text>
+                      <text x="0" y="15" text-anchor="middle" fill="#00ff88" font-size="12" font-weight="bold">B</text>
+                      <text x="0" y="28" text-anchor="middle" fill="#00ff88" font-size="10">Winner</text>
+                    </g>
+                    <!-- Loser C -->
+                    <g transform="translate(170, 50)" opacity="0.5">
+                      <rect x="-20" y="-25" width="40" height="50" rx="5" fill="rgba(255,51,102,0.1)" stroke="#ff3366" stroke-width="2" stroke-dasharray="5,3"/>
+                      <text x="0" y="-10" text-anchor="middle" fill="#ff3366" font-size="18" font-weight="bold">✗</text>
+                      <text x="0" y="15" text-anchor="middle" fill="#ff3366" font-size="12" font-weight="bold">C</text>
+                      <text x="0" y="28" text-anchor="middle" fill="#ff3366" font-size="10">Removed</text>
+                    </g>
+                    <!-- Winner D -->
+                    <g transform="translate(240, 50)">
+                      <rect x="-20" y="-25" width="40" height="50" rx="5" fill="rgba(0,255,136,0.15)" stroke="#00ff88" stroke-width="2"/>
+                      <text x="0" y="-10" text-anchor="middle" fill="#00ff88" font-size="18" font-weight="bold">⭐</text>
+                      <text x="0" y="15" text-anchor="middle" fill="#00ff88" font-size="12" font-weight="bold">D</text>
+                      <text x="0" y="28" text-anchor="middle" fill="#00ff88" font-size="10">Winner</text>
+                    </g>
+                  </svg>
+                </div>
+                <div class="step-content">
+                  <h4>Selection</h4>
+                  <p>Choose the best-performing solutions as "parents" for the next generation. Better solutions have <strong>higher chances of being selected</strong> for breeding.</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-illustration">
+                  <svg width="300" height="160" viewBox="0 0 300 160" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Parent 1 DNA -->
+                    <g transform="translate(15, 15)">
+                      <text x="0" y="0" fill="#00f6ff" font-size="11" font-weight="bold">Parent 1</text>
+                      <g transform="translate(0, 8)">
+                        <rect x="0" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="14" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="28" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="42" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="56" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="70" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="84" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="98" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="112" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="126" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                      </g>
+                    </g>
+                    <!-- Parent 2 DNA -->
+                    <g transform="translate(15, 50)">
+                      <text x="0" y="0" fill="#00f6ff" font-size="11" font-weight="bold">Parent 2</text>
+                      <g transform="translate(0, 8)">
+                        <rect x="0" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="14" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="28" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="42" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="56" y="0" width="12" height="15" rx="2" fill="#a855f7" opacity="0.4"/>
+                        <rect x="70" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="84" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="98" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="112" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="126" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                      </g>
+                    </g>
+                    <!-- Arrow down -->
+                    <path d="M 80 90 L 80 110 M 75 105 L 80 110 L 85 105" stroke="#00ff88" stroke-width="2" fill="none"/>
+                    <!-- Child DNA -->
+                    <g transform="translate(15, 120)">
+                      <text x="0" y="0" fill="#00ff88" font-size="11" font-weight="bold">Child</text>
+                      <g transform="translate(0, 8)">
+                        <rect x="0" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="14" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="28" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="42" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="56" y="0" width="12" height="15" rx="2" fill="#00f6ff" opacity="0.7"/>
+                        <rect x="70" y="0" width="12" height="15" rx="2" fill="#00ff88" opacity="0.7" stroke="#00ff88" stroke-width="2"/>
+                        <rect x="84" y="0" width="12" height="15" rx="2" fill="#00ff88" opacity="0.7" stroke="#00ff88" stroke-width="2"/>
+                        <rect x="98" y="0" width="12" height="15" rx="2" fill="#00ff88" opacity="0.7" stroke="#00ff88" stroke-width="2"/>
+                        <rect x="112" y="0" width="12" height="15" rx="2" fill="#00ff88" opacity="0.7" stroke="#00ff88" stroke-width="2"/>
+                        <rect x="126" y="0" width="12" height="15" rx="2" fill="#00ff88" opacity="0.7" stroke="#00ff88" stroke-width="2"/>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+                <div class="step-content">
+                  <h4>Crossover</h4>
+                  <p>Combine parts of successful solutions to create "offspring" that <strong>inherit good traits from both parents</strong>. This creates new solutions that build on proven strategies.</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-illustration">
+                  <svg width="300" height="100" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Original DNA -->
+                    <g transform="translate(15, 20)">
+                      <text x="35" y="-8" fill="#00f6ff" font-size="11" font-weight="bold">Original</text>
+                      <g transform="translate(0, 0)">
+                        <rect x="0" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="7" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">A</text>
+                        <rect x="16" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="23" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">B</text>
+                        <rect x="32" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="39" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">C</text>
+                        <rect x="48" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="55" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">D</text>
+                      </g>
+                    </g>
+                    <!-- Arrow right -->
+                    <path d="M 120 35 L 140 35 M 135 30 L 140 35 L 135 40" stroke="#a855f7" stroke-width="2" fill="none"/>
+                    <!-- Mutated DNA -->
+                    <g transform="translate(155, 20)">
+                      <text x="35" y="-8" fill="#ff3366" font-size="11" font-weight="bold">Mutated</text>
+                      <g transform="translate(0, 0)">
+                        <rect x="0" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="7" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">A</text>
+                        <rect x="16" y="0" width="14" height="20" rx="2" fill="#ff3366" opacity="0.8" stroke="#ff3366" stroke-width="2"/>
+                        <text x="23" y="15" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">X</text>
+                        <circle cx="23" cy="10" r="17" fill="none" stroke="#ff3366" stroke-width="1" opacity="0.5" stroke-dasharray="3,2"/>
+                        <rect x="32" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="39" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">C</text>
+                        <rect x="48" y="0" width="14" height="20" rx="2" fill="#00f6ff" opacity="0.7" stroke="#00f6ff" stroke-width="1"/>
+                        <text x="55" y="15" text-anchor="middle" fill="#000512" font-size="11" font-weight="bold">D</text>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+                <div class="step-content">
+                  <h4>Mutation</h4>
+                  <p>Introduce <strong>small random changes</strong> to maintain diversity and explore new possibilities. This prevents the algorithm from getting stuck in local optima.</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">6</div>
+                <div class="step-illustration">
+                  <svg width="300" height="160" viewBox="0 0 300 160" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="evolveGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" style="stop-color:#a855f7;stop-opacity:0.8" />
+                        <stop offset="100%" style="stop-color:#00f6ff;stop-opacity:1" />
+                      </linearGradient>
+                    </defs>
+                    <!-- Generation 1: 30% -->
+                    <g transform="translate(25, 120)">
+                      <rect x="-12" y="-30" width="24" height="30" rx="2" fill="url(#evolveGrad)" opacity="0.5"/>
+                      <rect x="-12" y="-30" width="24" height="1" rx="2" fill="#00f6ff" opacity="0.8"/>
+                      <text x="0" y="15" text-anchor="middle" fill="#00f6ff" font-size="10" font-weight="bold">Gen 1</text>
+                    </g>
+                    <!-- Generation 5: 50% -->
+                    <g transform="translate(100, 100)">
+                      <rect x="-12" y="-50" width="24" height="50" rx="2" fill="url(#evolveGrad)" opacity="0.7"/>
+                      <rect x="-12" y="-50" width="24" height="2" rx="2" fill="#00f6ff" opacity="0.8"/>
+                      <text x="0" y="15" text-anchor="middle" fill="#00f6ff" font-size="10" font-weight="bold">Gen 5</text>
+                    </g>
+                    <!-- Generation 10: 75% -->
+                    <g transform="translate(175, 65)">
+                      <rect x="-12" y="-75" width="24" height="75" rx="2" fill="url(#evolveGrad)" opacity="0.8"/>
+                      <rect x="-12" y="-75" width="24" height="2" rx="2" fill="#00f6ff" opacity="0.8"/>
+                      <text x="0" y="15" text-anchor="middle" fill="#00f6ff" font-size="10" font-weight="bold">Gen 10</text>
+                    </g>
+                    <!-- Generation 50: 95% -->
+                    <g transform="translate(250, 20)">
+                      <rect x="-12" y="-95" width="24" height="95" rx="2" fill="url(#evolveGrad)" opacity="1"/>
+                      <rect x="-12" y="-95" width="24" height="2" rx="2" fill="#00f6ff" opacity="1"/>
+                      <circle cx="0" cy="-100" r="3" fill="#00ff88"/>
+                      <text x="0" y="15" text-anchor="middle" fill="#00ff88" font-size="10" font-weight="bold">Gen 50</text>
+                    </g>
+                    <!-- Base line -->
+                    <line x1="10" y1="120" x2="270" y2="120" stroke="#00f6ff" stroke-width="1" opacity="0.3"/>
+                  </svg>
+                </div>
+                <div class="step-content">
+                  <h4>Evolution Over Time</h4>
+                  <p>Repeat this process for many generations. <strong>Each generation should perform better than the last</strong>, eventually finding optimal landing strategies. The population "evolves" toward the best solution.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Mars Lander Section -->
+          <div class="tutorial-section" id="tutorial-mars-lander">
+            <h3>🔴 The Mars Lander Challenge</h3>
+            <p>Landing on Mars is incredibly challenging. The lander must navigate complex terrain while managing limited fuel and precise physics.</p>
+            
+            <div class="challenge-details">
+              <div class="challenge-item">
+                <h4>🎯 Mission Objectives</h4>
+                <ul>
+                  <li><strong>Find the landing zone:</strong> Locate the flat area safe for landing</li>
+                  <li><strong>Control descent:</strong> Manage thrust and rotation every second</li>
+                  <li><strong>Safe landing criteria:</strong>
+                    <ul>
+                      <li>Vertical speed ≤ 40 m/s</li>
+                      <li>Horizontal speed ≤ 20 m/s</li>
+                      <li>Lander must be upright (0° angle)</li>
+                      <li>Land on flat ground</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              
+              <div class="challenge-item">
+                <h4>⚙️ Physics Simulation</h4>
+                <ul>
+                  <li><strong>Mars gravity:</strong> 3.711 m/s² (weaker than Earth)</li>
+                  <li><strong>No atmosphere:</strong> No air resistance to slow descent</li>
+                  <li><strong>Fuel management:</strong> Limited fuel, thrust consumes fuel</li>
+                  <li><strong>Real-time control:</strong> Decisions made every second of flight</li>
+                </ul>
+              </div>
+              
+              <div class="challenge-item">
+                <h4>🎮 Control Parameters</h4>
+                <ul>
+                  <li><strong>Rotation:</strong> -90° to +90° (lander orientation)</li>
+                  <li><strong>Thrust:</strong> 0 to 4 (4 needed to counteract gravity)</li>
+                  <li><strong>Strategy:</strong> Balance fuel consumption vs. control precision</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Visualization Section -->
+          <div class="tutorial-section" id="tutorial-visualization">
+            <h3>📊 Understanding the Visualization</h3>
+            <p>The simulation shows the evolution process in real-time. Here's what you're seeing:</p>
+            
+            <div class="visualization-guide">
+              <div class="guide-item">
+                <h4>🗺️ Terrain Display</h4>
+                <p>The background shows the Martian surface with:</p>
+                <ul>
+                  <li><strong>Rocky terrain:</strong> Dangerous areas where landing would fail</li>
+                  <li><strong>Flat landing zone:</strong> The safe area for successful landing</li>
+                  <li><strong>Scale:</strong> 7000m wide × 3000m high simulation area</li>
+                </ul>
+              </div>
+              
+              <div class="guide-item">
+                <h4>🚀 Lander Trajectories</h4>
+                <p>Watch the evolution of landing strategies:</p>
+                <ul>
+                  <li><strong>Current generation:</strong> All population members attempting to land</li>
+                  <li><strong>Path traces:</strong> Shows the flight path of each lander</li>
+                  <li><strong>Success/failure:</strong> Different visual indicators for outcomes</li>
+                  <li><strong>Best performer:</strong> Highlighted trajectory of the fittest individual</li>
+                </ul>
+              </div>
+              
+              <div class="guide-item">
+                <h4>📈 Evolution Progress</h4>
+                <p>Track the algorithm's improvement:</p>
+                <ul>
+                  <li><strong>Generation counter:</strong> Shows current generation number</li>
+                  <li><strong>Progress bar:</strong> Indicates how many generations completed</li>
+                  <li><strong>Frame navigation:</strong> Step through generations to see improvement</li>
+                  <li><strong>Speed control:</strong> Adjust playback speed for analysis</li>
+                </ul>
+              </div>
+              
+              <div class="guide-item">
+                <h4>🎛️ Interactive Controls</h4>
+                <p>Experiment with different settings:</p>
+                <ul>
+                  <li><strong>Population size:</strong> More individuals = better exploration</li>
+                  <li><strong>Mutation rate:</strong> Higher = more randomness</li>
+                  <li><strong>Crossover rate:</strong> How often parents combine traits</li>
+                  <li><strong>Elite rate:</strong> Percentage of best solutions preserved</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tutorial-footer">
+          <button id="start-simulation" class="primary-button">
+            <span class="button-text">Start Your First Simulation</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="seek-container">
-    <input type="range" id="seek" min="1" max="300" value="1" />
+    <input type="range" id="seek" min="1" max="300" value="1" aria-label="Seek through simulation frames" />
   </div>
 
-  <script type="module" src="js/ui-controller.js" fetchpriority="low"></script>
+  <!-- Prioritize main module to shorten critical path (LCP) -->
+  <script type="module" src="js/ui-controller.js" fetchpriority="high" defer></script>
 </body>
 
 </html>
