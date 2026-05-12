@@ -169,7 +169,7 @@ pub const WINNING_FITNESS: f64 = LAND_DISTANCE_X_WEIGHT
     + Y_SPEED_WEIGHT;
 
 #[inline(always)]
-pub fn calc_fit(
+pub(crate) fn calc_fit(
     land_dist_x: i32,
     land_dist_y: i32,
     rot: i8,
