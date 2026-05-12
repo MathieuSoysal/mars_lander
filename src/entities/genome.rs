@@ -1,10 +1,8 @@
 use rand::{distr::Bernoulli, prelude::*, random, rng};
 use std::ops::Div as _;
 
-use crate::entities::game::WIDTH;
-
 use super::{
-    game::{Game, HEIGHT},
+    game::{Game, HEIGHT, WIDTH},
     starship::Starship,
 };
 
