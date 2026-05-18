@@ -219,6 +219,8 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         });
         mobileQuery.addEventListener('change', syncSidebarToggle, { passive: true });
         syncSidebarToggle();
+        // Open sidebar by default on first visit
+        if (mobileQuery.matches) setSidebarOpen(true);
     }
 
     // ── Run button ───────────────────────────────────────────────────────
