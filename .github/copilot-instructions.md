@@ -95,6 +95,28 @@ mars_lander/
 
 ---
 
+## Testing & Static Analysis
+
+### Static Analysis
+- **ESLint** — the JS static analysis layer for `web/js/`. Add `eslint` to `devDependencies` only. Use the recommended ruleset plus `eslint-plugin-compat` to flag browser-API usage that may not be widely supported.
+- **No TypeScript** — this project deliberately uses plain JS. Do not introduce `tsc`, `.ts` files, or `tsconfig.json`. JSDoc comments are acceptable for editor hints but must not trigger a build step.
+- Enabling ESLint early (before the codebase grows) avoids large noisy refactors later. If a rule fires on code that is intentionally written that way, disable it inline with a comment explaining why, rather than turning it off globally.
+
+### Testing Strategy
+The codebase has two separate runtimes with different testing responsibilities:
+
+| Layer | What to test | How |
+|---|---|---|
+| **Rust / WASM** | Physics, fitness, selection, crossover, mutation | `cargo test --release -- --nocapture` |
+| **JS (browser)** | Pure utility functions in `wasm-interface.js` / `ui-controller.js` | [Vitest](https://vitest.dev/) (`devDependency` only), files named `*.test.js` |
+
+- **Do not mock `run_from_web()`** in JS tests — correctness of the WASM boundary is Rust's responsibility. JS tests should only cover logic that lives entirely in the JS layer (e.g. frame interpolation helpers, UI state machines).
+- **Do not implicitly test dependencies** — if a JS utility calls another module, mock the dependency so the test stays focused on the unit under test.
+- **Integration / E2E** — validate full playback rendering manually or with Playwright against the Vite preview (`npm run preview`). Do not add a headless-browser step to CI unless the project explicitly adopts it.
+- Prefer testing behaviour and outcomes over implementation details; a test that breaks every time internal variable names change adds maintenance cost without safety value.
+
+---
+
 ## Design System — Space / Sci-Fi Dark UI
 
 Tokens are defined as CSS custom properties. Reference them with `var(--name)`.
