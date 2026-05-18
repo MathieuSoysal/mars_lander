@@ -214,3 +214,65 @@ Each color has one job — do not use it for anything else:
 - **No user tracking** — do not add analytics scripts, pixel trackers, or social share widgets that execute cross-site JavaScript without the visitor's consent. Plain `<a href>` links are preferred.
 - **`<meta name="referrer">`** — `web/index.html` must include `<meta name="referrer" content="strict-origin-when-cross-origin">` to limit URL leakage to Google Fonts and other third parties.
 - **`localStorage`** — this project has no auth or user state; do not persist anything to `localStorage` unless there is a clear, user-visible reason (e.g. saving the last selected terrain).
+
+---
+
+## UX Research
+
+> These artefacts define **who** we are building for and **what** they need. Every UI/UX suggestion from Copilot must be evaluated against this research before implementation.
+
+### Primary Persona — Alex, the Curious Developer
+
+| Attribute | Detail |
+|---|---|
+| Age | 26 |
+| Background | Junior web developer. Studied CS but skipped AI/ML courses. Curious after hearing "genetic algorithm" mentioned in a podcast. |
+| Goal | Understand what a genetic algorithm *actually does*, step by step — well enough to explain it to someone else. |
+| Frustrations | Textbooks are too abstract. YouTube videos skip the "why". Interactive demos drop you in with zero context. |
+| Tech comfort | High for web browsing, medium for maths, zero for Rust/WASM internals. |
+| Device | Laptop, Chrome, ~1440 px wide. |
+| Key quote | *"I get that it's 'inspired by evolution', but what is the algorithm actually **doing** at each step?"* |
+
+### Empathy Map
+
+| Zone | What Alex experiences |
+|---|---|
+| **Thinks** | "What's a generation?" · "Why did that lander survive?" · "What does mutation rate actually do?" |
+| **Feels** | Curious but lost on arrival · Excited when a lander lands cleanly · Frustrated by unlabelled controls |
+| **Says** | "OK so this is cool, but what am I looking at?" · "Is there a tutorial somewhere?" |
+| **Does** | Clicks "Run Algorithm" immediately · Moves sliders randomly · Searches for a "Learn more" link · Closes the tab |
+| **Pains** | No explanation of what each generation represents · Sliders have no consequence description · No visible link between algorithm phase and on-screen action |
+
+### User Stories (prioritised)
+
+| ID | As a… | I want to… | So that… | Priority |
+|---|---|---|---|---|
+| US-01 | first-time visitor | see a brief explanation of genetic algorithms before I run anything | I understand the context before interacting | **Must** |
+| US-02 | visitor watching playback | know which algorithm phase is currently visualised (selection, mutation…) | I can connect what I see to the theory | **Must** |
+| US-03 | visitor adjusting parameters | see a plain-English description of what each slider does | I can run meaningful experiments | **Must** |
+| US-04 | curious learner | see the fitness score evolve across generations | I understand what "getting better" means in GA terms | Should |
+| US-05 | visitor on mobile | use all controls with touch targets ≥ 44 px | I don't get frustrated on a small screen | Should |
+| US-06 | returning visitor | have the last terrain I selected remembered | I don't have to reconfigure every time | Could |
+| US-07 | screen reader user | have all dynamic updates announced (running, done, generation count) | I can follow the simulation without sight | **Must** |
+
+### Journey Map — Pain Points & Opportunities
+
+| Stage | Alex's action | Current pain | Opportunity |
+|---|---|---|---|
+| **Discovery** | Finds site via search / link | — | SEO meta description already present |
+| **First load** | Reads title, looks around | No welcome text or onboarding — feels lost | Add a "How it works" intro panel (→ US-01) |
+| **First run** | Clicks "Run Algorithm" | No explanation of what the algorithm is doing | Annotate frames with algorithm phase labels (→ US-02) |
+| **Exploration** | Moves sliders, re-runs | Sliders have no effect description | Add tooltip per parameter describing its effect (→ US-03) |
+| **Understanding** | Watches generation 50+ converge | No step-by-step recap panel | Add a "What just happened?" summary after simulation ends |
+| **Sharing** | Tries to explain GA to a friend | No shareable summary or link | Add a "Copy summary" or permalink feature |
+
+### Implementation Priority for Copilot
+
+When suggesting UI/UX changes, address these in order:
+
+1. **Onboarding panel** (US-01) — collapsible "How it works" section in the dashboard sidebar, explaining the five GA steps: initialise → evaluate → select → crossover → mutate.
+2. **Parameter tooltips** (US-03) — each slider in `.dashboard` must have a `<button class="info-button">` with a plain-English explanation of what the parameter does *and* what visual change to expect.
+3. **Phase annotation** (US-02) — display the current algorithm phase (e.g. "Generation 12 — Selection") alongside the generation counter in `#counter` or as an overlay on `#svg-container`.
+4. **Fitness chart** (US-04) — a small inline chart showing best/average fitness per generation, rendered after WASM returns results.
+
+All copy must explain the **algorithm concept**, not just the UI mechanic. Prefer one clear sentence over a paragraph.
