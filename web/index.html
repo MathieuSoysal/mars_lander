@@ -28,6 +28,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet" media="print" onload="this.media='all'" crossorigin>
   <noscript>
@@ -356,7 +357,7 @@
       <div id="status-live" aria-live="polite" class="sr-only"></div>
 
       <!-- SVG frame display -->
-      <div id="svg-container" aria-label="Mars Lander trajectory visualisation">
+      <div id="svg-container" role="region" aria-label="Mars Lander trajectory visualisation">
         <!-- Idle state — replaced once simulation data arrives -->
         <div class="idle-msg">
           <p>Select a terrain and click <strong>Run Algorithm</strong> to start.</p>
@@ -372,14 +373,14 @@
 
       <!-- Player controls -->
       <div class="player-bar" role="group" aria-label="Playback controls">
-        <button id="btn-prev" class="player-btn" aria-label="Previous generation">
+        <button id="btn-prev" class="player-btn" aria-label="Previous generation" disabled>
           <span aria-hidden="true">⏮</span>
         </button>
-        <button id="btn-play" class="player-btn player-btn--primary" aria-label="Play">
+        <button id="btn-play" class="player-btn player-btn--primary" aria-label="Play" disabled>
           <span class="icon-play" aria-hidden="true">▶</span>
           <span class="icon-pause hidden" aria-hidden="true">⏸</span>
         </button>
-        <button id="btn-next" class="player-btn" aria-label="Next generation">
+        <button id="btn-next" class="player-btn" aria-label="Next generation" disabled>
           <span aria-hidden="true">⏭</span>
         </button>
 
