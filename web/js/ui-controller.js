@@ -129,38 +129,52 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
 
     function initInfoButtons() {
         let activeTooltip = null;
+        let activeBtn = null;
+        let tipCount = 0;
 
         function removeActive() {
-            if (activeTooltip) {
-                activeTooltip.remove();
-                activeTooltip = null;
-            }
+            if (activeTooltip) { activeTooltip.remove(); activeTooltip = null; }
+            if (activeBtn) { activeBtn.removeAttribute('aria-describedby'); activeBtn = null; }
+        }
+
+        function showTip(btn) {
+            if (activeBtn === btn) return; // already visible for this button
+            removeActive();
+
+            const tipId = `tip-${++tipCount}`;
+            const tip = document.createElement('div');
+            tip.id = tipId;
+            tip.className = 'tooltip';
+            tip.setAttribute('role', 'tooltip');
+            tip.textContent = btn.dataset.tip || '';
+
+            btn.setAttribute('aria-describedby', tipId);
+            activeBtn = btn;
+
+            // Position off-screen first to measure
+            tip.style.cssText = 'position:fixed;visibility:hidden;left:-9999px;top:-9999px;';
+            document.body.appendChild(tip);
+            activeTooltip = tip;
+
+            const rect = btn.getBoundingClientRect();
+            requestAnimationFrame(() => {
+                const tw = tip.offsetWidth;
+                const th = tip.offsetHeight;
+                tip.style.cssText = '';
+                tip.style.left = `${Math.max(8, rect.left + rect.width / 2 - tw / 2)}px`;
+                tip.style.top  = `${rect.top - th - 8}px`;
+                requestAnimationFrame(() => tip.classList.add('visible'));
+            });
         }
 
         document.querySelectorAll('.info-btn').forEach(btn => {
+            // Show on keyboard focus; hide on blur
+            btn.addEventListener('focus', function () { showTip(this); });
+            btn.addEventListener('blur', () => removeActive());
+            // Show on click (covers touch and mouse users)
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                removeActive();
-
-                const tip = document.createElement('div');
-                tip.className = 'tooltip';
-                tip.setAttribute('role', 'tooltip');
-                tip.textContent = this.dataset.tip || '';
-
-                // Position off-screen first to measure
-                tip.style.cssText = 'position:fixed;visibility:hidden;left:-9999px;top:-9999px;';
-                document.body.appendChild(tip);
-                activeTooltip = tip;
-
-                const rect = this.getBoundingClientRect();
-                requestAnimationFrame(() => {
-                    const tw = tip.offsetWidth;
-                    const th = tip.offsetHeight;
-                    tip.style.cssText = '';
-                    tip.style.left = `${Math.max(8, rect.left + rect.width / 2 - tw / 2)}px`;
-                    tip.style.top  = `${rect.top - th - 8}px`;
-                    requestAnimationFrame(() => tip.classList.add('visible'));
-                });
+                showTip(this);
             });
         });
 
