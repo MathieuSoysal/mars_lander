@@ -112,11 +112,14 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         }
 
         let svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7000 3000" width="7000" height="3000">';
+        const cs = getComputedStyle(document.documentElement);
+        const safeColor   = cs.getPropertyValue('--color-terrain-safe').trim();
+        const unsafeColor = cs.getPropertyValue('--color-terrain-unsafe').trim();
         for (let i = 0; i < len - 1; i++) {
             const [x1, y1] = pts[i];
             const [x2, y2] = pts[i + 1];
             const isFlat = y1 === y2;
-            const color  = isFlat ? '#00ff9d' : '#ff4d4d';
+            const color  = isFlat ? safeColor : unsafeColor;
             const width  = isFlat ? 10 : 7;
             const extra  = isFlat ? `<title>Landing zone</title>` : '';
             svg += `<line x1="${x1}" y1="${3000 - y1}" x2="${x2}" y2="${3000 - y2}" stroke="${color}" stroke-width="${width}">${extra}</line>`;
@@ -282,8 +285,13 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         if (counterValue) counterValue.textContent = `1 / ${total}`;
         updateProgress(0, total);
         showFrame(0);
+        btnPrev.disabled = false;
+        btnNext.disabled = false;
+        btnPlay.disabled = false;
         announce(`Simulation complete — ${total} generations computed.`);
-        startPlayback();
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            startPlayback();
+        }
     }
 
     // ── Event wiring ─────────────────────────────────────────────────────
@@ -305,7 +313,10 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         mutationRateInput.addEventListener('input', () => { mutationRateOutput.value = `${mutationRateInput.value}%`; });
 
         // Terrain preview on map change
-        mapSelect.addEventListener('change', () => showTerrainPreview(mapSelect.value));
+        mapSelect.addEventListener('change', () => {
+            showTerrainPreview(mapSelect.value);
+            localStorage.setItem('ga-last-terrain', mapSelect.value);
+        });
 
         // Run button
         runBtn.addEventListener('click', handleRunClick);
@@ -367,7 +378,14 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         initOnboarding();
         initSidebarToggle();
 
-        // Show default terrain preview after paint
-        requestAnimationFrame(() => showTerrainPreview(mapSelect.value));
+        // Show default terrain preview after paint, restoring last used terrain
+        requestAnimationFrame(() => {
+            const saved = localStorage.getItem('ga-last-terrain');
+            const options = Array.from(mapSelect.options).map(o => o.value);
+            if (saved && options.includes(saved)) {
+                mapSelect.value = saved;
+            }
+            showTerrainPreview(mapSelect.value);
+        });
     });
 })();
