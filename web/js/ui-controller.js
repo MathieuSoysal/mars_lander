@@ -100,7 +100,7 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         frames = [];
         total = 0;
         current = 0;
-        if (counterValue) counterValue.textContent = '— / —';
+        if (counterValue) counterValue.textContent = ': / :';
         updateProgress(0, 0);
 
         const raw = predefinedMaps[mapKey] || predefinedMaps.default;
@@ -288,7 +288,7 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         btnPrev.disabled = false;
         btnNext.disabled = false;
         btnPlay.disabled = false;
-        announce(`Simulation complete — ${total} generations computed.`);
+        announce(`Simulation complete : ${total} generations computed.`);
         if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             startPlayback();
         }

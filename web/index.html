@@ -62,7 +62,7 @@
 </head>
 
 <body>
-  <!-- Skip link — first focusable element -->
+  <!-- Skip link : first focusable element -->
   <a class="skip-link" href="#main-content">Skip to content</a>
 
   <header role="banner">
@@ -105,7 +105,7 @@
             <span class="step-num" aria-hidden="true">1</span>
             <div>
               <strong>Initialise</strong>
-              <p>Create a population of random landing command sequences — the algorithm's first guesses.</p>
+              <p>Create a population of random landing command sequences : the algorithm's first guesses.</p>
               <!-- SVG: diverse landers scattered at random positions and orientations -->
               <svg class="step-svg" aria-hidden="true" viewBox="0 0 240 44" xmlns="http://www.w3.org/2000/svg" focusable="false">
                 <g transform="translate(20,24) rotate(22)" opacity="0.35">
@@ -165,7 +165,7 @@
             <span class="step-num" aria-hidden="true">3</span>
             <div>
               <strong>Select</strong>
-              <p>Pick the highest-scoring landers as parents — better landers have a better chance.</p>
+              <p>Pick the highest-scoring landers as parents : better landers have a better chance.</p>
               <!-- SVG: two best landers circled with stars, others dimmed -->
               <svg class="step-svg" aria-hidden="true" viewBox="0 0 240 44" xmlns="http://www.w3.org/2000/svg" focusable="false">
                 <g opacity="0.2">
@@ -242,7 +242,7 @@
             </div>
           </li>
         </ol>
-        <p class="onboarding-cta">Repeat until a lander lands safely — or the generation limit is reached.</p>
+        <p class="onboarding-cta">Repeat until a lander lands safely : or the generation limit is reached.</p>
       </section>
 
       <h2 class="sidebar-title">Mission Control</h2>
@@ -309,7 +309,7 @@
         <!-- Elite rate -->
         <div class="field">
           <label for="elite-rate">
-            Elite rate —
+            Elite rate :
             <output id="elite-rate-value" for="elite-rate">20%</output>
             <button type="button" class="info-btn"
                     aria-label="About elite rate"
@@ -323,7 +323,7 @@
         <!-- Crossover rate -->
         <div class="field">
           <label for="crossover-rate">
-            Crossover rate —
+            Crossover rate :
             <output id="crossover-rate-value" for="crossover-rate">90%</output>
             <button type="button" class="info-btn"
                     aria-label="About crossover rate"
@@ -337,7 +337,7 @@
         <!-- Mutation rate -->
         <div class="field">
           <label for="mutation-rate">
-            Mutation rate —
+            Mutation rate :
             <output id="mutation-rate-value" for="mutation-rate">10%</output>
             <button type="button" class="info-btn"
                     aria-label="About mutation rate"
@@ -362,7 +362,7 @@
 
       <!-- SVG frame display -->
       <div id="svg-container" role="region" aria-label="Mars Lander trajectory visualisation">
-        <!-- Idle state — replaced once simulation data arrives -->
+        <!-- Idle state : replaced once simulation data arrives -->
         <div class="idle-msg">
           <p>Select a terrain and click <strong>Run Algorithm</strong> to start.</p>
           <p class="idle-msg__sub">The algorithm will evolve a population of landers across generations until one lands safely.</p>
@@ -372,7 +372,7 @@
       <!-- Generation counter -->
       <div id="counter" aria-label="Generation counter">
         <span class="counter-label">Generation</span>
-        <span id="counter-value">— / —</span>
+        <span id="counter-value">: / :</span>
       </div>
 
       <!-- Player controls -->
@@ -424,7 +424,7 @@
 
       <!-- Loader overlay -->
       <div id="loader" class="loader hidden" role="status">
-        <span class="sr-only">Computing genetic algorithm — please wait…</span>
+        <span class="sr-only">Computing genetic algorithm : please wait…</span>
         <div class="loader-spinner" aria-hidden="true"></div>
         <p class="loader-msg" aria-hidden="true">Computing generations…</p>
       </div>
