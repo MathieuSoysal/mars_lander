@@ -55,7 +55,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ═══════════════════════════════════════════════════════════════
-   Reduced motion — disable all transitions & animations
+   Reduced motion : disable all transitions & animations
    ═══════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -102,7 +102,7 @@ header { height: 3.75rem; display: flex; align-items: center; padding: 0 var(--s
 .app-layout { display: flex; flex-direction: column; height: calc(100dvh - 3.75rem); overflow-y: auto; }
 
 /* ═══════════════════════════════════════════════════════════════
-   Main viewer — right column
+   Main viewer : right column
    ═══════════════════════════════════════════════════════════════ */
 /* flex column: svg fills remaining space, counter + player bar sit below */
 #main-content { flex-shrink: 0; height: auto; min-height: min(60vh, 25rem); min-width: 0; position: relative; overflow: hidden; display: flex; flex-direction: column; background: rgba(0,3,14,.95); }
@@ -173,7 +173,7 @@ progress::-moz-progress-bar      { background: linear-gradient(90deg,var(--secon
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ═══════════════════════════════════════════════════════════════
-   Sidebar — overlay on mobile, fixed column on desktop
+   Sidebar : overlay on mobile, fixed column on desktop
    ═══════════════════════════════════════════════════════════════ */
 #sidebar {
   position: fixed; top: 3.75rem; left: 0; right: 0; bottom: 0;
@@ -196,7 +196,7 @@ body:has(#sidebar.sidebar--open) #sidebar { bottom: 3rem; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Tutorial — Quick Start card
+   Tutorial : Quick Start card
    ═══════════════════════════════════════════════════════════════ */
 .quickstart-card {
   background: linear-gradient(135deg,rgba(0,98,196,.18),rgba(0,246,255,.07));
@@ -232,7 +232,7 @@ body:has(#sidebar.sidebar--open) #sidebar { bottom: 3rem; }
 .legend-unsafe { color: var(--color-terrain-unsafe); font-weight: 600; }
 
 /* ═══════════════════════════════════════════════════════════════
-   Tutorial — How Genetic Algorithms Work (collapsible)
+   Tutorial : How Genetic Algorithms Work (collapsible)
    ═══════════════════════════════════════════════════════════════ */
 .onboarding-panel { background: rgba(0,246,255,.03); border: 1px solid rgba(0,246,255,.16); border-radius: var(--radius); overflow: hidden; }
 .panel-toggle {
@@ -261,7 +261,7 @@ body:has(#sidebar.sidebar--open) #sidebar { bottom: 3rem; }
 .onboarding-cta { padding: 0 var(--space-4) var(--space-3); font-size: var(--text-xs); color: rgba(0,246,255,.55); font-style: italic; line-height: 1.5; }
 
 /* ═══════════════════════════════════════════════════════════════
-   Form — GA parameters
+   Form : GA parameters
    ═══════════════════════════════════════════════════════════════ */
 #ga-params { display: flex; flex-direction: column; gap: var(--space-4); }
 .field { display: flex; flex-direction: column; gap: 0.3125rem; }
@@ -335,7 +335,7 @@ body:has(#sidebar.sidebar--open) .sidebar-toggle {
 .hidden { display: none !important; }
 
 /* ═══════════════════════════════════════════════════════════════
-   Responsive — desktop overrides (≥ 768 px)
+   Responsive : desktop overrides (≥ 768 px)
    ═══════════════════════════════════════════════════════════════ */
 @media (min-width: 768px) {
   .app-layout { flex-direction: row; overflow-y: hidden; }
