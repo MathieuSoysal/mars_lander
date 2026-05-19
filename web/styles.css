@@ -141,9 +141,10 @@ header { height: 3.75rem; display: flex; align-items: center; padding: 0 var(--s
 .player-btn {
   width: 2.75rem; height: 2.75rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
   background: rgba(0,246,255,.06); border: 1px solid rgba(0,246,255,.22);
-  border-radius: 50%; color: var(--text-bright); font-size: var(--text-base); cursor: pointer;
+  border-radius: 50%; color: var(--text-bright); cursor: pointer;
   transition: background var(--t), box-shadow var(--t);
 }
+.player-btn svg, .sidebar-toggle svg, .error-close svg, .chevron svg { display: block; }
 .player-btn:hover { background: rgba(0,246,255,.14); box-shadow: 0 0 12px rgba(0,246,255,.4); }
 .player-btn:disabled { opacity: .4; cursor: not-allowed; }
 .player-btn--primary { background: rgba(0,98,196,.2); border-color: rgba(0,246,255,.45); }
@@ -243,7 +244,7 @@ body:has(#sidebar.sidebar--open) #sidebar { bottom: 3rem; }
   min-height: 2.75rem; transition: background var(--t), color var(--t);
 }
 .panel-toggle:hover { background: rgba(0,246,255,.1); color: var(--primary-color); }
-.chevron { font-size: var(--text-xs); transition: transform var(--t); flex-shrink: 0; }
+.chevron { display: flex; align-items: center; justify-content: center; transition: transform var(--t); flex-shrink: 0; }
 .panel-toggle[aria-expanded="false"] .chevron { transform: rotate(-90deg); }
 .ga-steps { list-style: none; padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
 .ga-steps[hidden] { display: none; }
