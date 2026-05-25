@@ -12,7 +12,7 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
     let svgContainer, loader, statusLive,
         btnPrev, btnNext, btnPlay,
         speedInput, speedOutput,
-        playbackProgress, progressText,
+        seekBar,
         counterValue, genPhaseEl,
         runBtn,
         populationSizeInput, generationCountInput,
@@ -32,12 +32,11 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
     }
 
     function updateProgress(n, tot) {
+        if (!seekBar) return;
+        seekBar.value = n;
         const pct = tot > 0 ? Math.round(((n + 1) / tot) * 100) : 0;
-        if (playbackProgress) {
-            playbackProgress.value = pct;
-            playbackProgress.textContent = `${pct}%`;
-        }
-        if (progressText) progressText.textContent = `${pct}%`;
+        seekBar.style.setProperty('--seek-pct', `${pct}%`);
+        seekBar.setAttribute('aria-valuetext', tot > 0 ? `Generation ${n + 1} of ${tot}` : 'No simulation loaded');
     }
 
     function showError(msg) {
@@ -101,7 +100,13 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         total = 0;
         current = 0;
         if (counterValue) counterValue.textContent = ': / :';
-        updateProgress(0, 0);
+        if (seekBar) {
+            seekBar.max = 0;
+            seekBar.value = 0;
+            seekBar.disabled = true;
+            seekBar.style.setProperty('--seek-pct', '0%');
+            seekBar.setAttribute('aria-valuetext', 'No simulation loaded');
+        }
 
         const raw = predefinedMaps[mapKey] || predefinedMaps.default;
         const lines = raw.split('\n');
@@ -282,6 +287,13 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         total = frames.length;
         current = 0;
 
+        if (seekBar) {
+            seekBar.max = total - 1;
+            seekBar.value = 0;
+            seekBar.disabled = false;
+            seekBar.style.setProperty('--seek-pct', '0%');
+            seekBar.setAttribute('aria-valuetext', `Generation 1 of ${total}`);
+        }
         if (counterValue) counterValue.textContent = `1 / ${total}`;
         updateProgress(0, total);
         showFrame(0);
@@ -301,6 +313,12 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         btnPrev.addEventListener('click', () => { stopPlayback(); showFrame(current - 1); });
         btnNext.addEventListener('click', () => { stopPlayback(); showFrame(current + 1); });
         btnPlay.addEventListener('click', togglePlayback);
+
+        // Seek bar – scrub to any generation
+        seekBar.addEventListener('input', () => {
+            stopPlayback();
+            showFrame(parseInt(seekBar.value, 10));
+        });
 
         speedInput.addEventListener('input', () => {
             speedOutput.value = `${speedInput.value}×`;
@@ -351,8 +369,7 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         btnPlay            = document.getElementById('btn-play');
         speedInput         = document.getElementById('speed-input');
         speedOutput        = document.getElementById('speed-output');
-        playbackProgress   = document.getElementById('playback-progress');
-        progressText       = document.getElementById('progress-text');
+        seekBar            = document.getElementById('seek-bar');
         counterValue       = document.getElementById('counter-value');
         genPhaseEl         = document.getElementById('gen-phase');
         runBtn             = document.getElementById('run-ga');
