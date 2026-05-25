@@ -377,6 +377,16 @@
 
       <!-- Player controls -->
       <div class="player-bar" role="group" aria-label="Playback controls">
+
+        <!-- Seek bar: YouTube-style full-width scrubber -->
+        <div class="seek-row">
+          <input type="range" id="seek-bar" class="seek-bar"
+                 min="0" max="0" value="0"
+                 aria-label="Seek through generations"
+                 aria-valuetext="No simulation loaded"
+                 disabled>
+        </div>
+
         <button id="btn-prev" class="player-btn" aria-label="Previous generation" disabled>
           <span aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -415,10 +425,6 @@
             <output id="speed-output" for="speed-input">10×</output>
           </div>
 
-          <div class="progress-group" role="group" aria-label="Playback progress">
-            <progress id="playback-progress" value="0" max="100" aria-label="Simulation progress">0%</progress>
-            <span id="progress-text">0%</span>
-          </div>
         </div>
       </div>
 
