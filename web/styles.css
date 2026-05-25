@@ -1,3 +1,10 @@
+/* Register --seek-pct as a typed property so CSS can transition it */
+@property --seek-pct {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    Design Tokens
    ═══════════════════════════════════════════════════════════════ */
@@ -174,8 +181,9 @@ header { height: 3.75rem; display: flex; align-items: center; padding: 0 var(--s
     var(--primary-color) var(--seek-pct, 0%),
     rgba(0,246,255,.15) var(--seek-pct, 0%)
   ) no-repeat center / 100% 4px;
-  transition: background-size .12s ease;
+  transition: background-size .12s ease, --seek-pct .18s ease;
 }
+.seek-bar--scrubbing { transition: background-size .12s ease; /* no --seek-pct tween while dragging */ }
 .seek-bar:hover { background-size: 100% 6px; }
 .seek-bar:disabled { opacity: .4; cursor: not-allowed; }
 .seek-bar:disabled:hover { background-size: 100% 4px; }

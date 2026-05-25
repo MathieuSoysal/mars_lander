@@ -317,6 +317,9 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         btnPlay.addEventListener('click', togglePlayback);
 
         // Seek bar – scrub to any generation
+        seekBar.addEventListener('pointerdown', () => seekBar.classList.add('seek-bar--scrubbing'));
+        seekBar.addEventListener('pointerup',   () => seekBar.classList.remove('seek-bar--scrubbing'));
+        seekBar.addEventListener('pointercancel', () => seekBar.classList.remove('seek-bar--scrubbing'));
         seekBar.addEventListener('input', () => {
             stopPlayback();
             showFrame(parseInt(seekBar.value, 10));
