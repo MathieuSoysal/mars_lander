@@ -231,7 +231,9 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         sidebarToggle.setAttribute('aria-expanded', String(open));
         sidebarToggle.setAttribute('aria-label', open ? 'Close Mission Control' : 'Open Mission Control');
         const icon = sidebarToggle.querySelector('[aria-hidden]');
-        if (icon) icon.textContent = open ? '✕' : '⚙';
+        if (icon) icon.innerHTML = open
+            ? '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="2" x2="14" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="2" x2="2" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+            : '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
     }
 
     function initSidebarToggle() {
