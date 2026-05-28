@@ -259,7 +259,7 @@ output { color: var(--primary-color); font-size: var(--text-sm); font-weight: 60
   scrollbar-width: thin; scrollbar-color: rgba(0,246,255,.3) transparent;
 }
 #sidebar.sidebar--open { display: flex; }
-body:has(#sidebar.sidebar--open) #sidebar { bottom: 0; }
+body.sidebar-open #sidebar { bottom: 0; }
 #sidebar > * { flex-shrink: 0; }
 #sidebar::-webkit-scrollbar { width: 4px; }
 #sidebar::-webkit-scrollbar-track { background: transparent; }
@@ -391,7 +391,7 @@ body:has(#sidebar.sidebar--open) #sidebar { bottom: 0; }
 .sidebar-toggle { width: 2.75rem; height: 2.75rem; flex-shrink: 0; border-radius: 50%; background: rgba(0,8,36,.9); color: var(--primary-color); border: 1px solid rgba(0,246,255,.5); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 14px rgba(0,246,255,.25); transition: background var(--t), box-shadow var(--t), border-color var(--t); }
 .sidebar-toggle:hover { background: rgba(0,98,196,.3); box-shadow: 0 0 22px rgba(0,246,255,.55); border-color: var(--primary-color); }
 .sidebar-toggle.sidebar-toggle--open { border-color: rgba(0,246,255,.8); box-shadow: 0 0 18px rgba(0,246,255,.4); background: rgba(0,62,120,.5); }
-body:has(#sidebar.sidebar--open) .sidebar-toggle { position: fixed; bottom: 1rem; right: 1rem; z-index: 200; }
+body.sidebar-open .sidebar-toggle { position: fixed; bottom: 1rem; right: 1rem; z-index: 200; }
 
 /* ═══════════════════════════════════════════════════════════════
    Error banner
@@ -418,7 +418,7 @@ body:has(#sidebar.sidebar--open) .sidebar-toggle { position: fixed; bottom: 1rem
     background: linear-gradient(160deg,rgba(0,5,20,.96),rgba(5,10,45,.88));
   }
   .sidebar-toggle { display: none; }
-  body:has(#sidebar.sidebar--open) .sidebar-toggle { display: none; }
+  body.sidebar-open .sidebar-toggle { display: none; }
   .player-bar { flex-wrap: nowrap; justify-content: flex-start; align-self: center; margin: var(--space-1) var(--space-4) var(--space-3); border-radius: 2.5rem; }
   .player-controls { border-left: 1px solid rgba(0,246,255,.18); padding-left: var(--space-2); justify-content: flex-start; }
   .speed-slider { width: 4.375rem; }
