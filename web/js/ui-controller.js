@@ -13,10 +13,9 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         btnPrev, btnNext, btnPlay,
         speedInput, speedOutput,
         seekBar,
-        counterValue, genPhaseEl,
+        counterValue,
         runBtn,
         populationSizeInput, generationCountInput,
-        selectionModeInput,
         eliteRateInput, eliteRateOutput,
         crossoverRateInput, crossoverRateOutput,
         mutationRateInput, mutationRateOutput,
@@ -195,7 +194,8 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
     function initOnboarding() {
         if (!onboardingToggle || !onboardingSteps) return;
 
-        const collapsed = localStorage.getItem('ga-onboarding-collapsed') === 'true';
+        let collapsed = false;
+        try { collapsed = localStorage.getItem('ga-onboarding-collapsed') === 'true'; } catch (_) {}
         if (collapsed) {
             onboardingSteps.hidden = true;
             onboardingToggle.setAttribute('aria-expanded', 'false');
@@ -205,7 +205,7 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
             const isOpen = onboardingSteps.hidden === false;
             onboardingSteps.hidden = isOpen;
             onboardingToggle.setAttribute('aria-expanded', String(!isOpen));
-            localStorage.setItem('ga-onboarding-collapsed', String(isOpen));
+            try { localStorage.setItem('ga-onboarding-collapsed', String(isOpen)); } catch (_) {}
         });
     }
 
@@ -219,7 +219,10 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
             sidebarToggle.classList.remove('hidden');
         } else {
             sidebarToggle.classList.add('hidden');
-            sidebarEl && sidebarEl.classList.remove('sidebar--open');
+            if (sidebarEl) {
+                sidebarEl.classList.remove('sidebar--open');
+                document.body.classList.remove('sidebar-open');
+            }
             sidebarToggle.setAttribute('aria-expanded', 'false');
         }
     }
@@ -227,6 +230,7 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
     function setSidebarOpen(open) {
         if (!sidebarEl || !sidebarToggle) return;
         sidebarEl.classList.toggle('sidebar--open', open);
+        document.body.classList.toggle('sidebar-open', open);
         sidebarToggle.classList.toggle('sidebar-toggle--open', open);
         sidebarToggle.setAttribute('aria-expanded', String(open));
         sidebarToggle.setAttribute('aria-label', open ? 'Close Mission Control' : 'Open Mission Control');
@@ -253,7 +257,6 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         return {
             populationSize:  Math.max(10, parseInt(populationSizeInput.value, 10) || 100),
             generationCount: Math.max(1,  parseInt(generationCountInput.value, 10) || 200),
-            selectionMode:   selectionModeInput.value,
             eliteRate:       parseInt(eliteRateInput.value, 10),
             crossoverRate:   parseInt(crossoverRateInput.value, 10),
             mutationRate:    parseInt(mutationRateInput.value, 10),
@@ -338,7 +341,7 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         // Terrain preview on map change
         mapSelect.addEventListener('change', () => {
             showTerrainPreview(mapSelect.value);
-            localStorage.setItem('ga-last-terrain', mapSelect.value);
+            try { localStorage.setItem('ga-last-terrain', mapSelect.value); } catch (_) {}
         });
 
         // Run button
@@ -376,11 +379,9 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
         speedOutput        = document.getElementById('speed-output');
         seekBar            = document.getElementById('seek-bar');
         counterValue       = document.getElementById('counter-value');
-        genPhaseEl         = document.getElementById('gen-phase');
         runBtn             = document.getElementById('run-ga');
         populationSizeInput  = document.getElementById('population-size');
         generationCountInput = document.getElementById('generation-count');
-        selectionModeInput   = document.getElementById('selection-mode');
         eliteRateInput       = document.getElementById('elite-rate');
         eliteRateOutput      = document.getElementById('elite-rate-value');
         crossoverRateInput   = document.getElementById('crossover-rate');
@@ -402,7 +403,8 @@ import { predefinedMaps, runMarsLanderSimulation } from './wasm-interface.js';
 
         // Show default terrain preview after paint, restoring last used terrain
         requestAnimationFrame(() => {
-            const saved = localStorage.getItem('ga-last-terrain');
+            let saved = null;
+            try { saved = localStorage.getItem('ga-last-terrain'); } catch (_) {}
             const options = Array.from(mapSelect.options).map(o => o.value);
             if (saved && options.includes(saved)) {
                 mapSelect.value = saved;

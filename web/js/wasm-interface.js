@@ -130,7 +130,7 @@ async function ensureWasmLoaded() {
   if (!wasmLoadPromise) {
     wasmLoadPromise = init()
       .then(() => { wasmReady = true; return true; })
-      .catch(() => false);
+      .catch(err => { console.error('WASM init failed:', err); return false; });
   }
   return wasmLoadPromise;
 }
