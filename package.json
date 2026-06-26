@@ -5,6 +5,7 @@
     "scripts": {
         "build:wasm": "wasm-pack build --target web --out-dir ./web/pkg",
         "build": "npm run build:wasm && vite build",
+        "build:cf": "bash scripts/cf-build.sh",
         "dev": "npm run build:wasm && vite",
         "preview": "vite preview"
     },

@@ -149,3 +149,26 @@ The deployed site can be viewed at:
 ```
 https://<your-username>.github.io/<your-repository>/
 ```
+
+## Deploying to Cloudflare Pages ☁️
+
+This project can also be deployed with Cloudflare Pages' native Git integration.
+Because the build compiles Rust to WebAssembly, the build must install the Rust
+toolchain and `wasm-pack` (Cloudflare's build image only ships Node by default).
+The `scripts/cf-build.sh` script handles that and is exposed as the `build:cf`
+npm script.
+
+In the Cloudflare dashboard, under **Workers & Pages → your project → Settings →
+Build**, set:
+
+- **Build command:** `npm run build:cf`
+- **Build output directory:** `dist`
+
+The build output directory is also declared in `wrangler.jsonc`
+(`pages_build_output_dir: "./dist"`). Note that once a Wrangler configuration
+file with `pages_build_output_dir` exists, that value becomes the source of truth
+and can no longer be edited in the dashboard.
+
+> **Heads up:** if Cloudflare's native Git build is enabled *and* the GitHub
+> Actions workflow (`.github/workflows/deploy.yml`) also deploys to Cloudflare
+> Pages, every push triggers two deployments. Keep only one of the two methods.
