@@ -169,6 +169,7 @@ The build output directory is also declared in `wrangler.jsonc`
 file with `pages_build_output_dir` exists, that value becomes the source of truth
 and can no longer be edited in the dashboard.
 
-> **Heads up:** if Cloudflare's native Git build is enabled *and* the GitHub
-> Actions workflow (`.github/workflows/deploy.yml`) also deploys to Cloudflare
-> Pages, every push triggers two deployments. Keep only one of the two methods.
+> **Deployment model:** Cloudflare Pages' native Git integration builds and
+> deploys this site. The GitHub Actions workflow (`.github/workflows/deploy.yml`)
+> only builds the project as a CI check — it no longer deploys — so pushes don't
+> trigger duplicate deployments.
