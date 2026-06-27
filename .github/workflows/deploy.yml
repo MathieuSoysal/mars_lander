@@ -1,6 +1,6 @@
-name: Build and Deploy
+name: Build
 
-on: 
+on:
   push:
     branches: [master, main]
   pull_request:
@@ -8,8 +8,6 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
-  deployments: write
 
 jobs:
   build-and-deploy:
@@ -38,12 +36,3 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: mars-lander
-          directory: dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
